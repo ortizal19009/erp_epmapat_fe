@@ -183,6 +183,57 @@ export class PdfService {
     return url;
   }
 
+  bodyTwoTablesVertical(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    doc: any
+  ) {
+    this.header(titulo, doc);
+
+    autoTable(doc, {
+      head: [[{ content: ht1[0], colSpan: ht1[1].length, styles: { halign: 'center' } }]],
+      startY: 70,
+      theme: 'grid',
+      headStyles: { fontSize: 8 },
+    });
+    autoTable(doc, {
+      head: [ht1[1]],
+      body: bt1,
+      startY: doc.lastAutoTable.finalY,
+      theme: 'grid',
+      styles: { fontSize: 7, overflow: 'linebreak' },
+      columnStyles: { 0: { halign: 'center' }, 1: { halign: 'center' }, 6: { halign: 'right' } },
+    });
+
+    autoTable(doc, {
+      head: [[{ content: ht2[0], colSpan: ht2[1].length, styles: { halign: 'center' } }]],
+      startY: doc.lastAutoTable.finalY + 12,
+      theme: 'grid',
+      headStyles: { fontSize: 8 },
+    });
+    autoTable(doc, {
+      head: [ht2[1]],
+      body: bt2,
+      startY: doc.lastAutoTable.finalY,
+      theme: 'grid',
+      styles: { fontSize: 7, overflow: 'linebreak' },
+      columnStyles: { 0: { halign: 'center' }, 1: { halign: 'center' }, 5: { halign: 'right' } },
+    });
+
+    this.setfooter(doc);
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
+    if (pdfViewer) {
+      if (pdfViewer.src?.startsWith('blob:')) URL.revokeObjectURL(pdfViewer.src);
+      pdfViewer.src = url;
+    }
+    return url;
+  }
+
   _bodyTwoTables(
     titulo: string,
     ht1: any,
@@ -553,6 +604,12 @@ export class PdfService {
   ) {
     this.header(titulo, doc);
     const pageNumber = doc.internal.getNumberOfPages();
+    const columnasEmision: any = {
+      0: { halign: 'center' },
+      1: { halign: 'center' },
+      3: { halign: 'center' },
+      4: { halign: 'right' },
+    };
     // Primera tabla
     autoTable(doc, {
 
@@ -566,7 +623,7 @@ export class PdfService {
         ],
         this.headStyles(ht1[1]),
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      columnStyles: columnasEmision,
       body: bt1,
     });
     doc.setPage(pageNumber);
@@ -584,7 +641,7 @@ export class PdfService {
         ],
         this.headStyles(ht2[1]),
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      columnStyles: columnasEmision,
       body: bt2,
     });
     // Tercer tabla
@@ -600,7 +657,7 @@ export class PdfService {
         ],
         this.headStyles(ht3[1]),
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      columnStyles: columnasEmision,
       body: bt3,
     });
     // Cuarta tabla
@@ -616,7 +673,7 @@ export class PdfService {
         ],
         this.headStyles(ht4[1]),
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      columnStyles: columnasEmision,
       body: bt4,
     });
     // QUINTA tabla
@@ -632,7 +689,7 @@ export class PdfService {
         ],
         this.headStyles(ht5[1]),
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      columnStyles: { 0: { halign: 'center' }, 1: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt5,
     });
     this.setfooter(doc);

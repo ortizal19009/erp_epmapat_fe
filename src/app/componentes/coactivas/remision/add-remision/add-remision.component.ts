@@ -103,7 +103,7 @@ export class AddRemisionComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'add-remision');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'add-remision');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/add-remision', coloresJSON);
       this.colocaColor(datos);

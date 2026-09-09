@@ -556,6 +556,12 @@ export class FecfacturaService {
     });
   }
 
+  asegurarFacturaElectronica(idfactura: number): Observable<any> {
+    return this.http.get(`${baseUrl}/createFacElectro`, {
+      params: new HttpParams().set('idfactura', idfactura.toString()),
+    });
+  }
+
   async generateXmlOfPago(idfactura: number): Promise<any> {
     try {
       return await firstValueFrom(

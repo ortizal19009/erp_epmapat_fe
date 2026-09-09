@@ -81,7 +81,7 @@ export class ImpClienteComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, this.ventana);
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, this.ventana);
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem(this.ventana, coloresJSON);
       this.colocaColor(datos);

@@ -16,6 +16,8 @@ import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-transferencias',
@@ -51,6 +53,8 @@ export class TransferenciasComponent implements OnInit {
   cajaActiva: boolean = false;
   _caja: Cajas = new Cajas();
   recxcaja: Recaudaxcaja = new Recaudaxcaja();
+  transferenciaEnProceso = false;
+  estadoGeneracionFactura = new Map<number, 'generando' | 'generada' | 'error'>();
 
   constructor(
     private coloresService: ColoresService,
@@ -64,7 +68,8 @@ export class TransferenciasComponent implements OnInit {
     private s_cajas: CajaService,
     private s_recaudaxcaja: RecaudaxcajaService,
     private authSvc: AutorizaService,
-    private fecFacturaS: FecfacturaService
+    private fecFacturaS: FecfacturaService,
+    private loadingService: LoadingService,
   ) { }
 
   ngOnInit(): void {
@@ -385,31 +390,13 @@ export class TransferenciasComponent implements OnInit {
 
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
-      next: (datos) => {
-        this._sincobro = datos;
+      next: async (datos) => {
+        this._sincobro = datos || [];
         if (this._sincobro.length > 0) {
-          let suma: number = 0;
-          let i = 0;
-          this._sincobro.forEach(async (item: any) => {
-            if (item.idabonado != 0) {
-              const abonado: Abonados = await this.getAbonado(item.idabonado);
-              item.direccion = abonado.direccionubicacion;
-              item.responsablePago = abonado.idresponsable.nombre;
-            } else {
-              item.direccion = 'S/D';
-            }
-            if (this._sincobro[i].idmodulo.idmodulo == 3)
-              this._sincobro[i].comerc = 1;
-            this._sincobro[i].interes = 0;
-            this._sincobro[i].multa = 0;
-            suma +=
-              this._sincobro[i].totaltarifa +
-              this._sincobro[i].comerc +
-              this._sincobro[i].multa +
-              this._sincobro[i].interes;
-            i++;
-          });
-          this.sumtotal = suma;
+          await Promise.all(this._sincobro.map((item: any) => this.completarDatosFactura(item)));
+          this.sumtotal = this._sincobro.reduce((suma: number, item: any) =>
+            suma + Number(item.totaltarifa || 0) + Number(item.comerc || 0)
+              + Number(item.multa || 0) + Number(item.interes || 0), 0);
           this.swbusca = 3;
         } else {
           this.swbusca = 2;
@@ -420,6 +407,26 @@ export class TransferenciasComponent implements OnInit {
     });
   }
 
+  private async completarDatosFactura(item: any): Promise<void> {
+    const clienteFactura = item?.idcliente;
+    item.responsablePago = clienteFactura?.nombre || this.cliente.nombre || 'Sin responsable';
+    item.direccion = clienteFactura?.direccion || this.cliente.direccion || 'S/D';
+
+    if (Number(item?.idabonado || 0) > 0) {
+      try {
+        const abonado: Abonados = await this.getAbonado(item.idabonado);
+        item.direccion = abonado?.direccionubicacion || item.direccion;
+        item.responsablePago = abonado?.idresponsable?.nombre || item.responsablePago;
+      } catch (error) {
+        console.warn(`No se pudo cargar el abonado ${item.idabonado}; se muestra el cliente de la factura.`, error);
+      }
+    }
+
+    item.comerc = Number(item?.idmodulo?.idmodulo) === 3 ? 1 : 0;
+    item.interes = 0;
+    item.multa = 0;
+  }
+
   get f() {
     return this.formTransferir.controls;
   }
@@ -427,10 +434,67 @@ export class TransferenciasComponent implements OnInit {
     const abo = await this.aboService.getById(idabonado).toPromise();
     return abo;
   }
-  transferir() {
-    let i = 0;
-    this.actufacturas(i);
-    // this.onSubmit();
+  async transferir(): Promise<void> {
+    if (this.transferenciaEnProceso) return;
+
+    const facturasSeleccionadas = (this._sincobro || []).filter((factura: any) =>
+      factura.pagado && factura.nrofactura === null
+    );
+    if (!facturasSeleccionadas.length) return;
+
+    this.transferenciaEnProceso = true;
+    this.estadoGeneracionFactura.clear();
+    this.loadingService.showLoading();
+    try {
+      for (const factura of facturasSeleccionadas) {
+        const idfactura = Number(factura.idfactura);
+        this.estadoGeneracionFactura.set(idfactura, 'generando');
+        try {
+          await this.transferirFactura(factura);
+          factura.estado = 3;
+          this.estadoGeneracionFactura.set(idfactura, 'generada');
+        } catch (error) {
+          this.estadoGeneracionFactura.set(idfactura, 'error');
+          console.error(`No se pudo transferir o generar la factura electrónica ${idfactura}:`, error);
+        }
+      }
+      this.swtransferido = true;
+    } finally {
+      this.transferenciaEnProceso = false;
+      this.loadingService.hideLoading();
+    }
+  }
+
+  private async transferirFactura(facturaSeleccionada: any): Promise<void> {
+    const fechatransferencia = new Date();
+    const fac: any = await firstValueFrom(this.facService.getById(facturaSeleccionada.idfactura));
+    fac.estado = 3;
+    fac.fechatransferencia = fechatransferencia;
+    fac.usuariotransferencia = this.authService.idusuario;
+    fac.pagado = 1;
+    fac.fechacobro = fechatransferencia;
+    fac.usuariocobro = this.authService.idusuario;
+    fac.formapago = 4;
+
+    if (fac.nrofactura === null) {
+      const nrofac = this._nroFactura.split('-', 3);
+      const nrofacFinal = Number(nrofac[2]) + 1;
+      fac.nrofactura = `${this._codRecaudador}-${nrofacFinal.toString().padStart(9, '0')}`;
+      sessionStorage.setItem('ultfac', nrofacFinal.toString().padStart(9, '0'));
+      this._nroFactura = fac.nrofactura;
+    }
+
+    await firstValueFrom(this.facService.updateFacturas(fac));
+    await this.generarFacturaElectronicaTransferencia(fac.idfactura);
+    await this.actualizarUltimaFacturaCaja();
+  }
+
+  private async actualizarUltimaFacturaCaja(): Promise<void> {
+    if (!this._caja?.idcaja || !this._nroFactura) return;
+    const nrofac = this._nroFactura.split('-', 3);
+    this.recxcaja = await firstValueFrom(this.s_recaudaxcaja.getLastConexion(this._caja.idcaja));
+    this.recxcaja.facfin = Number(nrofac[2]);
+    await firstValueFrom(this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja));
   }
 
   actufacturas(i: number) {
@@ -467,7 +531,7 @@ export class TransferenciasComponent implements OnInit {
           this.facService.updateFacturas(fac).subscribe({
             next: async (nex) => {
               try {
-                await this.fecFacturaS.generateXmlOfPago(fac.idfactura);
+                await this.generarFacturaElectronicaTransferencia(fac.idfactura);
               } catch (error) {
                 console.error(
                   'Error al generar la factura electrónica de la transferencia:',
@@ -520,6 +584,12 @@ export class TransferenciasComponent implements OnInit {
       if (i < this._sincobro.length) this.actufacturas(i);
     }
   }
+
+  private async generarFacturaElectronicaTransferencia(idfactura: number): Promise<void> {
+    await firstValueFrom(this.fecFacturaS.asegurarFacturaElectronica(idfactura));
+    await this.fecFacturaS.generateXmlOfPago(idfactura);
+  }
+
   abrirCaja() {
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (dcaja) => {

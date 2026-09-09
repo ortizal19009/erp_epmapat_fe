@@ -35,6 +35,8 @@ export class ConveniosComponent implements OnInit {
   totalElements: number = 0;
   pages: number[] = [];
   maxPagesToShow: number = 5;
+  rolepermission = 1;
+  readonly ventana = 'convenios';
 
   constructor(
     private convService: ConvenioService,
@@ -52,6 +54,7 @@ export class ConveniosComponent implements OnInit {
     const coloresJSON = sessionStorage.getItem('/convenios');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
+    void this.loadRolePermission();
 
     this.formBuscar = this.fb.group({
       desde: [''],
@@ -100,6 +103,28 @@ export class ConveniosComponent implements OnInit {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  private async loadRolePermission(): Promise<void> {
+    if (this.authService.idusuario === 1) {
+      this.rolepermission = 3;
+      return;
+    }
+
+    this.rolepermission = await this.coloresService.getRolePermission(
+      this.authService.idusuario,
+      this.ventana,
+    );
+  }
+
+  canEditarConvenios(): boolean {
+    return this.authService.idusuario === 1 || this.rolepermission >= 2;
+  }
+
+  private bloquearEdicion(): boolean {
+    if (this.canEditarConvenios()) return false;
+    this.authService.swal('warning', 'Tu nivel de acceso es solo lectura. No tienes permiso para modificar convenios.');
+    return true;
   }
 
   ultimoNroconvenio() {
@@ -197,6 +222,7 @@ export class ConveniosComponent implements OnInit {
   }
 
   nuevo() {
+    if (this.bloquearEdicion()) return;
     this.router.navigate(['add-convenio']);
   }
 
@@ -209,23 +235,27 @@ export class ConveniosComponent implements OnInit {
   }
 
   public modiConvenio(idconvenio: number) {
+    if (this.bloquearEdicion()) return;
     sessionStorage.setItem('idconvenioToModi', idconvenio.toString());
     this.router.navigate(['modi-convenio']);
   }
 
   anularConvenio(idconvenio: number): void {
+    if (this.bloquearEdicion()) return;
     this.router.navigate(['/anular-convenio', idconvenio], {
       queryParams: { modo: 'anular' },
     });
   }
 
   eliminarConvenio(idconvenio: number): void {
+    if (this.bloquearEdicion()) return;
     this.router.navigate(['/anular-convenio', idconvenio], {
       queryParams: { modo: 'eliminar' },
     });
   }
 
   marcarConvenioPagado(convenio: any): void {
+    if (this.bloquearEdicion()) return;
     if (!this.puedeMarcarPagado(convenio)) return;
 
     Swal.fire({

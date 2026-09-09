@@ -85,6 +85,10 @@ export class EmisionService {
     );
   }
 
+  getProgresoGenerarPendientes(idemision: number) {
+    return this.http.get<any>(`${baseUrl}/${idemision}/generar-pendientes/progreso`);
+  }
+
   validarApertura(idemision: number) {
     return this.http.get<any>(`${baseUrl}/${idemision}/validar-apertura`);
   }

@@ -21,22 +21,22 @@
           </div>
           <div class="col-md-4 text-right">
             <div class="btn-group">
-              <button type="button" class="btn btn-light btn-sm dropdown-toggle"
-                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
                 <i class="bi bi-menu-button-wide"></i> Opciones
               </button>
               <div class="dropdown-menu dropdown-menu-right shadow">
-                <button class="dropdown-item" type="button" data-toggle="modal"
-                        data-target="#abrirCaja" (click)="abrirCaja()" [disabled]="!estadoCajaT">
+                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#abrirCaja"
+                  (click)="abrirCaja()" [disabled]="!estadoCajaT">
                   <i class="bi bi-door-open mr-2"></i>Abrir caja
                 </button>
-                <button class="dropdown-item" type="button" data-toggle="modal"
-                        data-target="#cerrarCaja" [disabled]="estadoCajaT">
+                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
+                  [disabled]="estadoCajaT">
                   <i class="bi bi-door-closed mr-2"></i>Cerrar caja
                 </button>
                 <div class="dropdown-divider"></div>
-                <button class="dropdown-item" type="button" data-toggle="modal"
-                        data-target="#imprimir" [disabled]="swbusca != 0">
+                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir"
+                  [disabled]="swbusca != 0">
                   <i class="bi bi-printer mr-2"></i>Imprimir
                 </button>
               </div>
@@ -55,13 +55,12 @@
           <div class="row align-items-end">
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">Número de Cuenta</label>
-              <input class="form-control form-control-sm" type="text" formControlName="cuenta"
-                     placeholder="Ej: 123456">
+              <input class="form-control form-control-sm" type="text" formControlName="cuenta" placeholder="Ej: 123456">
             </div>
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">Identificación</label>
               <input class="form-control form-control-sm" type="text" formControlName="identificacion"
-                     placeholder="Ej: 1723456789">
+                placeholder="Ej: 1723456789">
             </div>
             <div class="col-md-4">
               <div class="d-flex align-items-end h-100">
@@ -70,7 +69,7 @@
                     <i class="fa fa-search mr-1"></i>Buscar
                   </button>
                   <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
-                          data-target="#clientesModal" (click)="clientesModal()">
+                    data-target="#clientesModal" (click)="clientesModal()">
                     <i class="bi bi-people mr-1"></i>Clientes
                   </button>
                   <div *ngIf="swvalido == 0" class="alert alert-warning py-1 px-2 mb-0 small">
@@ -81,7 +80,7 @@
             </div>
             <div class="col-md-2" *ngIf="atransferir > 0 && !swtransferido && !estadoCajaT">
               <button type="button" class="btn btn-success btn-sm w-100" data-toggle="modal"
-                      data-target="#modalTransferir" (click)="valorAtransferir(atransferir)">
+                data-target="#modalTransferir" (click)="valorAtransferir(atransferir)">
                 <i class="bi bi-folder-symlink mr-1"></i>
                 <span class="d-block small">Transferir</span>
                 <strong class="small">{{atransferir | number: '1.2-2'}}</strong>
@@ -177,7 +176,8 @@
                       <th width="130" class="text-right">Valor</th>
                       <th width="80" class="text-center">
                         <div class="custom-control custom-checkbox custom-control-sm">
-                          <input type="checkbox" class="custom-control-input" id="selectAll" (change)="marcarTodas($event)">
+                          <input type="checkbox" class="custom-control-input" id="selectAll" disabled
+                            (change)="marcarTodas($event)">
                           <label class="custom-control-label" for="selectAll"></label>
                         </div>
                       </th>
@@ -185,9 +185,9 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let sincobro of _sincobro; let i = index"
-                        [class.table-success]="sincobro.estado == 3"
-                        [class.table-warning]="sincobro.idabonado == 0">
+                    <tr *ngFor="let sincobro of _sincobro; let i = index" [class.table-success]="sincobro.estado == 3"
+                      [class.table-warning]="sincobro.idabonado == 0"
+                      [class.invoice-processing]="estadoGeneracionFactura.get(sincobro.idfactura) === 'generando'">
                       <td class="text-center serial-number small">{{ i+1 }}</td>
                       <td class="text-center account-number">
                         <span *ngIf="sincobro.idabonado; else noAccount" class="badge badge-light badge-sm">
@@ -202,6 +202,18 @@
                       </td>
                       <td class="text-center invoice-number">
                         <span class="badge badge-primary badge-sm">{{ sincobro.idfactura }}</span>
+                        <span *ngIf="estadoGeneracionFactura.get(sincobro.idfactura) === 'generando'"
+                          class="badge badge-info invoice-status" title="Generando factura electrónica">
+                          <i class="fa fa-spinner fa-spin"></i>
+                        </span>
+                        <span *ngIf="estadoGeneracionFactura.get(sincobro.idfactura) === 'generada'"
+                          class="badge badge-success invoice-status" title="Factura electrónica generada">
+                          <i class="fa fa-check"></i>
+                        </span>
+                        <span *ngIf="estadoGeneracionFactura.get(sincobro.idfactura) === 'error'"
+                          class="badge badge-danger invoice-status" title="No se pudo generar la factura electrónica">
+                          <i class="fa fa-exclamation-triangle"></i>
+                        </span>
                       </td>
                       <td class="text-center date-cell small">
                         {{ sincobro.feccrea | date:"dd/MM/yyyy" }}
@@ -211,24 +223,22 @@
                       </td>
                       <td class="text-right amount-cell">
                         <span class="amount-value small">
-                          ${{ valorTarifas(sincobro.totaltarifa, sincobro.comerc, sincobro.interes, sincobro.multa, sincobro.idmodulo.idmodulo, sincobro.valorbase) | number:'1.2-2' }}
+                          ${{ valorTarifas(sincobro.totaltarifa, sincobro.comerc, sincobro.interes, sincobro.multa,
+                          sincobro.idmodulo.idmodulo, sincobro.valorbase) | number:'1.2-2' }}
                         </span>
                       </td>
                       <td class="text-center">
                         <div class="custom-control custom-checkbox custom-control-sm">
-                          <input type="checkbox" class="custom-control-input"
-                                 [id]="'check_' + i"
-                                 [(ngModel)]="sincobro.pagado"
-                                 (change)="marcarAnteriores(i)"
-                                 [disabled]="sincobro.estado == 3 || swtransferido">
+                          <input type="checkbox" class="custom-control-input" [id]="'check_' + i"
+                            [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
+                            [disabled]="sincobro.estado == 3 || swtransferido">
                           <label class="custom-control-label" [for]="'check_' + i"></label>
                         </div>
                       </td>
                       <td class="text-center">
                         <button class="btn btn-info btn-xs btn-icon" data-toggle="modal"
-                                data-target="#DetallePlanillaModal"
-                                (click)="getRubroxfac(sincobro.idfactura)"
-                                title="Ver detalles">
+                          data-target="#DetallePlanillaModal" (click)="getRubroxfac(sincobro.idfactura)"
+                          title="Ver detalles">
                           <i class="fa fa-eye"></i>
                         </button>
                       </td>
@@ -272,7 +282,8 @@
 
 <!-- MODALES CORREGIDOS -->
 <!-- Modal Buscar Clientes -->
-<div class="modal fade" id="clientesModal" tabindex="-1" role="dialog" aria-labelledby="clientesModalLabel" aria-hidden="true" data-backdrop="static">
+<div class="modal fade" id="clientesModal" tabindex="-1" role="dialog" aria-labelledby="clientesModalLabel"
+  aria-hidden="true" data-backdrop="static">
   <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white py-2">
@@ -287,11 +298,11 @@
             <form [formGroup]="formBusClientes">
               <div class="input-group input-group-sm">
                 <input type="text" placeholder="Nombre ó identificación (Mínimo 5 caracteres)"
-                      class="form-control form-control-sm" autofocus id="nombre_identifica"
-                      formControlName="nombre_identifica" required minlength="5" />
+                  class="form-control form-control-sm" autofocus id="nombre_identifica"
+                  formControlName="nombre_identifica" required minlength="5" />
                 <div class="input-group-append">
                   <button class="btn btn-primary btn-sm" type="button" (click)="buscarClientes()"
-                          [disabled]="formBusClientes.invalid">
+                    [disabled]="formBusClientes.invalid">
                     <i class="fa fa-search" aria-hidden="true"></i> Buscar
                   </button>
                 </div>
@@ -315,8 +326,8 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let cliente of _clientes | filter:filtro; let i= index"
-                      (click)="selecCliente(cliente)" style="cursor: pointer;">
+                  <tr *ngFor="let cliente of _clientes | filter:filtro; let i= index" (click)="selecCliente(cliente)"
+                    style="cursor: pointer;">
                     <td class="text-center small">{{i+1}}</td>
                     <td class="small">{{cliente.nombre}}</td>
                     <td class="small">{{cliente.cedula}}</td>
@@ -337,7 +348,8 @@
 </div>
 
 <!-- Modal Transferir -->
-<div class="modal fade" id="modalTransferir" tabindex="-1" role="dialog" aria-labelledby="modalTransferirLabel" data-backdrop="static" aria-hidden="true">
+<div class="modal fade" id="modalTransferir" tabindex="-1" role="dialog" aria-labelledby="modalTransferirLabel"
+  data-backdrop="static" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header bg-success text-white py-2">
@@ -355,13 +367,14 @@
                 <span class="input-group-text">$</span>
               </div>
               <input type="text" class="form-control form-control-sm text-right font-weight-bold"
-                     formControlName="atransferir" readonly>
+                formControlName="atransferir" readonly>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer py-2">
-        <button type="button" class="btn btn-success btn-sm" (click)="transferir()" data-dismiss="modal">
+        <button type="button" class="btn btn-success btn-sm" (click)="transferir()" data-dismiss="modal"
+          [disabled]="transferenciaEnProceso">
           <i class="fa fa-check-circle"></i> Confirmar
         </button>
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
@@ -373,7 +386,8 @@
 </div>
 
 <!-- Modal Detalle Planilla -->
-<div class="modal fade" id="DetallePlanillaModal" tabindex="-1" role="dialog" aria-labelledby="DetallePlanillaModalLabel">
+<div class="modal fade" id="DetallePlanillaModal" tabindex="-1" role="dialog"
+  aria-labelledby="DetallePlanillaModalLabel">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header bg-info text-white py-2">
@@ -422,7 +436,8 @@
 </div>
 
 <!-- Modal Abrir Caja -->
-<div class="modal fade" id="abrirCaja" tabindex="-1" role="dialog" aria-labelledby="abrirCajaLabel" data-backdrop="static" aria-hidden="true">
+<div class="modal fade" id="abrirCaja" tabindex="-1" role="dialog" aria-labelledby="abrirCajaLabel"
+  data-backdrop="static" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header bg-warning text-dark py-2">
@@ -451,8 +466,8 @@
         </div>
       </div>
       <div class="modal-footer py-2">
-        <button type="button" class="btn btn-warning btn-sm" [disabled]="cajaActiva"
-                data-dismiss="modal" (click)="validarCaja()">
+        <button type="button" class="btn btn-warning btn-sm" [disabled]="cajaActiva" data-dismiss="modal"
+          (click)="validarCaja()">
           <i class="fa fa-check-circle"></i> Iniciar Caja
         </button>
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
@@ -464,7 +479,8 @@
 </div>
 
 <!-- Modal Cerrar Caja -->
-<div class="modal fade" id="cerrarCaja" tabindex="-1" role="dialog" aria-labelledby="cerrarCajaLabel" data-backdrop="static" aria-hidden="true">
+<div class="modal fade" id="cerrarCaja" tabindex="-1" role="dialog" aria-labelledby="cerrarCajaLabel"
+  data-backdrop="static" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white py-2">
@@ -494,191 +510,192 @@
 
 <!-- Estilos CSS Actualizados -->
 <style>
-/* ===== ESTADO DE CAJA CON COLORES ===== */
-.badge-danger {
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-success {
-  background: linear-gradient(135deg, #28a745, #20c997);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-/* ===== NOTIFICACIÓN FLOTANTE ===== */
-.floating-notification {
-  position: fixed;
-  bottom: 25px;
-  left: 25px;
-  z-index: 1060;
-  max-width: 280px;
-  animation: slideInLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.notification-card {
-  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-left: 4px solid #dc3545;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.notification-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #dc3545, #e35d6a);
-}
-
-.notification-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.notification-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.notification-icon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #dc3545, #e35d6a);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-
-.notification-text {
-  flex: 1;
-}
-
-.notification-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #6c757d;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
-
-.notification-value {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #dc3545;
-  font-family: 'Courier New', monospace;
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-100px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ===== TABLA CON HEADER FIJADO ===== */
-.table-scroll-container {
-  position: relative;
-  max-height: 65vh;
-  overflow: auto;
-  border-radius: 8px;
-}
-
-.sticky-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-  backdrop-filter: blur(10px);
-}
-
-.sticky-header th {
-  position: sticky;
-  top: 0;
-  background: inherit;
-  border-bottom: 2px solid #1a252f;
-  padding: 12px 8px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: white;
-}
-
-/* Scrollbar personalizado */
-.table-scroll-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.table-scroll-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-}
-
-.table-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-}
-
-/* ===== ALINEACIÓN DE FORMULARIO ===== */
-.card-body .row.align-items-end {
-  align-items: flex-end !important;
-}
-
-.card-body .d-flex.align-items-end.h-100 {
-  height: 100%;
-  align-items: flex-end;
-}
-
-.form-label {
-  margin-bottom: 4px;
-}
-
-.btn-sm {
-  margin-bottom: 1px;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .floating-notification {
-    bottom: 15px;
-    left: 15px;
-    right: 15px;
-    max-width: none;
+  /* ===== ESTADO DE CAJA CON COLORES ===== */
+  .badge-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
   }
 
-  .badge-danger,
   .badge-success {
-    font-size: 0.7rem;
-    padding: 0.3rem 0.6rem;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
   }
-}
 
-/* Resto de estilos se mantienen igual */
+  /* ===== NOTIFICACIÓN FLOTANTE ===== */
+  .floating-notification {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    z-index: 1060;
+    max-width: 280px;
+    animation: slideInLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .notification-card {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #dc3545;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .notification-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #dc3545, #e35d6a);
+  }
+
+  .notification-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .notification-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #dc3545, #e35d6a);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .notification-text {
+    flex: 1;
+  }
+
+  .notification-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .notification-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #dc3545;
+    font-family: 'Courier New', monospace;
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-100px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* ===== TABLA CON HEADER FIJADO ===== */
+  .table-scroll-container {
+    position: relative;
+    max-height: 65vh;
+    overflow: auto;
+    border-radius: 8px;
+  }
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    backdrop-filter: blur(10px);
+  }
+
+  .sticky-header th {
+    position: sticky;
+    top: 0;
+    background: inherit;
+    border-bottom: 2px solid #1a252f;
+    padding: 12px 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+  }
+
+  /* Scrollbar personalizado */
+  .table-scroll-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .table-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .table-scroll-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+  }
+
+  .table-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  }
+
+  /* ===== ALINEACIÓN DE FORMULARIO ===== */
+  .card-body .row.align-items-end {
+    align-items: flex-end !important;
+  }
+
+  .card-body .d-flex.align-items-end.h-100 {
+    height: 100%;
+    align-items: flex-end;
+  }
+
+  .form-label {
+    margin-bottom: 4px;
+  }
+
+  .btn-sm {
+    margin-bottom: 1px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .floating-notification {
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      max-width: none;
+    }
+
+    .badge-danger,
+    .badge-success {
+      font-size: 0.7rem;
+      padding: 0.3rem 0.6rem;
+    }
+  }
+
+  /* Resto de estilos se mantienen igual */
 </style>

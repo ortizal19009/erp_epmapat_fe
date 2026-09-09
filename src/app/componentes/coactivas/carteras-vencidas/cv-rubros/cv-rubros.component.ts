@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
@@ -27,7 +28,8 @@ export class CvRubrosComponent implements OnInit {
     private s_rxf: RubroxfacService,
     private s_facturas: FacturaService,
     private fb: FormBuilder,
-    private s_loading: LoadingService
+    private s_loading: LoadingService,
+    private authService: AutorizaService
   ) { }
 
   ngOnInit(): void {
@@ -52,7 +54,7 @@ export class CvRubrosComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-rubros');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'cv-rubros');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/cv-rubros', coloresJSON);
       this.colocaColor(datos);

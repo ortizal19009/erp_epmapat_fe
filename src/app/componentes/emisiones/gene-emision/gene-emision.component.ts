@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
@@ -20,7 +20,7 @@ import { RutasxemisionService } from 'src/app/servicios/rutasxemision.service';
   templateUrl: './gene-emision.component.html',
   styleUrls: ['./gene-emision.component.css'],
 })
-export class GeneEmisionComponent implements OnInit {
+export class GeneEmisionComponent implements OnInit, OnDestroy {
   idemision: number;
   _rutas: any;
   _abonados: any;
@@ -35,6 +35,8 @@ export class GeneEmisionComponent implements OnInit {
   swgenerando: boolean = false;
   resumenGeneracion: string = '';
   detalleGeneracion: EmisionGeneracionResponse | null = null;
+  estadoGeneracion: AperturaProgreso | null = null;
+  private seguimientoGeneracion?: ReturnType<typeof setInterval>;
 
   constructor(
     private emiServicio: EmisionService,
@@ -93,14 +95,28 @@ export class GeneEmisionComponent implements OnInit {
   }
 
   async generar() {
+    if (this.swgenerando) {
+      return;
+    }
+
     this.swgenerando = true;
-    this.progreso = 10;
+    this.progreso = 1;
     this.resumenGeneracion = '';
     this.detalleGeneracion = null;
+    this.estadoGeneracion = {
+      mensaje: 'Iniciando la apertura de la emision.',
+      progreso: 1,
+      totalRutas: this.totalrutas || 0,
+      rutasProcesadas: 0,
+      abonadosProcesados: 0,
+      lecturasCreadas: 0,
+    };
+    this.iniciarSeguimientoGeneracion();
     this.emiServicio
       .generarPendientes(this.idemision, this.authService.idusuario)
       .subscribe({
         next: (resp: EmisionGeneracionResponse) => {
+          this.detenerSeguimientoGeneracion();
           this.progreso = 100;
           this.detalleGeneracion = resp;
           this.resumenGeneracion =
@@ -113,12 +129,46 @@ export class GeneEmisionComponent implements OnInit {
           }
         },
         error: (err) => {
+          this.detenerSeguimientoGeneracion();
           this.swgenerando = false;
           this.progreso = 0;
           this.resumenGeneracion = this.getGeneracionErrorMessage(err);
           console.error(err);
         },
       });
+  }
+
+  private iniciarSeguimientoGeneracion(): void {
+    this.detenerSeguimientoGeneracion();
+    this.actualizarProgresoGeneracion();
+    this.seguimientoGeneracion = setInterval(() => {
+      this.actualizarProgresoGeneracion();
+    }, 1000);
+  }
+
+  private detenerSeguimientoGeneracion(): void {
+    if (this.seguimientoGeneracion) {
+      clearInterval(this.seguimientoGeneracion);
+      this.seguimientoGeneracion = undefined;
+    }
+  }
+
+  private actualizarProgresoGeneracion(): void {
+    if (!this.swgenerando) {
+      return;
+    }
+
+    this.emiServicio.getProgresoGenerarPendientes(this.idemision).subscribe({
+      next: (progreso: AperturaProgreso) => {
+        if (!this.swgenerando || progreso.estado === 'SIN_PROCESO') {
+          return;
+        }
+        this.estadoGeneracion = progreso;
+        this.progreso = Math.max(this.progreso, Math.min(progreso.progreso || 1, 99));
+      },
+      // La solicitud principal puede tardar unos instantes en crear el seguimiento.
+      error: () => undefined,
+    });
   }
 
   get rutasPendientes(): EmisionGeneracionRuta[] {
@@ -238,6 +288,7 @@ export class GeneEmisionComponent implements OnInit {
   }
 
   regresar() {
+    this.detenerSeguimientoGeneracion();
     this.router.navigate(['emisiones']);
   }
 
@@ -281,6 +332,10 @@ export class GeneEmisionComponent implements OnInit {
     } catch {
       return String(err).toLowerCase();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.detenerSeguimientoGeneracion();
   }
 }
 
@@ -376,4 +431,15 @@ interface EmisionGeneracionResponse {
   lecturasCreadas: number;
   lecturasPendientes: number;
   rutas: EmisionGeneracionRuta[];
+}
+
+interface AperturaProgreso {
+  estado?: string;
+  progreso: number;
+  mensaje: string;
+  totalRutas: number;
+  rutasProcesadas: number;
+  rutaActual?: string;
+  abonadosProcesados: number;
+  lecturasCreadas: number;
 }

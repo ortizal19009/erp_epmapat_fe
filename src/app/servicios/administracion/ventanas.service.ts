@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, firstValueFrom, tap } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { Ventanas } from 'src/app/modelos/administracion/ventanas.model';
 import { environment } from 'src/environments/environment';
 
@@ -33,6 +33,26 @@ export class VentanasService {
 
    updateVentana(idventana: number, ventana: Ventanas): Observable<Object> {
       return this.http.put(baseUrl + "/" + idventana, ventana);
+   }
+
+   getCatalogoVentanas(): Observable<string[]> {
+      return this.http.get<string[]>(`${baseUrl}/catalogo`);
+   }
+
+   getCatalogoModulosVentanas(): Observable<any[]> {
+      return this.http.get<any[]>(`${baseUrl}/catalogo-modulos`);
+   }
+
+   saveCatalogoModulosVentanas(catalogo: any[]): Observable<void> {
+      return this.http.post<void>(`${baseUrl}/catalogo-modulos`, catalogo);
+   }
+
+   getPermisosUsuario(idusuario: number): Observable<any[]> {
+      return this.http.get<any[]>(`${baseUrl}/usuario/${idusuario}`);
+   }
+
+   savePermisosUsuario(idusuario: number, permisos: Ventanas[]): Observable<Ventanas[]> {
+      return this.http.post<Ventanas[]>(`${baseUrl}/usuario/${idusuario}`, permisos);
    }
 
 }

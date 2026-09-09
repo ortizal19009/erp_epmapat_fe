@@ -1,0 +1,8 @@
+.module-catalog { max-width: 1180px; }
+.catalog-hero { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.5rem; color: #fff; background: linear-gradient(120deg, #164a63, #28705b); border-radius: 16px; }
+.catalog-hero h4 { margin: 0.2rem 0; font-weight: 700; }
+.catalog-hero p { margin: 0; max-width: 680px; opacity: 0.9; }
+.eyebrow { font-size: 0.72rem; letter-spacing: 0.12em; font-weight: 700; text-transform: uppercase; opacity: 0.8; }
+.module-catalog .card { border-radius: 16px; }
+.module-catalog thead { background: #edf4f2; color: #21473a; }
+@media (max-width: 576px) { .catalog-hero { align-items: flex-start; flex-direction: column; } }

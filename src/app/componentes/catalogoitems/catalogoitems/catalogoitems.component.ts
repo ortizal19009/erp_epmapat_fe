@@ -28,6 +28,7 @@ export class CatalogoitemsComponent implements OnInit {
       private moduService: ModulosService) { }
 
    ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/catalogoitems');
       let idmodulo = sessionStorage.getItem("idmoduloCatFacturacion");
       if (idmodulo == null || idmodulo == '0') this.idmodulo = 3;
       else this.idmodulo = +idmodulo;

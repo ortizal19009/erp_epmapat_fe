@@ -221,7 +221,9 @@ export class InfoFacturasComponent implements OnInit {
     const porcentajeIva = Number(this._impuesto?.valor || 0) / 100;
 
     (this._rubroxfac || []).forEach((rubro: any) => {
-      const totalRubro = Number(rubro?.cantidad || 0) * Number(rubro?.valorunitario || 0);
+      const totalRubro = Math.round(
+        (Number(rubro?.cantidad || 0) * Number(rubro?.valorunitario || 0) + Number.EPSILON) * 100
+      ) / 100;
       const esRubroIva = Number(rubro?.idrubro_rubros?.esiva || 0) === 1;
 
       if (esRubroIva) {

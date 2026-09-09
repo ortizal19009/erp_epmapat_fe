@@ -458,6 +458,25 @@
         </div>
         <div class='modal-body cuerpo'>
 
+          <div class="alert alert-info py-1 px-2 small mb-2" *ngIf="modoFiltro">
+            Se exportaran <strong>{{ pdfAlcance === 'todos' ? totalElements : _abonados.length }}</strong> abonado(s)
+            con la combinacion de filtros actual.
+          </div>
+
+          <div class="form-group mb-2" *ngIf="modoFiltro">
+            <label class="small text-muted mb-1">Alcance del reporte</label>
+            <div class="d-flex flex-column" style="gap:4px">
+              <label class="mb-0">
+                <input type="radio" [(ngModel)]="pdfAlcance" [value]="'pagina'"> &nbsp;
+                Solo pagina actual ({{ _abonados.length }} registros)
+              </label>
+              <label class="mb-0">
+                <input type="radio" [(ngModel)]="pdfAlcance" [value]="'todos'"> &nbsp;
+                Todos los resultados filtrados ({{ totalElements }})
+              </label>
+            </div>
+          </div>
+
           <div class="form-group  my-0 py-0">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">

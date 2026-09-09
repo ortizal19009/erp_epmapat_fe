@@ -75,7 +75,7 @@ export class IfinanComponent implements OnInit {
       const tagName = event.target.tagName;
       if (tagName === 'TD') {
          sessionStorage.setItem('idifinanToInfo', idifinan.toString());
-         this.router.navigate(['info-ifinan']);
+         this.router.navigate(['/info-ifinan', idifinan]);
       }
    }
 

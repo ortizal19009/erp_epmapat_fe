@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { concatMap, finalize, forkJoin, from, map, Observable, of, switchMap, tap, toArray } from 'rxjs';
 import Swal from 'sweetalert2';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 import { Catalogoitems } from 'src/app/modelos/catalogoitems.model';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Facturacion } from 'src/app/modelos/facturacion.model';
@@ -51,6 +52,8 @@ export class AddFacturacionComponent implements OnInit {
   cliente: any;
   modulo: any;
   factura: any;
+  rolepermission = 1;
+  readonly ventana = 'facturacion';
 
   constructor(
     private router: Router,
@@ -68,10 +71,14 @@ export class AddFacturacionComponent implements OnInit {
     private rubService: RubrosService,
     private liqfacService: LiquidafacService,
     private authService: AutorizaService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private coloresService: ColoresService,
   ) { }
 
   ngOnInit(): void {
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    void this.loadRolePermission();
+
     this.formFacturacion = this.fb.group({
       fecha: new Date().toISOString().substring(0, 10),
       cliente: '',
@@ -154,6 +161,8 @@ export class AddFacturacionComponent implements OnInit {
   }
 
   guardar() {
+    if (this.bloquearEdicion()) return;
+
     if (!this.cliente) {
       this.authService.swal('warning', 'Seleccione un cliente');
       return;
@@ -193,6 +202,32 @@ export class AddFacturacionComponent implements OnInit {
           this.authService.mostrarError('Error al guardar la facturación', err?.error ?? err?.message ?? err);
         },
       });
+  }
+
+  canEditarFacturacion(): boolean {
+    return this.authService.idusuario === 1 || this.rolepermission >= 2;
+  }
+
+  private async loadRolePermission(): Promise<void> {
+    if (this.authService.idusuario === 1) {
+      this.rolepermission = 3;
+      return;
+    }
+
+    this.rolepermission = await this.coloresService.getRolePermission(
+      this.authService.idusuario,
+      this.ventana,
+    );
+  }
+
+  private bloquearEdicion(): boolean {
+    if (this.canEditarFacturacion()) return false;
+
+    this.authService.swal(
+      'warning',
+      'Tu nivel de acceso es solo lectura. No tienes permiso para crear una facturación.',
+    );
+    return true;
   }
 
   private guardarItemsFacturacion$(facturacion: Facturacion): Observable<any[]> {

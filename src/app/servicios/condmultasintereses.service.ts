@@ -49,6 +49,13 @@ export class CondmultasinteresesService {
     });
   }
 
+  aprobarLote(ids: number[], idusuario: number, observacion?: string): Observable<any> {
+    return this.http.put(`${baseUrl}/aprobar-lote?idusuario=${idusuario}`, {
+      ids,
+      observacion: observacion || null,
+    });
+  }
+
   rechazar(id: number, idusuario: number, observacion: string): Observable<Condmultaintereses> {
     return this.http.put<Condmultaintereses>(`${baseUrl}/${id}/rechazar?idusuario=${idusuario}`, {
       observacion,

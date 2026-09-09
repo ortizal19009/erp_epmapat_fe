@@ -13,6 +13,7 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
   selector: 'app-home',
@@ -112,6 +113,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private clientesService: ClientesService,
     private categoriaService: CategoriaService,
     private facturaService: FacturaService,
+    private authService: AutorizaService,
   ) {}
 
   // ══════════════════════════════════════
@@ -152,7 +154,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'cv-facturas');
       sessionStorage.setItem('/cv-facturas', JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) {

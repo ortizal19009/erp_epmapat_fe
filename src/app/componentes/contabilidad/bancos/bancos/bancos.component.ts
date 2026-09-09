@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Conciliaban } from 'src/app/modelos/contabilidad/conciliaban.model';
@@ -48,7 +49,8 @@ export class BancosComponent implements OnInit {
 
    constructor(private fb: FormBuilder, private router: Router, private cueService: CuentasService,
       private tranService: TransaciService, private coloresService: ColoresService,
-      private docuService: DocumentosService, private conciService: ConciliabanService) { }
+      private docuService: DocumentosService, private conciService: ConciliabanService,
+      private authService: AutorizaService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/bancos');
@@ -107,7 +109,7 @@ export class BancosComponent implements OnInit {
 
    async buscaColor() {
       try {
-         const datos = await this.coloresService.setcolor(1, 'bancos');
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'bancos');
          const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/bancos', coloresJSON);
          this.colocaColor(datos);
@@ -171,25 +173,34 @@ export class BancosComponent implements OnInit {
 
    cambioDatosCheck(e: any, transaci: any) {
       let date: Date = new Date();
+      const previousMesConcili = transaci.mesconcili;
+      const previousChecked = !e.target.checked;
 
       if (e.target.checked === false) {
-         transaci.mesconcili = 0;
-         this.updateTransaci(transaci);
+        transaci.mesconcili = 0;
       } else if (e.target.checked === true) {
          transaci.mesconcili = date.getMonth();
          //transaci.mesconcili = 1;
-         this.updateTransaci(transaci);
       }
+      this.updateTransaci(transaci, () => {
+         transaci.mesconcili = previousMesConcili;
+         transaci.swconcili = previousChecked;
+         e.target.checked = previousChecked;
+         e.target.style.border = 'red 1px solid';
+      });
       e.target.style.border = 'green 1px solid';
       setTimeout(() => {
          e.target.style.border = '';
       }, 1000);
    }
 
-   updateTransaci(transaci: any) {
+   updateTransaci(transaci: any, onError?: () => void) {
       this.tranService.updateTransaci(transaci).subscribe({
          next: datos => { },
-         error: (e) => console.error(e),
+         error: (e) => {
+            onError?.();
+            console.error(e);
+         },
       });
    }
 

@@ -88,7 +88,7 @@ export class CondonacionesComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'condonaciones');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'condonaciones');
       sessionStorage.setItem('/condonaciones', JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) {

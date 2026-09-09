@@ -70,6 +70,8 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
   swMulta: boolean = false;
+  rolepermission = 1;
+  readonly ventana = 're-facturacion';
 
   constructor(
     private fb: FormBuilder,
@@ -98,6 +100,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     });
 
     sessionStorage.setItem('ventana', '/re-facturacion');
+    void this.loadRolePermission();
     let coloresJSON = sessionStorage.getItem('/re-facturacion');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
@@ -154,6 +157,32 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async loadRolePermission(): Promise<void> {
+    if (this.authService.idusuario === 1) {
+      this.rolepermission = 3;
+      return;
+    }
+
+    this.rolepermission = await this.coloresService.getRolePermission(
+      this.authService.idusuario,
+      this.ventana,
+    );
+  }
+
+  canCrearEmisionIndividual(): boolean {
+    return this.authService.idusuario === 1 || this.rolepermission >= 2;
+  }
+
+  private bloquearNuevaEmisionIndividual(): boolean {
+    if (this.canCrearEmisionIndividual()) return false;
+
+    this.authService.swal(
+      'warning',
+      'Tu nivel de acceso es solo lectura. No tienes permiso para crear una emisión individual.',
+    );
+    return true;
+  }
+
   // ✅ Guardar habilitado SOLO si: abonado seleccionado + existen facturas eliminadas + no cargando
   get puedeGuardar(): boolean {
     return (
@@ -179,6 +208,8 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   }
 
   irNueva(): void {
+    if (this.bloquearNuevaEmisionIndividual()) return;
+
     this.limpiarSiNoGuardado();
     this.vista = 'NUEVA';
     this.limpiarNueva();
@@ -230,7 +261,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   // data
   // =======================
   getAllEmisiones(): void {
-    this.emiService.findAllEmisiones().subscribe({
+    this.emiService.findAllEmisionesBasic().subscribe({
       next: (datos: any[]) => {
         // ✅ SOLO estado 1
         this._allemisiones = (datos || []).filter((e) => +e.estado === 1);
@@ -396,6 +427,8 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   // guardar (✅ flujo real implementado)
   // =======================
   async guardarRefacturacion(): Promise<void> {
+    if (this.bloquearNuevaEmisionIndividual()) return;
+
     if (!this.puedeGuardar) {
       console.warn(
         'No se puede guardar: no existen facturas antiguas eliminadas.',
@@ -474,7 +507,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
         item.cantidad,
         item.valorunitario.toFixed(2),
       ]);
-      sum_anterior += item.cantidad * item.valorunitario;
+      sum_anterior += Math.round((Number(item.cantidad) * Number(item.valorunitario) + Number.EPSILON) * 100) / 100;
     });
     autoTable(doc, {
       headStyles: {
@@ -544,7 +577,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
         item.cantidad,
         item.valorunitario.toFixed(2),
       ]);
-      sum_nuevos += item.cantidad * item.valorunitario;
+      sum_nuevos += Math.round((Number(item.cantidad) * Number(item.valorunitario) + Number.EPSILON) * 100) / 100;
     });
     let m3_nuevo: number =
       emisionIndividual.idlecturanueva.lecturaactual -

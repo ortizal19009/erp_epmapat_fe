@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Certificaciones } from 'src/app/modelos/ccertificaciones';
 import { CertificacionesService } from 'src/app/servicios/ccertificaciones.service';
@@ -19,7 +20,8 @@ export class ListarCertificacionesComponent implements OnInit {
     private coloresService: ColoresService,
     public certiService: CertificacionesService,
     public router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AutorizaService
   ) {}
 
   ngOnInit(): void {
@@ -78,7 +80,7 @@ export class ListarCertificacionesComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'ccertificaciones');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'ccertificaciones');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/ccertificaciones', coloresJSON);
       this.colocaColor(datos);

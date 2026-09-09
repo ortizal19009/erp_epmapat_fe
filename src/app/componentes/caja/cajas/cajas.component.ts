@@ -36,6 +36,8 @@ export class ListarCajaComponent implements OnInit, OnDestroy {
   swAddCaja: boolean = false;
   idcaja: number;
   _iduser: number;
+  rolepermission = 1;
+  readonly ventana = 'cajas';
   private cajasEstadoEventSource: EventSource | null = null;
   @ViewChild('swModi', { read: TemplateRef }) swModi: TemplateRef<unknown> | undefined;
 
@@ -60,6 +62,7 @@ export class ListarCajaComponent implements OnInit, OnDestroy {
     let coloresJSON = sessionStorage.getItem('/cajas');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
+    void this.loadRolePermission();
     this.listarCajas();
     this.iniciarStreamCajas();
     let fDate = format(fechaActual, 'YYYY-MM-DD');
@@ -92,6 +95,28 @@ export class ListarCajaComponent implements OnInit, OnDestroy {
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
+  }
+
+  private async loadRolePermission(): Promise<void> {
+    if (this.authService.idusuario === 1) {
+      this.rolepermission = 3;
+      return;
+    }
+
+    this.rolepermission = await this.coloresService.getRolePermission(
+      this.authService.idusuario,
+      this.ventana,
+    );
+  }
+
+  canEditarCajas(): boolean {
+    return this.authService.idusuario === 1 || this.rolepermission >= 2;
+  }
+
+  private bloquearEdicion(): boolean {
+    if (this.canEditarCajas()) return false;
+    this.authService.swal('warning', 'Tu nivel de acceso es solo lectura. No tienes permiso para modificar cajas.');
+    return true;
   }
 
   public listarCajas() {
@@ -243,6 +268,7 @@ export class ListarCajaComponent implements OnInit, OnDestroy {
     }
   }
   setIdcaja(idcaja: number) {
+    if (this.bloquearEdicion()) return;
     this.idcaja = idcaja;
     this.swAddCaja = true;
 

@@ -43,7 +43,7 @@
           data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-          <button class="dropdown-item" type="button" (click)="nuevo()">
+          <button class="dropdown-item" type="button" (click)="nuevo()" [disabled]="!canEditarConvenios()">
             <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
           <button class="dropdown-item" type="button" (click)="imprimir()">
             <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
@@ -152,18 +152,18 @@
                   aria-expanded="false">
                 </button>
                 <div class="dropdown-menu dropdown-menu-right popLista">
-                  <button class="dropdown-item" type="button" (click)="modiConvenio( convenio.idconvenio )">
+                  <button class="dropdown-item" type="button" (click)="modiConvenio( convenio.idconvenio )" [disabled]="!canEditarConvenios()">
                     <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                   <button class="dropdown-item" type="button" (click)="anularConvenio(convenio.idconvenio)"
-                    [disabled]="!puedeAnular(convenio)"
+                    [disabled]="!puedeAnular(convenio) || !canEditarConvenios()"
                     [title]="puedeAnular(convenio) ? 'Anular convenio' : 'Solo se puede anular si existe al menos una factura nueva pagada.'">
                     <i class="bi bi-slash-circle"></i>&nbsp; Anular</button>
                   <button class="dropdown-item" type="button" (click)="eliminarConvenio(convenio.idconvenio)"
-                    [disabled]="!puedeEliminar(convenio)"
+                    [disabled]="!puedeEliminar(convenio) || !canEditarConvenios()"
                     [title]="puedeEliminar(convenio) ? 'Eliminar convenio' : 'Solo se puede eliminar si no existe ninguna factura nueva pagada.'">
                     <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                   <button class="dropdown-item" type="button" (click)="marcarConvenioPagado(convenio)"
-                    [disabled]="!puedeMarcarPagado(convenio)" [title]="getTooltipMarcarPagado(convenio)">
+                    [disabled]="!puedeMarcarPagado(convenio) || !canEditarConvenios()" [title]="getTooltipMarcarPagado(convenio)">
                     <i class="bi bi-check-circle"></i>&nbsp; Marcar pagado</button>
                 </div>
               </div>

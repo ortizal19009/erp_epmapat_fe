@@ -1,1 +1,29 @@
-.card{border-radius:10px;}
+.access-admin { max-width: 1180px; }
+
+.access-hero {
+  color: #fff;
+  padding: 1.8rem;
+  margin-bottom: 1rem;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #174f69, #2e765d);
+  box-shadow: 0 0.75rem 1.5rem rgba(24, 68, 77, 0.18);
+}
+
+.access-hero h4 { margin: 0.25rem 0; font-weight: 700; }
+.access-hero p { margin: 0; opacity: 0.9; }
+.access-hero__eyebrow, .access-card__number { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.access-hero__eyebrow { opacity: 0.78; }
+
+.access-card, .access-catalog-card { border-radius: 16px; }
+.access-card { overflow: hidden; }
+.access-card--permissions { border-top: 4px solid #d8a43d !important; }
+.access-card__number { color: #28705b; }
+.access-card h5, .access-catalog-card h5 { margin-top: 0.45rem; font-weight: 700; color: #263844; }
+
+.role-list, .permission-list { display: grid; gap: 0.55rem; }
+.role-item, .permission-item { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem 0.75rem; border-radius: 10px; background: #f3f7f8; }
+.role-item__index, .permission-item__level { display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; font-size: 0.78rem; font-weight: 700; color: #fff; border-radius: 50%; background: #28705b; }
+.permission-item__level { border-radius: 6px; background: #9b6a16; }
+.access-catalog-card { border-left: 5px solid #28705b !important; }
+
+@media (max-width: 575.98px) { .access-hero { padding: 1.35rem; } }

@@ -212,9 +212,11 @@ export class ImpCajasComponent implements OnInit {
       case 2: // Recaudación diaria - Planillas
         try {
           this._cobradas = await this.facService.getByFechacobroTotAsync(fecha);
-          this._cobradas.map(async (item: any) => {
-            item[0] = await this.facService.getByIdAsync(item.idfactura);
-          });
+          await Promise.all(
+            this._cobradas.map(async (item: any) => {
+              item[0] = await this.facService.getByIdAsync(item.idfactura);
+            })
+          );
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -294,9 +296,11 @@ export class ImpCajasComponent implements OnInit {
             d_fecha,
             h_fecha
           );
-          this._cobradas.map(async (item: any) => {
-            item[0] = await this.facService.getByIdAsync(item.idfactura);
-          });
+          await Promise.all(
+            this._cobradas.map(async (item: any) => {
+              item[0] = await this.facService.getByIdAsync(item.idfactura);
+            })
+          );
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -622,6 +626,7 @@ export class ImpCajasComponent implements OnInit {
     };
 
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -643,15 +648,20 @@ export class ImpCajasComponent implements OnInit {
 
     const datos: any = [];
     let suma: number = 0;
-    var i = 0;
+    let i = 0;
     this._cobradas.forEach((item: any) => {
-      let totalPorFormaCobro =
-        +this._cobradas[i].total + +this._cobradas[i].iva;
+      const factura = item?.[0];
+      if (!factura) {
+        console.warn('No se encontró la factura para el reporte:', item?.idfactura);
+        return;
+      }
+
+      const totalPorFormaCobro = +item.total + +item.iva;
       datos.push([
-        this._cobradas[i][0].idfactura,
-        this._cobradas[i][0].feccrea,
-        this._cobradas[i][0].nrofactura,
-        this._cobradas[i][0].formapago,
+        factura.idfactura,
+        factura.feccrea,
+        factura.nrofactura,
+        factura.formapago,
         formatNumber(totalPorFormaCobro),
       ]);
       suma += totalPorFormaCobro;
@@ -707,6 +717,7 @@ export class ImpCajasComponent implements OnInit {
     });
 
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -898,6 +909,7 @@ export class ImpCajasComponent implements OnInit {
     };
 
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -993,6 +1005,7 @@ export class ImpCajasComponent implements OnInit {
     });
 
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -1064,6 +1077,7 @@ export class ImpCajasComponent implements OnInit {
       },
     });
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -1163,6 +1177,7 @@ export class ImpCajasComponent implements OnInit {
     });
 
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -1264,6 +1279,25 @@ export class ImpCajasComponent implements OnInit {
         window.open(blobUrl, '_blank');
       }
     }
+  }
+
+  private agregarPieAuditoria(doc: any): void {
+    const momentoImpresion = new Date();
+    const fechaHora = `${momentoImpresion.toLocaleDateString('es-EC')} ${momentoImpresion.toLocaleTimeString('es-EC', {
+      hour12: false,
+    })}`;
+    const usuario = this.authService.alias || `Usuario ${this.authService.idusuario}`;
+    const pie = `Impreso el: ${fechaHora} | Usuario: ${usuario}`;
+    const totalPaginas = doc.internal.pages.length - 1;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+      doc.setPage(pagina);
+      doc.text(pie, 50, doc.internal.pageSize.height - 16);
+    }
+    doc.setTextColor(0, 0, 0);
   }
 
   exportarResumen() {

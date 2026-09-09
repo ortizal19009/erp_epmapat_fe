@@ -113,7 +113,7 @@ export class ListarAbonadosComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, this.ventana);
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, this.ventana);
       sessionStorage.setItem(`/${this.ventana}`, JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) { console.error(error); }
@@ -185,27 +185,28 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   onFiltroEstado() {
-    this.filtroCategoria = null;
-    this.filtroRuta = null;
-    if (this.filtroEstado === null) { this.limpiarFiltros(); return; }
-    this.page = 0;
-    this.buscarConFiltros();
+    this.actualizarFiltros();
   }
 
   onFiltroCategoria() {
-    this.filtroEstado = null;
-    this.filtroRuta = null;
-    if (this.filtroCategoria === null) { this.limpiarFiltros(); return; }
+    this.actualizarFiltros();
+  }
+
+  onFiltroRuta() {
+    this.actualizarFiltros();
+  }
+
+  private actualizarFiltros() {
+    if (!this.hayFiltrosActivos()) {
+      this.limpiarFiltros();
+      return;
+    }
     this.page = 0;
     this.buscarConFiltros();
   }
 
-  onFiltroRuta() {
-    this.filtroEstado = null;
-    this.filtroCategoria = null;
-    if (this.filtroRuta === null) { this.limpiarFiltros(); return; }
-    this.page = 0;
-    this.buscarConFiltros();
+  private hayFiltrosActivos(): boolean {
+    return this.filtroEstado !== null || this.filtroCategoria !== null || this.filtroRuta !== null;
   }
 
   buscarConFiltros() {
@@ -223,18 +224,13 @@ export class ListarAbonadosComponent implements OnInit {
     };
     const onError = (e: any) => { console.error(e); this.loadingService.hideLoading(); };
 
-    if (this.filtroCategoria !== null) {
-      this.aboService.getAbonadosByCategoriaPageable(this.filtroCategoria, this.page, this.size)
-        .subscribe({ next: onSuccess, error: onError });
-    } else if (this.filtroEstado !== null) {
-      this.aboService.getAbonadosByEstadoPageable(this.filtroEstado, this.page, this.size)
-        .subscribe({ next: onSuccess, error: onError });
-    } else if (this.filtroRuta !== null) {
-      this.aboService.getAbonadosByRutaPageable(this.filtroRuta, this.page, this.size)
-        .subscribe({ next: onSuccess, error: onError });
-    } else {
+    if (!this.hayFiltrosActivos()) {
       this.loadingService.hideLoading();
+      return;
     }
+
+    this.aboService.getAbonadosPage(this.page, this.size, 'idabonado,asc', this.filtrosReporte())
+      .subscribe({ next: onSuccess, error: onError });
   }
 
 
@@ -648,19 +644,19 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   private async descargarTodosParaPdf(): Promise<any[]> {
-    const { firstValueFrom } = await import('rxjs');
-    let obs;
-    if (this.filtroCategoria !== null) {
-      obs = this.aboService.getAbonadosByCategoriaPageable(this.filtroCategoria, 0, this.totalElements);
-    } else if (this.filtroEstado !== null) {
-      obs = this.aboService.getAbonadosByEstadoPageable(this.filtroEstado, 0, this.totalElements);
-    } else if (this.filtroRuta !== null) {
-      obs = this.aboService.getAbonadosByRutaPageable(this.filtroRuta, 0, this.totalElements);
-    } else {
-      return this._abonados;
-    }
-    const resp = await firstValueFrom(obs);
+    if (!this.hayFiltrosActivos()) return this._abonados;
+    const resp = await firstValueFrom(
+      this.aboService.getAbonadosPage(0, this.totalElements, 'idabonado,asc', this.filtrosReporte())
+    );
     return resp.content;
+  }
+
+  private filtrosReporte() {
+    return {
+      estado: this.filtroEstado,
+      idcategoria: this.filtroCategoria,
+      idruta: this.filtroRuta,
+    };
   }
 
   private generarPdf(datos: any[]) {
@@ -684,17 +680,20 @@ export class ListarAbonadosComponent implements OnInit {
     doc.text('LISTADO DE ABONADOS', margenL, 46);
 
     // Subtitulo con filtro activo
-    let subtitulo = '';
+    const filtros: string[] = [];
     if (this.filtroEstado !== null) {
       const estados: any = { 0: 'Eliminado', 1: 'Activo', 2: 'Suspendido', 3: 'Retirado' };
-      subtitulo = `Filtro - Estado: ${estados[this.filtroEstado] ?? this.filtroEstado}`;
-    } else if (this.filtroCategoria !== null) {
-      const cat = this._categorias.find(c => c.idcategoria === this.filtroCategoria);
-      subtitulo = `Filtro - Categoria: ${cat?.descripcion ?? this.filtroCategoria}`;
-    } else if (this.filtroRuta !== null) {
-      const ruta = this._rutas.find(r => r.idruta === this.filtroRuta);
-      subtitulo = `Filtro - Ruta: ${ruta?.descripcion ?? this.filtroRuta}`;
+      filtros.push(`Estado: ${estados[this.filtroEstado] ?? this.filtroEstado}`);
     }
+    if (this.filtroCategoria !== null) {
+      const cat = this._categorias.find(c => c.idcategoria === this.filtroCategoria);
+      filtros.push(`Categoria: ${cat?.descripcion ?? this.filtroCategoria}`);
+    }
+    if (this.filtroRuta !== null) {
+      const ruta = this._rutas.find(r => r.idruta === this.filtroRuta);
+      filtros.push(`Ruta: ${ruta?.descripcion ?? this.filtroRuta}`);
+    }
+    const subtitulo = filtros.length ? `Filtros - ${filtros.join(' | ')}` : '';
 
     let startY = 56;
     if (subtitulo) {
@@ -805,42 +804,86 @@ export class ListarAbonadosComponent implements OnInit {
     }
   }
 
-  exporta() {
-    this.aboService.getCampos().subscribe({
-      next: (datos) => {
-        this._campos = datos;
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Abonados');
-        worksheet.addRow(['Abonados']);
-        const font = { name: 'Times New Roman', bold: true, size: 14, color: { argb: '002060' } };
-        worksheet.getCell('A1').font = font;
-        worksheet.getCell('C1').font = font;
-        worksheet.addRow([]);
-        const cabecera = ['Cuenta', 'Nombre', 'Identificacion', 'Direccion', 'Direccion Ubicacion', 'Telefono', 'F.Nacimiento', 'e-mail'];
-        const headerRow = worksheet.addRow(cabecera);
-        headerRow.eachCell((cell) => {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '002060' } };
-          cell.font = { bold: true, name: 'Times New Roman', color: { argb: 'FFFFFF' } };
-        });
-        this._campos.forEach((a: any) => {
-          worksheet.addRow([a.idabonado, a.nombre, a.cedula, a.direccion, a.direccionubicacion, a.telefono, a.fechanacimiento, a.email]);
-        });
-        [10, 50, 14, 50, 50, 20, 12, 40].forEach((w, i) => { worksheet.getColumn(i + 1).width = w; });
-        [3, 6, 7].forEach((col) => {
-          worksheet.getColumn(col).eachCell({ includeEmpty: true }, (cell) => {
-            cell.alignment = { vertical: 'middle', horizontal: 'center' };
-          });
-        });
-        workbook.xlsx.writeBuffer().then((buffer) => {
-          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = `${this.archExportar}.xlsx`; a.click();
-          window.URL.revokeObjectURL(url);
-        });
-      },
-      error: (err) => console.error(err.error),
+  async exporta() {
+    this.loadingService.showLoading();
+    try {
+      const datos = this.modoFiltro && this.pdfAlcance === 'todos'
+        ? await this.descargarTodosParaPdf()
+        : this._abonados;
+      this.generarExcel(datos);
+    } catch (error) {
+      console.error(error);
+      Swal.fire('No se pudo exportar', 'Ocurrio un error al obtener los abonados para el reporte.', 'error');
+    } finally {
+      this.loadingService.hideLoading();
+    }
+  }
+
+  private generarExcel(datos: any[]) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Abonados');
+    const estados: any = { 0: 'Eliminado', 1: 'Activo', 2: 'Suspendido', 3: 'Retirado' };
+    const filtros = this.descripcionFiltrosReporte();
+
+    worksheet.mergeCells('A1:G1');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = 'LISTADO DE ABONADOS';
+    titleCell.font = { name: 'Times New Roman', bold: true, size: 14, color: { argb: '002060' } };
+    titleCell.alignment = { horizontal: 'center' };
+    if (filtros) {
+      worksheet.mergeCells('A2:G2');
+      worksheet.getCell('A2').value = filtros;
+      worksheet.getCell('A2').alignment = { horizontal: 'center' };
+    }
+    worksheet.addRow([]);
+
+    const headerRow = worksheet.addRow(['Cuenta', 'Nombre', 'Identificacion', 'Categoria', 'Ruta', 'Direccion', 'Estado']);
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '002060' } };
+      cell.font = { bold: true, name: 'Times New Roman', color: { argb: 'FFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
     });
+
+    datos.forEach((abonado: any) => {
+      worksheet.addRow([
+        abonado.idabonado ?? '',
+        abonado.nombre || abonado.idresponsable?.nombre || abonado.idcliente_clientes?.nombre || '',
+        abonado.identificacion || abonado.idresponsable?.cedula || '',
+        abonado.categoria || abonado.idcategoria_categorias?.descripcion || '',
+        abonado.ruta || abonado.idruta_rutas?.descripcion || '',
+        abonado.direccion || abonado.direccionubicacion || '',
+        estados[abonado.estado] ?? String(abonado.estado ?? ''),
+      ]);
+    });
+
+    [12, 42, 18, 24, 24, 52, 16].forEach((width, index) => worksheet.getColumn(index + 1).width = width);
+    worksheet.views = [{ state: 'frozen', ySplit: filtros ? 4 : 3 }];
+    worksheet.autoFilter = { from: 'A' + headerRow.number, to: 'G' + headerRow.number };
+
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${(this.archExportar || 'Abonados').trim() || 'Abonados'}.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
+  private descripcionFiltrosReporte(): string {
+    const partes: string[] = [];
+    const estados: any = { 0: 'Eliminado', 1: 'Activo', 2: 'Suspendido', 3: 'Retirado' };
+    if (this.filtroEstado !== null) partes.push(`Estado: ${estados[this.filtroEstado] ?? this.filtroEstado}`);
+    if (this.filtroCategoria !== null) {
+      const categoria = this._categorias.find(c => c.idcategoria === this.filtroCategoria);
+      partes.push(`Categoria: ${categoria?.descripcion ?? this.filtroCategoria}`);
+    }
+    if (this.filtroRuta !== null) {
+      const ruta = this._rutas.find(r => r.idruta === this.filtroRuta);
+      partes.push(`Ruta: ${ruta?.descripcion ?? this.filtroRuta}`);
+    }
+    return partes.length ? `Filtros: ${partes.join(' | ')}` : '';
   }
 
   private async leerArchivoExcel(file: File): Promise<Array<{ idabonado: number; geolocalizacion: string }>> {

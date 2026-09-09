@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { JwtInterceptor } from './compartida/jwt.interceptor';
 
 import { AppRoutingModule } from './app-routing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -133,6 +134,7 @@ import { InfoTabla4Component } from './features/admin-central/pages/administraci
 import { ModiTabla4Component } from './features/admin-central/pages/administracion/tabla4/modi-tabla4/modi-tabla4.component';
 import { LoginComponent } from './compartida/login/login.component';
 import { ServiceErrorInterceptor } from './compartida/service-error.interceptor';
+import { WritePermissionInterceptor } from './compartida/write-permission.interceptor';
 
 // ================ Pipes ==========================
 import { NombreEmisionPipe } from './pipes/nombre-emision.pipe';
@@ -280,6 +282,7 @@ import { ModificarRutasComponent } from './componentes/rutas/modificar-rutas/mod
 import { RegrecaudaComponent } from './componentes/contabilidad/regrecauda/regrecauda/regrecauda.component';
 import { ImpNiifcuentasComponent } from './componentes/contabilidad/niifcuentas/imp-niifcuentas/imp-niifcuentas.component';
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
+import { InfoIfinanComponent } from './componentes/contabilidad/ifinan/info-ifinan/info-ifinan.component';
 import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/info-liquida/info-liquida.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
@@ -537,6 +540,7 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     RegrecaudaComponent,
     ImpNiifcuentasComponent,
     IfinanComponent,
+    InfoIfinanComponent,
     InfoLiquidaComponent,
 
     // ========== ADMINISTRACION CENTRAL ============
@@ -698,6 +702,8 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     MainFooterComponent,
     { provide: LocationStrategy, useClass: HashLocationStrategy },
     { provide: HTTP_INTERCEPTORS, useClass: ServiceErrorInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: WritePermissionInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     /* https://angular.io/api/common/HashLocationStrategy */
   ],
 

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
@@ -54,7 +55,8 @@ export class CvAbonadosComponent implements OnInit {
     private categoriaService: CategoriaService,
     private rutasService: RutasService,
     private loadingService: LoadingService,
-    private pdfService: PdfService
+    private pdfService: PdfService,
+    private authService: AutorizaService
   ) { }
 
   ngOnInit(): void {
@@ -90,7 +92,7 @@ export class CvAbonadosComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-abonados');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'cv-abonados');
       sessionStorage.setItem('/cv-abonados', JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) {

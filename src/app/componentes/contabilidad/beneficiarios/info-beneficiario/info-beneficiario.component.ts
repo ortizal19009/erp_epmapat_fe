@@ -86,7 +86,8 @@ export class InfoBeneficiarioComponent implements OnInit {
 		});
 	}
 
-	comprobante(tipcom: number, compro: number): string {
+	comprobante(tipcom?: number, compro?: number): string {
+		if (tipcom == null || compro == null) return '-';
 		switch (tipcom) {
 			case 1:
 				return 'I-' + compro.toString();
@@ -112,37 +113,43 @@ export class InfoBeneficiarioComponent implements OnInit {
 		this.sumsaldo = 0;
 		let i = 0;
 		this._movimi.forEach(() => {
-			switch (this._movimi[i].inttra.tiptran) {
+			const movimiento = this._movimi[i];
+			const transaccion = movimiento.inttra;
+			if (!transaccion) {
+				i++;
+				return;
+			}
+			switch (transaccion.tiptran) {
 				case 2:
-					this._movimi[i].anticipo = this._movimi[i].valor;
-					this.sumanticipo = this.sumanticipo + this._movimi[i].valor;
+					movimiento.anticipo = movimiento.valor;
+					this.sumanticipo = this.sumanticipo + movimiento.valor;
 					break;
 				case 3:
-					this._movimi[i].cxc = this._movimi[i].valor;
-					this.sumcxc = this.sumcxc + this._movimi[i].valor;
+					movimiento.cxc = movimiento.valor;
+					this.sumcxc = this.sumcxc + movimiento.valor;
 					break;
 				case 4:
-					this._movimi[i].cxc = this._movimi[i].valor;
-					this.sumcxc = this.sumcxc + this._movimi[i].valor;
+					movimiento.cxc = movimiento.valor;
+					this.sumcxc = this.sumcxc + movimiento.valor;
 					break;
 				case 5:
-					this._movimi[i].ft = this._movimi[i].valor;
-					this.sumft = this.sumft + this._movimi[i].valor;
+					movimiento.ft = movimiento.valor;
+					this.sumft = this.sumft + movimiento.valor;
 					break;
 				case 6:
-					this._movimi[i].cxp = this._movimi[i].valor;
-					this.sumcxp = this.sumcxp + this._movimi[i].valor;
+					movimiento.cxp = movimiento.valor;
+					this.sumcxp = this.sumcxp + movimiento.valor;
 					break;
 				case 7:
-					this._movimi[i].cxp = this._movimi[i].valor;
-					this.sumcxp = this.sumcxp + this._movimi[i].valor;
+					movimiento.cxp = movimiento.valor;
+					this.sumcxp = this.sumcxp + movimiento.valor;
 					break;
 				default:
 
 			}
-			this._movimi[i].saldo = this._movimi[i].valor - this._movimi[i].totpagcob;
-			this.sumtotpagcob = this.sumtotpagcob + this._movimi[i].totpagcob;
-			this.sumsaldo = this.sumsaldo + this._movimi[i].saldo;
+			movimiento.saldo = movimiento.valor - movimiento.totpagcob;
+			this.sumtotpagcob = this.sumtotpagcob + movimiento.totpagcob;
+			this.sumsaldo = this.sumsaldo + movimiento.saldo;
 			i++;
 		});
 	}
@@ -165,7 +172,7 @@ export class InfoBeneficiarioComponent implements OnInit {
 		let movimientoToInfo: { idbenxtra: number, nomben: string }
 		movimientoToInfo = {
 			idbenxtra: movimi.idbenxtra,
-			nomben: movimi.idbene.nomben
+			nomben: movimi.idbene?.nomben || ''
 		};
 		sessionStorage.setItem('movimientoToInfo', JSON.stringify(movimientoToInfo));
 

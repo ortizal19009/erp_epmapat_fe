@@ -24,7 +24,7 @@
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#nuevaCaja"
-                  (click)="swAddCaja = false">
+                  (click)="swAddCaja = false" [disabled]="!canEditarCajas()">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                <button class="dropdown-item" type="button" (click)="imprimir()">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
@@ -90,7 +90,7 @@
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" (click)="setIdcaja(caja.idcaja)"[disabled]="([8, 10026, 1].includes(_iduser))" type="button"
+                           <button class="dropdown-item" (click)="setIdcaja(caja.idcaja)"[disabled]="([8, 10026, 1].includes(_iduser)) || !canEditarCajas()" type="button"
                               data-toggle="collapse" data-target="#modiCaja">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                            <button class="dropdown-item" type="button" data-toggle="modal" (click)="imprimirReportes(caja)" >

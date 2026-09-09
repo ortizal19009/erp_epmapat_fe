@@ -1,105 +1,58 @@
-<div class="content mt-1 pt-1 pl-0" *ngIf="puedeAprobar">
+<!-- The Angular watcher uses this file as the component template. -->
+<div class="content mt-1 pt-1 pl-0" *ngIf="puedeVer">
   <div class="container-fluid">
-    <div class="row m-0 px-0 py-2 justify-content-start cabecera border sombra align-items-center">
-      <div class="col-sm-4">
-        <h4 class="m-0 font-weight-bold"><i class="bi bi-clock-history"></i> Solicitudes pendientes de aprobación</h4>
-      </div>
+    <div class="row m-0 px-0 py-2 cabecera border sombra align-items-center">
+      <div class="col-sm-4"><h4 class="m-0 font-weight-bold"><i class="bi bi-clipboard-data"></i> Historial de exoneraciones</h4></div>
       <div class="col-sm-8">
-        <form [formGroup]="filtroForm">
-          <div class="row">
-            <div class="col-sm-2">
-              <select class="form-control form-control-sm" formControlName="estado">
-                <option value="">Todos</option>
-                <option value="PENDIENTE">Pendiente</option>
-                <option value="APROBADO">Aprobado</option>
-                <option value="RECHAZADO">Rechazado</option>
-              </select>
-            </div>
-            <div class="col-sm-2"><input class="form-control form-control-sm" placeholder="Cuenta" formControlName="cuenta"></div>
-            <div class="col-sm-2"><input class="form-control form-control-sm" placeholder="Factura" formControlName="nrofactura"></div>
-            <div class="col-sm-2"><input type="date" class="form-control form-control-sm" formControlName="feccreaDesde"></div>
-            <div class="col-sm-2"><input type="date" class="form-control form-control-sm" formControlName="feccreaHasta"></div>
-            <div class="col-sm-2"><button type="button" class="btn btn-primary btn-sm btn-block" (click)="buscar()">Buscar</button></div>
-          </div>
-        </form>
+        <form [formGroup]="filtroForm"><div class="row">
+          <div class="col-sm-2"><select class="form-control form-control-sm" formControlName="estado"><option value="">Todos</option><option value="PENDIENTE">Pendiente</option><option value="APROBADO">Aprobado</option><option value="RECHAZADO">Rechazado</option></select></div>
+          <div class="col-sm-2"><input class="form-control form-control-sm" placeholder="Cuenta" formControlName="cuenta"></div>
+          <div class="col-sm-2"><input class="form-control form-control-sm" placeholder="Factura" formControlName="nrofactura"></div>
+          <div class="col-sm-2"><input type="date" class="form-control form-control-sm" formControlName="feccreaDesde"></div>
+          <div class="col-sm-2"><input type="date" class="form-control form-control-sm" formControlName="feccreaHasta"></div>
+          <div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm btn-block" (click)="buscar()">Buscar</button></div>
+          <div class="col-sm-1 d-flex px-1"><button type="button" class="btn btn-light btn-sm mr-1 flex-fill" title="Imprimir reporte" (click)="imprimirReporte()"><i class="bi bi-printer"></i></button><button *ngIf="puedeAprobar && pendientesAprobables.length" type="button" class="btn btn-success btn-sm flex-fill" title="Aprobar todas las pendientes visibles" (click)="aprobarTodas()"><i class="bi bi-check2-all"></i></button></div>
+        </div></form>
       </div>
     </div>
   </div>
 </div>
 
-<div class="container-fluid mt-2">
-  <div class="row">
-    <div class="col-lg-7">
-      <div class="card sombra">
-        <div class="card-header"><strong>Solicitudes</strong></div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-sm table-hover table-bordered mb-0">
-              <thead class="cabecera text-center">
-                <tr>
-                  <th>ID</th>
-                  <th>Factura</th>
-                  <th>Abonado</th>
-                  <th>Cuenta</th>
-                  <th>Interés</th>
-                  <th>Multa</th>
-                  <th>Creador</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let item of solicitudes" (click)="seleccionar(item)" [class.table-active]="solicitudSeleccionada?.idcondmultainteres === item.idcondmultainteres">
-                  <td class="text-center">{{ item.idcondmultainteres }}</td>
-                  <td>{{ item.nrofactura || item.idfactura }}</td>
-                  <td>{{ item.abonado || '-' }}</td>
-                  <td class="text-center">{{ item.cuenta || '-' }}</td>
-                  <td class="text-right">{{ item.totalinteres || 0 | number:'1.2-2' }} $</td>
-                  <td class="text-right">{{ item.totalmultas || 0 | number:'1.2-2' }} $</td>
-                  <td>{{ item.usuarioCreador || item.usucrea }}</td>
-                  <td class="text-center">{{ item.estado }}</td>
-                </tr>
-                <tr *ngIf="!solicitudes.length">
-                  <td colspan="8" class="text-center text-muted py-4">No hay solicitudes para mostrar.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="container-fluid mt-2" *ngIf="puedeVer">
+  <div class="row mb-2">
+    <div class="col-md-2 col-6"><div class="resumen-item"><small>Solicitudes</small><strong>{{ solicitudes.length }}</strong></div></div>
+    <div class="col-md-2 col-6"><div class="resumen-item"><small>Aprobadas</small><strong>{{ aprobadas }}</strong></div></div>
+    <div class="col-md-2 col-6"><div class="resumen-item"><small>Pendientes</small><strong>{{ pendientes }}</strong></div></div>
+    <div class="col-md-2 col-6"><div class="resumen-item"><small>Intereses</small><strong>{{ totalIntereses | number:'1.2-2' }} $</strong></div></div>
+    <div class="col-md-2 col-6"><div class="resumen-item"><small>Multas</small><strong>{{ totalMultas | number:'1.2-2' }} $</strong></div></div>
+    <div class="col-md-2 col-6"><div class="resumen-item destacado"><small>Total exonerado</small><strong>{{ totalExonerado | number:'1.2-2' }} $</strong></div></div>
+  </div>
 
-    <div class="col-lg-5">
-      <div class="card sombra h-100">
-        <div class="card-header"><strong>Detalle</strong></div>
-        <div class="card-body" *ngIf="solicitudSeleccionada; else sinSeleccion">
-          <table class="table table-sm table-bordered">
-            <tbody>
-              <tr><td>ID solicitud</td><td>{{ solicitudSeleccionada.idcondmultainteres }}</td></tr>
-              <tr><td>Factura</td><td>{{ solicitudSeleccionada.nrofactura || solicitudSeleccionada.idfactura }}</td></tr>
-              <tr><td>Abonado</td><td>{{ solicitudSeleccionada.abonado || '-' }}</td></tr>
-              <tr><td>Cuenta</td><td>{{ solicitudSeleccionada.cuenta || '-' }}</td></tr>
-              <tr><td>Interés</td><td>{{ solicitudSeleccionada.totalinteres || 0 | number:'1.2-2' }} $</td></tr>
-              <tr><td>Multa</td><td>{{ solicitudSeleccionada.totalmultas || 0 | number:'1.2-2' }} $</td></tr>
-              <tr><td>Razón</td><td>{{ solicitudSeleccionada.razonExoneracion || solicitudSeleccionada.razoncondonacion || '-' }}</td></tr>
-              <tr><td>Usuario creador</td><td>{{ solicitudSeleccionada.usuarioCreador || solicitudSeleccionada.usucrea }}</td></tr>
-              <tr><td>Fecha creación</td><td>{{ solicitudSeleccionada.feccrea | date:'yyyy-MM-dd HH:mm' }}</td></tr>
-              <tr><td>Estado</td><td>{{ solicitudSeleccionada.estado }}</td></tr>
-              <tr><td>Observación</td><td>{{ solicitudSeleccionada.observacionAprobacion || '-' }}</td></tr>
-            </tbody>
-          </table>
-          <div class="row" *ngIf="solicitudSeleccionada.estado === 'PENDIENTE'">
-            <div class="col-sm-6 mb-2">
-              <button class="btn btn-outline-danger btn-sm btn-block" type="button" (click)="rechazar()">Rechazar</button>
-            </div>
-            <div class="col-sm-6 mb-2">
-              <button class="btn btn-success btn-sm btn-block" type="button" (click)="aprobar()">Aprobar</button>
-            </div>
-          </div>
-        </div>
-        <ng-template #sinSeleccion>
-          <div class="card-body text-muted">Seleccione una solicitud para ver el detalle.</div>
-        </ng-template>
+  <div class="row">
+    <div class="col-lg-8"><div class="card sombra"><div class="card-header"><strong>Detalle de solicitudes</strong></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-sm table-hover table-bordered mb-0">
+      <thead class="cabecera text-center"><tr><th>ID</th><th>Factura</th><th>Abonado</th><th>Cuenta</th><th>Interes</th><th>Multa</th><th>Fecha</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let item of solicitudes" (click)="seleccionar(item)" [class.table-active]="solicitudSeleccionada?.idcondmultainteres === item.idcondmultainteres">
+          <td class="text-center">{{ item.idcondmultainteres }}</td><td>{{ item.nrofactura || item.idfactura }}</td><td>{{ item.abonado || '-' }}</td><td class="text-center">{{ item.cuenta || '-' }}</td><td class="text-right">{{ item.totalinteres || 0 | number:'1.2-2' }} $</td><td class="text-right">{{ item.totalmultas || 0 | number:'1.2-2' }} $</td><td class="text-center">{{ item.feccrea | date:'dd/MM/yyyy' }}</td><td class="text-center">{{ item.estado }}</td>
+        </tr>
+        <tr *ngIf="!solicitudes.length"><td colspan="8" class="text-center text-muted py-4">No hay solicitudes para mostrar.</td></tr>
+      </tbody>
+    </table></div></div></div></div>
+
+    <div class="col-lg-4"><div class="card sombra h-100"><div class="card-header"><strong>Detalle</strong></div>
+      <div class="card-body" *ngIf="solicitudSeleccionada; else sinSeleccion"><table class="table table-sm table-bordered"><tbody>
+        <tr><td>Factura</td><td>{{ solicitudSeleccionada.nrofactura || solicitudSeleccionada.idfactura }}</td></tr>
+        <tr><td>Abonado</td><td>{{ solicitudSeleccionada.abonado || '-' }}</td></tr>
+        <tr><td>Interes</td><td>{{ solicitudSeleccionada.totalinteres || 0 | number:'1.2-2' }} $</td></tr>
+        <tr><td>Multa</td><td>{{ solicitudSeleccionada.totalmultas || 0 | number:'1.2-2' }} $</td></tr>
+        <tr><td>Razon</td><td>{{ solicitudSeleccionada.razonExoneracion || solicitudSeleccionada.razoncondonacion || '-' }}</td></tr>
+        <tr><td>Solicitante</td><td>{{ solicitudSeleccionada.usuarioCreador || solicitudSeleccionada.usucrea }}</td></tr>
+        <tr><td>Estado</td><td>{{ solicitudSeleccionada.estado }}</td></tr>
+        <tr><td>Observacion</td><td>{{ solicitudSeleccionada.observacionAprobacion || '-' }}</td></tr>
+      </tbody></table>
+      <div class="row" *ngIf="puedeAprobar && solicitudSeleccionada.estado === 'PENDIENTE'"><div class="col-6"><button class="btn btn-outline-danger btn-sm btn-block" type="button" (click)="rechazar()">Rechazar</button></div><div class="col-6"><button class="btn btn-success btn-sm btn-block" type="button" (click)="aprobar()">Aprobar</button></div></div>
       </div>
-    </div>
+      <ng-template #sinSeleccion><div class="card-body text-muted">Seleccione una solicitud para ver el detalle.</div></ng-template>
+    </div></div>
   </div>
 </div>

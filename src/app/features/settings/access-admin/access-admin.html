@@ -1,78 +1,47 @@
-<div class="container-fluid mt-2">
-  <div class="card shadow-sm border-0 p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <h5 class="m-0">Administración de Accesos</h5>
-      <span class="badge badge-info">Solo admin</span>
+<div class="container-fluid mt-2 access-admin" *ngIf="canManageAccess">
+  <section class="access-hero">
+    <span class="access-hero__eyebrow">Administración de accesos</span>
+    <h4>Roles y permisos</h4>
+    <p>Configura las reglas de acceso. La selección de usuarios se realiza desde el módulo de Usuarios.</p>
+  </section>
+
+  <div class="row">
+    <div class="col-lg-6 mb-3">
+      <article class="card shadow-sm border-0 h-100 access-card">
+        <div class="card-body p-4">
+          <span class="access-card__number">01</span>
+          <h5>Roles de usuario</h5>
+          <p class="text-muted">Cada rol define el alcance general del usuario. Se asigna desde su perfil individual.</p>
+          <div class="role-list">
+            <div class="role-item" *ngFor="let role of roleOptions; let i = index">
+              <span class="role-item__index">{{ i + 1 }}</span><strong>{{ role }}</strong>
+            </div>
+          </div>
+          <a class="btn btn-outline-primary mt-3" routerLink="/usuarios">Ir a usuarios</a>
+        </div>
+      </article>
     </div>
-
-    <div *ngIf="!modulesWriteEnabled && modulesWriteMessage" class="alert alert-warning py-2">
-      {{ modulesWriteMessage }}
-    </div>
-
-    <div class="small text-muted mb-1">Crear nuevo módulo</div>
-    <div class="form-row mb-3">
-      <div class="col-md-6 mb-2"><input class="form-control form-control-sm" [(ngModel)]="adminNewModulo.descripcion" placeholder="Descripción módulo"></div>
-      <div class="col-md-3 mb-2">
-        <select class="custom-select custom-select-sm" [(ngModel)]="adminNewModulo.platform">
-          <option value="WEB">WEB</option><option value="MOBILE">MOBILE</option><option value="BOTH">BOTH</option>
-        </select>
-      </div>
-      <div class="col-md-3 mb-2"><button class="btn btn-sm btn-success btn-block" (click)="saveNewModulo()" [disabled]="!modulesWriteEnabled">Guardar módulo</button></div>
-    </div>
-
-    <div class="small text-muted mb-1">Editar módulos</div>
-    <table class="table table-sm table-bordered mb-3">
-      <thead><tr><th>#</th><th>Módulo</th><th>Platform</th><th></th></tr></thead>
-      <tbody>
-        <tr *ngFor="let m of allModules; let i=index">
-          <td>{{i+1}}</td>
-          <td><input class="form-control form-control-sm" [(ngModel)]="m.descripcion"></td>
-          <td><select class="custom-select custom-select-sm" [(ngModel)]="m.platform"><option>WEB</option><option>MOBILE</option><option>BOTH</option></select></td>
-          <td><button class="btn btn-sm btn-outline-success" (click)="saveModuloEdit(m)" [disabled]="!modulesWriteEnabled">Guardar</button></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="small text-muted mb-1">Secciones y subsecciones</div>
-    <div class="form-row mb-2">
-      <div class="col-md-6 mb-2">
-        <select class="custom-select custom-select-sm" [(ngModel)]="selectedModuleId" (change)="loadSectionCatalog()">
-          <option [ngValue]="null">(Selecciona módulo)</option>
-          <option *ngFor="let m of allModules" [ngValue]="m.iderpmodulo">{{m.descripcion}}</option>
-        </select>
-      </div>
-      <div class="col-md-6 small text-muted pt-1">Usa códigos jerárquicos para subsecciones (ej: GD_CFG.SYSTEM)</div>
-    </div>
-
-    <div *ngIf="!sectionsCatalogEnabled && sectionsCatalogMessage" class="alert alert-warning py-2">
-      {{ sectionsCatalogMessage }}
-    </div>
-
-    <table class="table table-sm table-bordered" *ngIf="selectedModuleId && sectionsCatalogEnabled">
-      <thead><tr><th>Código</th><th>Descripción</th><th>Ruta</th><th>Orden</th><th>Platform</th><th>Activo</th><th></th></tr></thead>
-      <tbody>
-        <tr *ngFor="let s of sectionCatalog">
-          <td><input class="form-control form-control-sm" [(ngModel)]="s.codigo"></td>
-          <td><input class="form-control form-control-sm" [(ngModel)]="s.descripcion"></td>
-          <td><input class="form-control form-control-sm" [(ngModel)]="s.ruta"></td>
-          <td><input class="form-control form-control-sm" type="number" [(ngModel)]="s.orden"></td>
-          <td><select class="custom-select custom-select-sm" [(ngModel)]="s.platform"><option>WEB</option><option>MOBILE</option><option>BOTH</option></select></td>
-          <td class="text-center"><input type="checkbox" [(ngModel)]="s.activo"></td>
-          <td><button class="btn btn-sm btn-outline-success" (click)="saveSectionEdit(s)">Guardar</button></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="border rounded p-2" *ngIf="selectedModuleId && sectionsCatalogEnabled">
-      <div class="small font-weight-bold mb-2">Nueva sección/subsección</div>
-      <div class="form-row">
-        <div class="col-sm-2 mb-1"><input class="form-control form-control-sm" placeholder="Código" [(ngModel)]="adminNewSection.codigo"></div>
-        <div class="col-sm-3 mb-1"><input class="form-control form-control-sm" placeholder="Descripción" [(ngModel)]="adminNewSection.descripcion"></div>
-        <div class="col-sm-3 mb-1"><input class="form-control form-control-sm" placeholder="Ruta" [(ngModel)]="adminNewSection.ruta"></div>
-        <div class="col-sm-1 mb-1"><input class="form-control form-control-sm" type="number" [(ngModel)]="adminNewSection.orden"></div>
-        <div class="col-sm-2 mb-1"><select class="custom-select custom-select-sm" [(ngModel)]="adminNewSection.platform"><option>WEB</option><option>MOBILE</option><option>BOTH</option></select></div>
-        <div class="col-sm-1 mb-1"><button class="btn btn-sm btn-success btn-block" (click)="saveNewSectionCatalog()">+</button></div>
-      </div>
+    <div class="col-lg-6 mb-3">
+      <article class="card shadow-sm border-0 h-100 access-card access-card--permissions">
+        <div class="card-body p-4">
+          <span class="access-card__number">02</span>
+          <h5>Niveles de permiso</h5>
+          <p class="text-muted">Los permisos se aplican a las ventanas que pertenezcan a módulos habilitados.</p>
+          <div class="permission-list">
+            <div class="permission-item" *ngFor="let level of permissionLevels">
+              <span class="permission-item__level">{{ level.value }}</span><span>{{ level.label }}</span>
+            </div>
+          </div>
+          <p class="small text-muted mb-0 mt-3">Para editar permisos de una persona, ábrela desde Usuarios y selecciona su perfil.</p>
+        </div>
+      </article>
     </div>
   </div>
+
+  <article class="card shadow-sm border-0 access-catalog-card">
+    <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3 p-4">
+      <div><span class="access-card__number">03</span><h5 class="mb-1">Catálogo de módulos y ventanas</h5><p class="text-muted mb-0">Relaciona cada ventana WEB con el módulo que debe estar habilitado para verla.</p></div>
+      <a class="btn btn-success" routerLink="/admin/catalogo-ventanas">Administrar catálogo</a>
+    </div>
+  </article>
 </div>

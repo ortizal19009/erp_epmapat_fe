@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { ImpTransaciComponent } from 'src/app/componentes/contabilidad/transaci/imp-transaci/imp-transaci.component';
 import { ClientesService } from 'src/app/servicios/clientes.service';
@@ -36,7 +37,8 @@ export class CvFacturasComponent implements OnInit {
     private coloresService: ColoresService,
     private fb: FormBuilder,
     private s_facturas: FacturaService,
-    private s_loading: LoadingService
+    private s_loading: LoadingService,
+    private authService: AutorizaService
   ) { }
 
   ngOnInit(): void {
@@ -73,7 +75,7 @@ export class CvFacturasComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'cv-facturas');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/cv-facturas', coloresJSON);
       this.colocaColor(datos);

@@ -39,7 +39,7 @@
         </button>
         <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addEmision" (click)="nuevo()"
-            [disabled]="cerrado == 6">
+            [disabled]="cerrado == 6 || !canEditarEmision()">
             <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
           <button class="dropdown-item" type="button" (click)="emisionIndividual()">
             <i class="bi-file-earmark-plus"></i>&nbsp; Emisión individual</button>
@@ -96,7 +96,7 @@
             <p class="card-text">Desea generarlas ?</p>
           </div>
           <div class="mb-0 text-center detalle">
-            <button type="button" class="btn btn-success btn-sm mb-3" (click)="generar()">
+            <button type="button" class="btn btn-success btn-sm mb-3" (click)="generar()" [disabled]="!canEditarEmision()">
               <i class="fa fa-check-circle"></i> Aceptar</button>
             <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-3" (click)="nogenerar()">
               <i class="fa fa-times-circle"></i> Cancelar</button>
@@ -114,21 +114,21 @@
           </button>
           <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarEmision"
-              (click)="cerrar()" [disabled]="!swcerrar">
+              (click)="cerrar()" [disabled]="!swcerrar || !canEditarEmision()">
               <i class="bi-door-closed"></i>&nbsp; Cerrar emisión</button>
             <button class="dropdown-item" type="button" [disabled]="true" data-toggle="modal" data-target="#imprimir1">
               <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-            <button class="dropdown-item" [disabled]="estado==1" (click)="cerrarRutas()" type="button">
+            <button class="dropdown-item" [disabled]="estado==1 || !canEditarEmision()" (click)="cerrarRutas()" type="button">
               <i class="bi bi-printer"></i>&nbsp; Cerrar Rutas</button>
-            <button class="dropdown-item" (click)="confirmarReabrirEmision()" [disabled]="estado == 0" type="button">
+            <button class="dropdown-item" (click)="confirmarReabrirEmision()" [disabled]="estado == 0 || !canEditarEmision()" type="button">
               <i class="bi bi-arrow-counterclockwise"></i>&nbsp; Reabrir emisión</button>
-            <button class="dropdown-item" type="button" (click)="validarORevalidarApertura()" [disabled]="!showDiv || !idemision">
+            <button class="dropdown-item" type="button" (click)="validarORevalidarApertura()" [disabled]="!showDiv || !idemision || !canEditarEmision()">
               <i class="bi bi-patch-check"></i>&nbsp; Validar apertura</button>
             <button class="dropdown-item" type="button" *ngIf="authService.idusuario === 1"
               (click)="generarFacturasCabeceraUltimaEmisionAbierta()">
               <i class="bi bi-file-earmark-medical"></i>&nbsp; Generar facturas cabecera</button>
             <button class="dropdown-item text-danger" type="button" data-toggle="modal" data-target="#anularEmisionModal"
-              (click)="abrirModalAnularEmision()" [disabled]="!canAnularEmision()">
+              (click)="abrirModalAnularEmision()" [disabled]="!canAnularEmision() || !canEditarEmision()">
               <i class="fa fa-ban"></i>&nbsp; Anular emisión</button>
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#auditoriaEmision"
               (click)="abrirAuditoriaEmision()" [disabled]="!showDiv || !idemision">
@@ -813,7 +813,7 @@
             </div>
 
             <div class="mt-2 mb-0 text-center">
-              <button type="button" class="btn btn-success btn-sm mb-1" data-dismiss='modal' (click)="saveEmision()">
+              <button type="button" class="btn btn-success btn-sm mb-1" data-dismiss='modal' (click)="saveEmision()" [disabled]="!canEditarEmision()">
                 <i class="fa fa-check-circle"></i> Aceptar</button>
               <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'>
                 <i class="fa fa-times-circle"></i> Cancelar</button>
@@ -857,7 +857,7 @@
             </div>
           </div>
           <div class='modal-footer justify-content-center'>
-            <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="cerrarEmision()">
+            <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="cerrarEmision()" [disabled]="!canEditarEmision()">
               <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
             <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
               <i class="bi bi-x-circle"></i> Cancelar</button>

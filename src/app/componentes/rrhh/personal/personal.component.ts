@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { CargosService } from 'src/app/servicios/rrhh/cargos.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
@@ -69,7 +70,8 @@ export class PersonalComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private cargosService: CargosService,
-    private tpcontratosService: TpcontratosService
+    private tpcontratosService: TpcontratosService,
+    private authService: AutorizaService
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +93,7 @@ export class PersonalComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'abonados');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'abonados');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/personal', coloresJSON);
       this.colocaColor(datos);

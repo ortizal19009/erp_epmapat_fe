@@ -1380,6 +1380,7 @@ export class LecturasComponent implements OnInit {
   }
   async planillas() {
     this.enProceso = true; // 🔒 Bloquear salida
+    const resumenesPendientes = await this.obtenerResumenPendientesPorCuenta(this._lecturas || []);
     for (
       this.kontador = 0;
       this.kontador < this._lecturas.length;
@@ -1417,6 +1418,12 @@ export class LecturasComponent implements OnInit {
             this._lecturas[this.kontador].idlectura,
             patch,
           );
+          const cuenta = Number(lectura?.idabonado_abonados?.idabonado ?? 0);
+          this.registrarCuentaProcesadaAlCerrarRuta(
+            lectura,
+            total,
+            resumenesPendientes.get(cuenta),
+          );
         } catch (e) {
           console.error('Error en calcularValores:', e);
         }
@@ -1441,7 +1448,111 @@ export class LecturasComponent implements OnInit {
       .subscribe({
         next: (nex) => (this.btncerrar = true),
         error: (err) => console.error(err.error),
-      });
+    });
+  }
+
+  private async obtenerResumenPendientesPorCuenta(lecturas: any[]): Promise<Map<number, any>> {
+    const cuentas = lecturas
+      .map((lectura) => Number(lectura?.idabonado_abonados?.idabonado ?? 0))
+      .filter((cuenta) => cuenta > 0);
+    const facturasExcluidas = lecturas
+      .map((lectura) => Number(lectura?.idfactura ?? 0))
+      .filter((factura) => factura > 0);
+    try {
+      const resumenes = await this.facService.getResumenPendientesPorCuentas(cuentas, facturasExcluidas);
+      return new Map(resumenes.map((resumen) => [Number(resumen.cuenta), resumen]));
+    } catch (error) {
+      console.error('No se pudo obtener el resumen de facturas pendientes de la ruta', error);
+      return new Map();
+    }
+  }
+
+  private registrarCuentaProcesadaAlCerrarRuta(
+    lectura: any,
+    totalCalculado: number,
+    resumenPendientes?: any,
+  ): void {
+    const abonado = lectura?.idabonado_abonados ?? {};
+    const titular = abonado?.idcliente_clientes ?? {};
+    const responsable = abonado?.idresponsable ?? titular;
+    const m3Emitidos = Math.max(
+      Number(lectura?.lecturaactual ?? 0) - Number(lectura?.lecturaanterior ?? 0),
+      0,
+    );
+    const categoria = abonado?.idcategoria_categorias?.descripcion ?? '';
+    const promedioM3 = Number(abonado?.promedio ?? 0);
+
+    console.log('[Cierre de ruta - Lecturas] Cuenta procesada', {
+      idlectura: lectura?.idlectura ?? null,
+      idfactura: lectura?.idfactura ?? null,
+      cuenta: abonado?.idabonado ?? lectura?.idabonado ?? null,
+      responsablePago: responsable?.nombre ?? titular?.nombre ?? '',
+      nombre: titular?.nombre ?? responsable?.nombre ?? '',
+      telefono: responsable?.telefono ?? titular?.telefono ?? '',
+      correoElectronico: responsable?.email ?? titular?.email ?? '',
+      categoria,
+      nuevoValor: totalCalculado,
+      m3Emitidos,
+      promedioM3,
+      novedades: this.getNovedadesCierre(lectura, m3Emitidos, promedioM3, categoria),
+      facturasPendientes: resumenPendientes?.totalFacturasPendientes ?? null,
+      valoresPendientes: resumenPendientes ? {
+        consumoAgua: {
+          facturas: resumenPendientes.facturasConsumo,
+          capital: resumenPendientes.capitalConsumo,
+          interes: resumenPendientes.interesConsumo,
+          valor: resumenPendientes.valorConsumo,
+        },
+        servicios: {
+          facturas: resumenPendientes.facturasServicios,
+          capital: resumenPendientes.capitalServicios,
+          interes: resumenPendientes.interesServicios,
+          valor: resumenPendientes.valorServicios,
+        },
+        convenios: {
+          facturas: resumenPendientes.facturasConvenios,
+          capital: resumenPendientes.capitalConvenios,
+          interes: resumenPendientes.interesConvenios,
+          valor: resumenPendientes.valorConvenios,
+        },
+        intereses: resumenPendientes.totalIntereses,
+        total: resumenPendientes.totalPendiente,
+      } : null,
+    });
+  }
+
+  private getNovedadesCierre(
+    lectura: any,
+    m3Emitidos: number,
+    promedioM3: number,
+    categoria: string,
+  ): string[] {
+    const novedades: string[] = [];
+    const consumoOriginal = Number(lectura?.lecturaactual ?? 0) - Number(lectura?.lecturaanterior ?? 0);
+    const novedadRegistrada = lectura?.idnovedad_novedades;
+    const idNovedad = Number(novedadRegistrada?.idnovedad ?? 0);
+    const descripcionNovedad = String(novedadRegistrada?.descripcion ?? '').trim();
+    const categoriaNormalizada = categoria.toLowerCase();
+    const idCategoria = Number(lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria ?? 0);
+
+    if (idNovedad > 0 && idNovedad !== 1 && descripcionNovedad) {
+      novedades.push(`Novedad registrada: ${descripcionNovedad}`);
+    }
+    if (consumoOriginal < 0) {
+      novedades.push(`Consumo negativo: ${consumoOriginal} m3`);
+    }
+    if (promedioM3 > 0 && consumoOriginal >= 0 && m3Emitidos > promedioM3 * 2) {
+      novedades.push(`Consumo sobre promedio: ${m3Emitidos} m3 vs ${promedioM3} m3`);
+    }
+    if ((categoriaNormalizada.includes('resid') || idCategoria === 1) && m3Emitidos > 70) {
+      novedades.push(`Residencial supera 70 m3: ${m3Emitidos} m3`);
+    }
+    if (Boolean(lectura?.idabonado_abonados?.adultomayor)
+      && (categoriaNormalizada.includes('especial') || idCategoria === 9)
+      && m3Emitidos > 34) {
+      novedades.push(`Especial adulto mayor supera 34 m3: ${m3Emitidos} m3`);
+    }
+    return novedades;
   }
 
   private getTotalFromResponse(totalResp: any): number {

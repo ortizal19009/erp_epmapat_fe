@@ -262,6 +262,7 @@ import { ComparativoComponent } from './componentes/contabilidad/costos/comparat
 import { ResulcostosComponent } from './componentes/contabilidad/costos/resulcostos/resulcostos.component';
 import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-unicostos/imp-unicostos.component';
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
+import { InfoIfinanComponent } from './componentes/contabilidad/ifinan/info-ifinan/info-ifinan.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
 import { ModiPersonalComponent } from './componentes/rrhh/personal/modi-personal/modi-personal.component';
@@ -1050,6 +1051,10 @@ const routes: Routes = [
    { path: 'info-estrfunc', component: InfoEstrfuncComponent, canActivate: [AuthGuard], },
 
    { path: 'ifinan', component: IfinanComponent, canActivate: [AuthGuard] },
+   { path: 'info-ifinan', component: InfoIfinanComponent, canActivate: [AuthGuard] },
+   { path: 'info-ifinan/:idifinan', component: InfoIfinanComponent, canActivate: [AuthGuard] },
+   { path: 'info-ifina', component: InfoIfinanComponent, canActivate: [AuthGuard] },
+   { path: 'info-ifina/:idifinan', component: InfoIfinanComponent, canActivate: [AuthGuard] },
 
   //================ RRHH =============================
   { path: 'personal', component: PersonalComponent, canActivate: [AuthGuard] },
@@ -1090,7 +1095,12 @@ const routes: Routes = [
   },
 
   // ============== ADMINISTRACION CENTRAL ===================
-  { path: 'tabla4', component: Tabla4Component, canActivate: [AuthGuard] },
+  {
+    path: 'tabla4',
+    component: Tabla4Component,
+    canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'tabla4', minPermission: 1 },
+  },
   {
     path: 'add-tabla4',
     component: AddTabla4Component,
@@ -1139,9 +1149,15 @@ const routes: Routes = [
   {
     path: 'perfil-usuario',
     component: PerfilUsuarioComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'usuarios', minPermission: 5 },
   },
-  { path: 'definir', component: DefinirComponent, canActivate: [AuthGuard] },
+  {
+    path: 'definir',
+    component: DefinirComponent,
+    canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'definir', minPermission: 1 },
+  },
   {
     path: 'admin/configuracion-impresion',
     loadComponent: () => import('./features/admin-central/pages/administracion/impresion-qz/impresion-qz.component').then(m => m.ImpresionQzComponent),
@@ -1155,16 +1171,25 @@ const routes: Routes = [
     path: 'admin/access-control',
     loadComponent: () => import('./features/settings/access-admin/access-admin').then(m => m.AccessAdminComponent),
     canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'admin-access-control', minPermission: 5 },
+  },
+  {
+    path: 'admin/catalogo-ventanas',
+    loadComponent: () => import('./features/settings/module-window-catalog/module-window-catalog.component').then(m => m.ModuleWindowCatalogComponent),
+    canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'admin-access-control', minPermission: 5 },
   },
   {
     path: 'admin/correos',
     loadComponent: () => import('./features/admin-central/pages/administracion/correos/email-admin.component').then(m => m.EmailAdminComponent),
     canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'admin-correos', minPermission: 5 },
   },
   {
     path: 'admin/mobile-apk',
     component: MobileAppVersionsComponent,
     canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'admin-mobile-apk', minPermission: 5 },
   },
 
   /* COACTIVAS */

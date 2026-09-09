@@ -64,6 +64,10 @@ export class BeneficiariosService {
       return this.http.get<number>(`${baseUrl}/countByIdifinan?idifinan=${idifinan}`);
    }
 
+   findByInstitucion(idifinan: number) {
+      return this.http.get<Beneficiarios[]>(`${baseUrl}/institucion/${idifinan}`);
+   }
+
    save(beneficiario: Beneficiarios): Observable<Object> {
       return this.http.post(baseUrl, beneficiario);
    }

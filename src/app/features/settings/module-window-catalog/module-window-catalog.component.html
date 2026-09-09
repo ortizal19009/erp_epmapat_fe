@@ -1,0 +1,49 @@
+<div class="container-fluid mt-2 module-catalog" *ngIf="canManageAccess">
+  <div class="catalog-hero mb-3">
+    <div>
+      <span class="eyebrow">Configuración WEB</span>
+      <h4>Catálogo de módulos y ventanas</h4>
+      <p>Define el módulo responsable de cada ventana. Solo los usuarios con ese módulo habilitado podrán verla.</p>
+    </div>
+    <button class="btn btn-light" type="button" (click)="regresar()">Volver a usuarios</button>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-3 p-lg-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+          <h5 class="m-0">Asignaciones de ventanas</h5>
+          <small class="text-muted">Los módulos solo MOBILE no aparecen en este catálogo.</small>
+        </div>
+        <button class="btn btn-success" (click)="guardarRelacion()" [disabled]="guardando || cargando">
+          {{ guardando ? 'Guardando...' : 'Guardar relación' }}
+        </button>
+      </div>
+
+      <div *ngIf="cargando" class="py-5 text-center text-muted">Cargando catálogo...</div>
+      <div class="table-responsive" *ngIf="!cargando">
+        <table class="table table-sm table-hover align-middle mb-0">
+          <thead>
+            <tr><th>Ventana</th><th>Módulo WEB responsable</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ventana of catalogoModulosVentanas">
+              <td class="font-weight-bold">{{ ventana.nombre }}</td>
+              <td>
+                <select class="custom-select custom-select-sm" [(ngModel)]="ventana.iderpmodulo">
+                  <option [ngValue]="null">Sin asignar</option>
+                  <option *ngFor="let modulo of webModules" [ngValue]="modulo.iderpmodulo">
+                    {{ modulo.descripcion }}
+                  </option>
+                </select>
+              </td>
+            </tr>
+            <tr *ngIf="!catalogoModulosVentanas.length">
+              <td colspan="2" class="text-center text-muted py-4">No hay ventanas registradas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

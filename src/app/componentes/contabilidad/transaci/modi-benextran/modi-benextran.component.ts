@@ -100,7 +100,7 @@ export class ModiBenextranComponent implements OnInit {
 
    async buscaColor() {
       try {
-         const datos = await this.coloresService.setcolor(1, 'transaci');
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'transaci');
          const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/transaci', coloresJSON);
          this.colocaColor(datos);

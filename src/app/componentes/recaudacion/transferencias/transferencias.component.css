@@ -160,6 +160,14 @@
   background-color: rgba(255, 193, 7, 0.05) !important;
 }
 
+.invoice-processing {
+  background-color: rgba(23, 162, 184, 0.12) !important;
+}
+
+.invoice-status {
+  margin-left: 0.35rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .table-container {

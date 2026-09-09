@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Tramites } from 'src/app/modelos/ctramites';
 import { LiquidaTramiteService } from 'src/app/servicios/liquida-tramite.service';
@@ -25,7 +26,8 @@ export class TramitesComponent implements OnInit {
    tipo: boolean = false;
 
    constructor(private coloresService: ColoresService, private traService: TramitesService, private router: Router,
-      private tptramiService: TpTramiteService, private liqtraService: LiquidaTramiteService) { }
+      private tptramiService: TpTramiteService, private liqtraService: LiquidaTramiteService,
+      private authService: AutorizaService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/tramites');
@@ -48,7 +50,7 @@ export class TramitesComponent implements OnInit {
 
    async buscaColor() {
       try {
-         const datos = await this.coloresService.setcolor(1, 'tramites');
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'tramites');
          const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/tramites', coloresJSON);
          this.colocaColor(datos);

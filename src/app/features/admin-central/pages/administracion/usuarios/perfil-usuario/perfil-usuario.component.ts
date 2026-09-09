@@ -2,11 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
-import { AccesoService } from 'src/app/servicios/administracion/acceso.service';
+import { Ventanas } from 'src/app/modelos/administracion/ventanas.model';
 import { ErpmodulosService } from 'src/app/servicios/administracion/erpmodulos.service';
 import { UsrxmodulosService } from 'src/app/servicios/administracion/usrxmodulos.service';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { VentanasService } from 'src/app/servicios/administracion/ventanas.service';
 import { firstValueFrom } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
+import Swal from 'sweetalert2';
 
 declare const $: any;
 
@@ -16,14 +20,32 @@ declare const $: any;
   styleUrls: ['./perfil-usuario.component.css'],
 })
 export class PerfilUsuarioComponent implements OnInit {
+  readonly roleOptions = [
+    'SIN_PERFIL',
+    'CONSULTA',
+    'OPERATIVO',
+    'SUPERVISOR',
+    'ADMINISTRADOR',
+  ];
+  readonly permissionLevels = [
+    { value: 0, label: 'Sin acceso' },
+    { value: 1, label: 'Ver' },
+    { value: 2, label: 'Registrar' },
+    { value: 3, label: 'Aprobar' },
+    { value: 5, label: 'Administrar' },
+  ];
   idusuario: number;
   formUsuario: FormGroup;
   usuario: Usuarios;
-  _acceso: any;
-  filtro: string;
   _erpmodulos: any;
   _usrxmodulo: any[] = [];
   _user: Usuarios = new Usuarios();
+  selectedPerfil = 'SIN_PERFIL';
+  permisosVentana: Ventanas[] = [];
+  modulosHabilitados: string[] = [];
+  cargandoPermisos = false;
+  guardandoPerfil = false;
+  guardandoPermisos = false;
   adminNewModulo = { descripcion: '', platform: 'WEB' };
   allModules: any[] = [];
   selectedModuleId: number | null = null;
@@ -42,9 +64,11 @@ export class PerfilUsuarioComponent implements OnInit {
     private router: Router,
     private usuService: UsuarioService,
     private fb: FormBuilder,
-    private accService: AccesoService,
     private s_erpmodulos: ErpmodulosService,
-    private s_usrxmodulos: UsrxmodulosService
+    private s_usrxmodulos: UsrxmodulosService,
+    private ventanasService: VentanasService,
+    private authService: AutorizaService,
+    private coloresService: ColoresService
   ) {}
 
   private normalizeText(value: any): string {
@@ -82,6 +106,20 @@ export class PerfilUsuarioComponent implements OnInit {
     return false;
   }
 
+  private mostrarAlerta(
+    icon: 'success' | 'error' | 'warning' | 'info',
+    title: string,
+    text?: string
+  ): void {
+    Swal.fire({
+      icon,
+      title,
+      text,
+      timer: icon === 'success' ? 1800 : undefined,
+      showConfirmButton: icon !== 'success',
+    });
+  }
+
   private buildModuloPayload(item: any): any | null {
     const idusuario = Number(this._user?.idusuario || this.idusuario || 0);
     const iderpmodulo = Number(
@@ -104,6 +142,23 @@ export class PerfilUsuarioComponent implements OnInit {
     $('#modulos').modal('hide');
     $('body').removeClass('modal-open');
     $('.modal-backdrop').remove();
+  }
+
+  private resolveActorUserId(): number {
+    if (this.authService.idusuario) {
+      return Number(this.authService.idusuario) || 0;
+    }
+
+    try {
+      const raw = sessionStorage.getItem('abc');
+      if (!raw) {
+        return 0;
+      }
+      const decoded = JSON.parse(atob(raw));
+      return Number(decoded?.idusuario) || 0;
+    } catch {
+      return 0;
+    }
   }
 
   ngOnInit(): void {
@@ -144,7 +199,9 @@ export class PerfilUsuarioComponent implements OnInit {
             nomusu: this.usuario.nomusu,
           });
           if (this.usuario != null) {
-            this.buscaAcceso();
+            this.selectedPerfil =
+              String(this.usuario.perfil || 'SIN_PERFIL').trim() || 'SIN_PERFIL';
+            this.cargarPermisosVentana();
             this.getAllErpModulos();
           }
         },
@@ -155,60 +212,96 @@ export class PerfilUsuarioComponent implements OnInit {
     }
   }
 
-  buscaAcceso() {
-    let regacc: number;
-    this.accService.getAcceso().subscribe({
-      next: (resp) => {
-        this._acceso = resp;
-        if (this._acceso != null) {
-          let i = 0;
-          this._acceso.forEach(() => {
-            this._acceso[i].indice = i;
-            this._acceso[i].largo = +this._acceso[i].codacc.length;
-            this._acceso[i].espacios = this._acceso[i].codacc.slice(2, 10);
-            this._acceso[i].selec = false;
-            regacc = +this._acceso[i].regacc;
-            if (this.usuario.priusu != null) {
-              this._acceso[i].selec =
-                +this.usuario.priusu.slice(regacc, regacc + 1) >= 5;
-            }
-            i++;
-          });
-        }
+  cargarPermisosVentana(): void {
+    this.cargandoPermisos = true;
+    this.ventanasService.getPermisosUsuario(this.idusuario).subscribe({
+      next: (rows: any[]) => {
+        this.permisosVentana = (rows || []).map((item: any) => ({
+          idventana: item.idventana,
+          nombre: item.nombre,
+          modulo: item.modulo,
+          color1: item.color1,
+          color2: item.color2,
+          idusuario: item.idusuario,
+          permissions: Number(item.permissions ?? 0),
+        }));
+        this.cargandoPermisos = false;
       },
-      error: (err) => console.error(err.error),
+      error: (err: any) => {
+        this.cargandoPermisos = false;
+        this.permisosVentana = [];
+        console.error(err);
+      },
     });
   }
 
-  guardar() {
-    let priusu = '';
-    for (let i = 0; i < 300; i++) {
-      const posi = this._acceso.find((opcion: any) => opcion.regacc == i);
-      let j = -1;
-      if (posi) j = posi.indice;
-      if (j >= 0) {
-        if (
-          this._acceso[j].selec != null &&
-          this._acceso[j].selec != undefined
-        ) {
-          if (this._acceso[j].selec) {
-            const pi = Math.floor(Math.random() * (9 - 5 + 1)) + 5;
-            priusu = priusu + pi.toString();
-          } else {
-            const pi = Math.floor(Math.random() * (4 - 0 + 1)) + 0;
-            priusu = priusu + pi.toString();
-          }
-        }
-      } else {
-        const pi = Math.floor(Math.random() * (4 - 0 + 1)) + 0;
-        priusu = priusu + pi.toString();
-      }
+  guardarPerfil(): void {
+    if (this.guardandoPerfil) {
+      return;
     }
-    this.usuario.priusu = priusu;
-    this.usuService.updateUsuario(this.idusuario, this.usuario).subscribe({
-      next: () => this.regresar(),
-      error: (err) => console.error('Al actualizar el Usuario; ', err.error),
-    });
+    const perfil = this.normalizeText(this.selectedPerfil || 'SIN_PERFIL');
+    const usumodi = this.resolveActorUserId();
+    this.guardandoPerfil = true;
+    this.usuService
+      .updatePerfil(
+        this.idusuario,
+        perfil === 'SIN_PERFIL' ? '' : perfil,
+        usumodi || undefined
+      )
+      .subscribe({
+        next: () => {
+          this.guardandoPerfil = false;
+          this.selectedPerfil = perfil;
+          this.usuario.perfil =
+            perfil === 'SIN_PERFIL' ? '' : perfil;
+          this.coloresService.clearPermissionCache(this.idusuario);
+          this.mostrarAlerta('success', 'Perfil actualizado');
+        },
+        error: (err: any) => {
+          this.guardandoPerfil = false;
+          console.error(err);
+          this.mostrarAlerta(
+            'error',
+            'No se pudo actualizar el perfil',
+            err?.error?.message
+          );
+        },
+      });
+  }
+
+  guardarPermisosVentana(): void {
+    if (this.guardandoPermisos) {
+      return;
+    }
+    this.guardandoPermisos = true;
+    this.ventanasService
+      .savePermisosUsuario(this.idusuario, this.permisosVentana)
+      .subscribe({
+        next: () => {
+          this.guardandoPermisos = false;
+          this.coloresService.clearPermissionCache(this.idusuario);
+          this.cargarPermisosVentana();
+          this.mostrarAlerta('success', 'Permisos actualizados');
+        },
+        error: (err: any) => {
+          this.guardandoPermisos = false;
+          console.error(err);
+          this.mostrarAlerta(
+            'error',
+            'No se pudieron actualizar los permisos',
+            err?.error?.message
+          );
+        },
+      });
+  }
+
+  guardar(): void {
+    this.guardarPerfil();
+  }
+
+  getPermissionLabel(value: number): string {
+    const item = this.permissionLevels.find((level) => level.value === Number(value));
+    return item?.label || 'Sin acceso';
   }
 
   getAllErpModulos() {
@@ -253,6 +346,9 @@ export class PerfilUsuarioComponent implements OnInit {
                 saving: false,
               };
             });
+            this.modulosHabilitados = this._usrxmodulo
+              .filter((modulo: any) => modulo.enabled)
+              .map((modulo: any) => modulo.iderpmodulo_erpmodulos.descripcion);
           },
           error: (e: any) => {
             console.error('Error obteniendo mÃ³dulos del usuario:', e);
@@ -265,6 +361,7 @@ export class PerfilUsuarioComponent implements OnInit {
               dirty: false,
               saving: false,
             }));
+            this.modulosHabilitados = [];
           },
         });
       },
@@ -303,10 +400,10 @@ export class PerfilUsuarioComponent implements OnInit {
           sec.saving = false;
           console.error('Error al guardar secciÃ³n:', err);
           sec.enabled = prev;
-          alert(
-            `Error al ${
-              enabled ? 'habilitar' : 'deshabilitar'
-            } la secciÃ³n: ${err.error?.message || 'Error desconocido'}`
+          this.mostrarAlerta(
+            'error',
+            `No se pudo ${enabled ? 'habilitar' : 'deshabilitar'} la sección`,
+            err.error?.message || 'Error desconocido'
           );
         },
       });
@@ -344,13 +441,15 @@ export class PerfilUsuarioComponent implements OnInit {
 
       this.cerrarModalModulos();
       this.getAllErpModulos();
+      this.cargarPermisosVentana();
+      this.mostrarAlerta('success', 'Módulos actualizados');
     } catch (e: any) {
       pendientes.forEach((row: any) => (row.item.saving = false));
       console.error('Error al guardar mÃ³dulos del usuario:', e);
-      alert(
-        `Error al guardar los mÃ³dulos del usuario: ${
-          e?.error?.message || 'Error desconocido'
-        }`
+      this.mostrarAlerta(
+        'error',
+        'No se pudieron guardar los módulos',
+        e?.error?.message || 'Error desconocido'
       );
     } finally {
       this.savingModules = false;

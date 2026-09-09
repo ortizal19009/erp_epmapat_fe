@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from '../autoriza.service';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { PerfilAccesoService } from 'src/app/servicios/administracion/perfil-acceso.service';
 
 @Component({
    selector: 'app-login',
@@ -19,7 +20,8 @@ export class LoginComponent implements OnInit{
       private router: Router,
       public fb: FormBuilder,
       private authService: AutorizaService,
-      private usuarioService: UsuarioService
+      private usuarioService: UsuarioService,
+      private perfilAcceso: PerfilAccesoService,
    ) { }
 
    ngOnInit(): void {
@@ -50,13 +52,21 @@ export class LoginComponent implements OnInit{
                   idusuario,
                   alias: resp?.username || username,
                   nomusu: resp?.username || username,
-                  modules: resp?.modules || []
+                  modules: []
                };
                sessionStorage.setItem('abc', btoa(JSON.stringify(tokenPayload)));
                localStorage.setItem('sessionlog', 'true');
             } catch {}
 
-            this.authService.enabModulos();
+            // Do not expose the ERP modules until both module and window permissions are verified.
+            this.perfilAcceso.loadForCurrentUser(true).subscribe({
+               next: (loaded) => {
+                  if (!loaded) {
+                     this.authService.logout();
+                     alert('No se pudo verificar los permisos del usuario. Intente iniciar sesión nuevamente.');
+                  }
+               }
+            });
          },
          error: (e) => {
             console.error(e);

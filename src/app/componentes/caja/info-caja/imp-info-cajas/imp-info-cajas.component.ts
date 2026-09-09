@@ -79,7 +79,7 @@ export class ImpInfoCajasComponent implements OnInit {
 
   private getTotalResumen(rubro: any): number {
     const total = Number(rubro?.[2] ?? 0);
-    return Number.isFinite(total) ? total : 0;
+    return Number.isFinite(total) ? this.redondearMoneda(total) : 0;
   }
 
   private debeMostrarRubroResumen(rubro: any): boolean {
@@ -91,7 +91,9 @@ export class ImpInfoCajasComponent implements OnInit {
     if (rubro?.[3] !== true || totalRecaudado === 0) {
       return 0;
     }
-    return totalRecaudado * (fechaCorte >= '2024-04-01' ? 0.15 : 0.12);
+    return this.redondearMoneda(
+      totalRecaudado * (fechaCorte >= '2024-04-01' ? 0.15 : 0.12)
+    );
   }
 
   private construirFilasResumenExcel(
@@ -107,20 +109,23 @@ export class ImpInfoCajasComponent implements OnInit {
           return;
         }
         const totalRecaudado = this.getTotalResumen(rubro);
-        subtotal += totalRecaudado;
-        iva += this.calcularIvaResumen(rubro, fechaCorte);
+        subtotal = this.redondearMoneda(subtotal + totalRecaudado);
+        iva = this.redondearMoneda(iva + this.calcularIvaResumen(rubro, fechaCorte));
         filas.push([rubro[0], rubro[1], totalRecaudado]);
       });
       if (iva > 0) {
         filas.push(['', 'IVA', +iva.toFixed(2)]);
       }
-      filas.push(['', 'SUBTOTAL', +(subtotal + iva).toFixed(2)]);
-      return subtotal + iva;
+      const totalBloque = this.redondearMoneda(subtotal + iva);
+      filas.push(['', 'SUBTOTAL', totalBloque]);
+      return totalBloque;
     };
 
     const totalActual = agregarBloque('PERÍODO ACTUAL', this._cobradas);
     const totalAnterior = agregarBloque('PERÍODOS ANTERIORES', this._rubrosanterior);
-    const totalGeneral = +((totalActual || 0) + (totalAnterior || 0)).toFixed(2);
+    const totalGeneral = this.redondearMoneda(
+      (totalActual || 0) + (totalAnterior || 0)
+    );
     filas.push(['', 'TOTAL', totalGeneral]);
     return { filas, totalGeneral };
   }
@@ -128,7 +133,13 @@ export class ImpInfoCajasComponent implements OnInit {
   private getTotalFacturaExportacion(factura: any): number {
     const total = Number(factura?.total ?? 0);
     const iva = Number(factura?.iva ?? 0);
-    return +((Number.isFinite(total) ? total : 0) + (Number.isFinite(iva) ? iva : 0)).toFixed(2);
+    return this.redondearMoneda(
+      (Number.isFinite(total) ? total : 0) + (Number.isFinite(iva) ? iva : 0)
+    );
+  }
+
+  private redondearMoneda(valor: number): number {
+    return Math.round((valor + Number.EPSILON) * 100) / 100;
   }
 
   private toLocalDateTime(date: Date, time: string): string {
@@ -612,6 +623,7 @@ export class ImpInfoCajasComponent implements OnInit {
     };
 
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -715,6 +727,7 @@ export class ImpInfoCajasComponent implements OnInit {
     });
 
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -787,6 +800,7 @@ export class ImpInfoCajasComponent implements OnInit {
       },
     });
     addPageNumbers();
+    this.agregarPieAuditoria(doc);
 
     this.muestraPDF(doc);
   }
@@ -821,6 +835,27 @@ export class ImpInfoCajasComponent implements OnInit {
         window.open(blobUrl, '_blank');
       }
     }
+  }
+
+  private agregarPieAuditoria(doc: any): void {
+    const momentoImpresion = new Date();
+    const fechaHora = `${momentoImpresion.toLocaleDateString('es-EC')} ${momentoImpresion.toLocaleTimeString('es-EC', {
+      hour12: false,
+    })}`;
+    const usuario = this.authService.alias || `Usuario ${this.authService.idusuario}`;
+    const pie = `Impreso el: ${fechaHora} | Usuario: ${usuario}`;
+    const totalPaginas = doc.internal.pages.length - 1;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+      doc.setPage(pagina);
+      doc.text(pie, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.height - 16, {
+        align: 'center',
+      });
+    }
+    doc.setTextColor(0, 0, 0);
   }
 
   exportarResumen() {

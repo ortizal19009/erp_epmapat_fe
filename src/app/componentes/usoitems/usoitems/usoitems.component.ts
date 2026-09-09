@@ -27,6 +27,7 @@ export class UsoitemsComponent implements OnInit {
       private usoiService: UsoitemsService) { }
 
    ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/usoitems');
       this.listarModulos();
       this.listarUsoitems()
    }

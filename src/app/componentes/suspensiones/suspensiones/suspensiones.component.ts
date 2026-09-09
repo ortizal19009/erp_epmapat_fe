@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
@@ -33,7 +34,8 @@ export class SuspensionesComponent implements OnInit {
     private fb: FormBuilder,
     private s_lecturas: LecturasService,
     private s_facturas: FacturaService,
-    private s_rubroxfac: RubroxfacService
+    private s_rubroxfac: RubroxfacService,
+    private authService: AutorizaService
   ) {}
 
   ngOnInit(): void {
@@ -51,7 +53,7 @@ export class SuspensionesComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'suspensiones');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'suspensiones');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/suspensiones', coloresJSON);
       this.colocaColor(datos);

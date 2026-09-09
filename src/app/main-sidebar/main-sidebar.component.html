@@ -58,7 +58,7 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 50)">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!canAnyWindowPermission(['clientes', 'abonados', 'emisiones', 'suspensiones', 'habilitaciones', 'rutas', 'pliego', 'pliego24'], 1)">
             <i class="bi-droplet-half nav-icon" style="font-size: 15px;"></i>
             <p> Consumo Agua
               <i class="fas fa-angle-right right"></i>
@@ -68,25 +68,25 @@
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <!-- 0: Comercializacion   52: Clientes -->
-              <a routerLink="/clientes" class="nav-link" [class.disabled]="!isOptionEnabled(0, 51)">
+              <a routerLink="/clientes" class="nav-link" [class.disabled]="!canWindowPermission('clientes', 1)">
                 &nbsp;<i class="bi-person-circle nav-icon"></i>
                 <p class="text-warning">&nbsp;&nbsp; Clientes</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/abonados" class="nav-link" [class.disabled]="!isOptionEnabled(0, 60)">
+              <a routerLink="/abonados" class="nav-link" [class.disabled]="!canWindowPermission('abonados', 1)">
                 <i class="fa fa-building nav-icon"></i>
                 <p class="text-warning"> Abonados</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/emisiones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 70)">
+              <a routerLink="/emisiones" class="nav-link" [class.disabled]="!canWindowPermission('emisiones', 1)">
                 <i class="bi bi-moisture nav-icon"></i>
                 <p class="text-warning">&nbsp;&nbsp; Emisiones</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link" [class.disabled]="!isOptionEnabled(0, 80)">
+              <a href="#" class="nav-link" [class.disabled]="!canAnyWindowPermission(['suspensiones', 'habilitaciones'], 1)">
                 <i class="fa fa-calculator nav-icon"></i>
                 <p class="text-warning font-weight-bold"> Medidores
                   <i class="right fas fa-angle-right"></i>
@@ -94,14 +94,14 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a routerLink="/suspensiones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 81)">
+                  <a routerLink="/suspensiones" class="nav-link" [class.disabled]="!canWindowPermission('suspensiones', 1)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="fa fa-gavel nav-icon"></i>
                     <p class="text-warning"> Suspensiones</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a routerLink="/habilitaciones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 90)">
+                  <a routerLink="/habilitaciones" class="nav-link" [class.disabled]="!canWindowPermission('habilitaciones', 1)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="fa fa-gift nav-icon"></i>
                     <p class="text-warning"> Habilitaciones</p>
@@ -112,19 +112,19 @@
             </li>
 
             <li class="nav-item">
-              <a routerLink="/rutas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 100)">
+              <a routerLink="/rutas" class="nav-link" [class.disabled]="!canWindowPermission('rutas', 1)">
                 <i class="fa fa-bus nav-icon"></i>
                 <p class="text-warning"> Rutas</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/pliego" class="nav-link" [class.disabled]="!isOptionEnabled(0, 110)">
+              <a routerLink="/pliego" class="nav-link" [class.disabled]="!canWindowPermission('pliego', 1)">
                 <i class="bi-asterisk nav-icon"></i>
                 <p class="text-warning"> Pliego tarifario</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/pliego24" class="nav-link" [class.disabled]="!isOptionEnabled(0, 111)">
+              <a routerLink="/pliego24" class="nav-link" [class.disabled]="!canWindowPermission('pliego24', 1)">
                 <i class="fa fa-history nav-icon"></i>
                 <p class="text-warning"> Nuevo Pliego</p>
               </a>
@@ -133,7 +133,7 @@
         </li>
 
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 150)">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!canAnyWindowPermission(['facturacion', 'fecfactura', 'generadorxml', 'facturas', 'catalogoitems', 'usoitems', 'rubros'], 1)">
             <i class="bi-bookmarks-fill nav-icon" style="font-size: 15px;"></i>
             <p> Facturación
               <i class="fas fa-angle-right right"></i>
@@ -142,13 +142,13 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="/facturacion" class="nav-link" [class.disabled]="!isOptionEnabled(0, 151)">
+              <a routerLink="/facturacion" class="nav-link" [class.disabled]="!canWindowPermission('facturacion', 1)">
                 <i class="fa fa-bookmark nav-icon"></i>
                 <p class="text-warning"> Facturación</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link" [class.disabled]="!isOptionEnabled(0, 185)">
+              <a href="#" class="nav-link" [class.disabled]="!canAnyWindowPermission(['fecfactura', 'generadorxml'], 1)">
                 <i class="fa fa-laptop nav-icon"></i>
                 <!-- <i class="fa fa-shopping-basket nav-icon"></i> -->
                 <p class="text-warning font-weight-bold"> Fac. Electrónica
@@ -165,7 +165,7 @@
                      </a> -->
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a routerLink="/fecfactura" class="nav-link py-0" [class.disabled]="!isOptionEnabled(0, 176)">
+                  <a routerLink="/fecfactura" class="nav-link py-0" [class.disabled]="!canWindowPermission('fecfactura', 1)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-arrow-up-left-square-fill nav-icon"></i>
                     <p class="small text-warning">&nbsp; Exportar</p>
@@ -173,7 +173,7 @@
                 </li>
                 <li class="nav-item">
                   <a routerLink="/generadorxml" class="nav-link py-0"
-                    [class.disabled]="!isOptionEnabled(0, 185)">
+                    [class.disabled]="!canWindowPermission('generadorxml', 1)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-earmark-binary nav-icon"></i>
                     <p class="small text-warning">&nbsp; Generar</p>
@@ -183,14 +183,14 @@
               </ul>
             </li>
             <li class="nav-item">
-              <a routerLink="/facturas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 165)">
+              <a routerLink="/facturas" class="nav-link" [class.disabled]="!canWindowPermission('facturas', 1)">
                 <i class="fa fa-calendar nav-icon"></i>
                 <p class="text-warning"> Planillas</p>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="#" class="nav-link" [class.disabled]="!isOptionEnabled(0, 175)">
+              <a href="#" class="nav-link" [class.disabled]="!canAnyWindowPermission(['catalogoitems', 'usoitems', 'rubros'], 1)">
                 <i class="fa fa-shopping-basket nav-icon"></i>
                 <p class="text-warning font-weight-bold"> Catálogo
                   <i class="right fas fa-angle-right"></i>
@@ -199,21 +199,21 @@
               <ul class="nav nav-treeview">
                 <li class="nav-item">
                   <a routerLink="/catalogoitems" class="nav-link py-0"
-                    [class.disabled]="!isOptionEnabled(0, 176)">
+                    [class.disabled]="!canWindowPermission('catalogoitems', 1)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-ruled nav-icon"></i>
                     <p class="small text-warning">&nbsp; Productos</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a routerLink="/usoitems" class="nav-link py-0" [class.disabled]="!isOptionEnabled(0, 185)">
+                  <a routerLink="/usoitems" class="nav-link py-0" [class.disabled]="!canWindowPermission('usoitems', 1)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi bi-diagram-3 nav-icon"></i>
                     <p class="small text-warning">&nbsp; Usos de los productos</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a routerLink="/rubros" class="nav-link pt-0" [class.disabled]="!isOptionEnabled(0, 195)">
+                  <a routerLink="/rubros" class="nav-link pt-0" [class.disabled]="!canWindowPermission('rubros', 1)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-bullseye nav-icon"></i>
                     <p class="small text-warning">&nbsp; Rubros (planillas)</p>
@@ -224,7 +224,7 @@
           </ul>
         </li>
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 3)">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!canAnyWindowPermission(['aguatramite', 'ctramites', 'reclamos', 'ccertificaciones'], 1)">
             <i class="bi-badge-tm-fill nav-icon" style="font-size: 15px; "></i>
             <p> Trámites
               <i class="fas fa-angle-right right"></i>
@@ -233,26 +233,26 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="/aguatramite" class="nav-link" [class.disabled]="!isOptionEnabled(0, 4)">
+              <a routerLink="/aguatramite" class="nav-link" [class.disabled]="!canWindowPermission('aguatramite', 1)">
                 <i class="fa fa-bath nav-icon"></i>
                 <p class="text-warning"> Trámites de agua</p>
               </a>
             </li>
 
             <li class="nav-item">
-              <a routerLink="/ctramites" class="nav-link" [class.disabled]="!isOptionEnabled(0, 10)">
+              <a routerLink="/ctramites" class="nav-link" [class.disabled]="!canWindowPermission('ctramites', 1)">
                 <i class="fa fa-inbox nav-icon"></i>
                 <p class="text-warning"> Trámites externos</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/reclamos" class="nav-link" [class.disabled]="!isOptionEnabled(0, 20)">
+              <a routerLink="/reclamos" class="nav-link" [class.disabled]="!canWindowPermission('reclamos', 1)">
                 <i class="fa fa-bug nav-icon"></i>
                 <p class="text-warning"> Reclamos</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/ccertificaciones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 30)">
+              <a routerLink="/ccertificaciones" class="nav-link" [class.disabled]="!canWindowPermission('ccertificaciones', 1)">
                 <i class="fa fa-certificate nav-icon"></i>
                 <p class="text-warning"> Certificaciones</p>
               </a>
@@ -260,7 +260,7 @@
           </ul>
         </li>
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 112)">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!canAnyWindowPermission(['recaudaciones', 'transferencias', 'anulaciones-bajas', 'convenios', 'ntacredito', 'cajas'], 1)">
             <i class="bi-archive-fill nav-icon" style="font-size: 15px;"></i>
             <p> Recaudación
               <i class="fas fa-angle-right right"></i>
@@ -269,7 +269,7 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="recaudaciones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 202)">
+              <a routerLink="recaudaciones" class="nav-link" [class.disabled]="!canWindowPermission('recaudaciones', 1)">
                 &nbsp;<i class="bi bi-cash-coin nav-icon"></i>
                 <p class="text-warning"> &nbsp;Cobros</p>
               </a>
@@ -277,7 +277,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="transferencias" class="nav-link" [class.disabled]="!isOptionEnabled(0, 113)">
+              <a routerLink="transferencias" class="nav-link" [class.disabled]="!canWindowPermission('transferencias', 1)">
                 <i class="bi-folder-symlink nav-icon"></i>
                 <p class="text-warning"> &nbsp;Transferencias</p>
               </a>
@@ -285,7 +285,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="anulaciones-bajas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 120)">
+              <a routerLink="anulaciones-bajas" class="nav-link" [class.disabled]="!canWindowPermission('anulaciones-bajas', 1)">
                 <i class="bi-trash nav-icon"></i>
                 <p class="text-warning"> &nbsp;Anulaciones y bajas</p>
               </a>
@@ -293,7 +293,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="convenios" class="nav-link" [class.disabled]="!isOptionEnabled(0, 130)">
+              <a routerLink="convenios" class="nav-link" [class.disabled]="!canWindowPermission('convenios', 1)">
                 <i class="fa fa-american-sign-language-interpreting nav-icon" aria-hidden="true"></i>
                 <p class="text-warning"> Convenios de Pago</p>
               </a>
@@ -301,7 +301,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="ntacredito" class="nav-link" [class.disabled]="!isOptionEnabled(0, 130)">
+              <a routerLink="ntacredito" class="nav-link" [class.disabled]="!canWindowPermission('ntacredito', 1)">
                 <i class="fa fa-sticky-note" aria-hidden="true"></i>
                 <p class="text-warning">&nbsp;Notas de crédito</p>
               </a>
@@ -309,7 +309,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="cajas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 140)">
+              <a routerLink="cajas" class="nav-link" [class.disabled]="!canWindowPermission('cajas', 1)">
                 <i class="fa fa-th nav-icon" aria-hidden="true"></i>
                 <p class="text-warning"> Cajas</p>
               </a>
@@ -318,7 +318,7 @@
         </li>
 
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 205)">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!canAnyWindowPermission(['categorias', 'ptoemision', 'estadom', 'intereses', 'nacionalidades', 'novedades', 'tpidentificas', 'tipopago', 'tpreclamos', 'ubicacionm'], 1)">
             <i class="bi-wallet-fill nav-icon" style="font-size: 15px;"></i>
             <p> Catálogos
               <i class="fas fa-angle-right right"></i>
@@ -327,61 +327,61 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="/categorias" class="nav-link" [class.disabled]="!isOptionEnabled(0, 206)">
+              <a routerLink="/categorias" class="nav-link" [class.disabled]="!canWindowPermission('categorias', 1)">
                 <i class="fa fa-compass nav-icon"></i>
                 <p class="text-warning"> Categorías</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/ptoemision" class="nav-link" [class.disabled]="!isOptionEnabled(0, 207)">
+              <a routerLink="/ptoemision" class="nav-link" [class.disabled]="!canWindowPermission('ptoemision', 1)">
                 <i class="fa fa-folder nav-icon"></i>
                 <p class="text-warning"> Establecimientos</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/estadom" class="nav-link" [class.disabled]="!isOptionEnabled(0, 208)">
+              <a routerLink="/estadom" class="nav-link" [class.disabled]="!canWindowPermission('estadom', 1)">
                 <i class="fa fa-eye nav-icon"></i>
                 <p class="text-warning"> Estado de los medidores</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/intereses" class="nav-link" [class.disabled]="!isOptionEnabled(0, 209)">
+              <a routerLink="/intereses" class="nav-link" [class.disabled]="!canWindowPermission('intereses', 1)">
                 <i class="fa fa-info nav-icon"></i>
                 <p class="text-warning">Intereses</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/nacionalidades" class="nav-link" [class.disabled]="!isOptionEnabled(0, 210)">
+              <a routerLink="/nacionalidades" class="nav-link" [class.disabled]="!canWindowPermission('nacionalidades', 1)">
                 <i class="fa fa-globe nav-icon"></i>
                 <p class="text-warning">Nacionalidades</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/novedades" class="nav-link" [class.disabled]="!isOptionEnabled(0, 211)">
+              <a routerLink="/novedades" class="nav-link" [class.disabled]="!canWindowPermission('novedades', 1)">
                 <i class="fa fa-bell nav-icon"></i>
                 <p class="text-warning">Novedades</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/tpidentificas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 212)">
+              <a routerLink="/tpidentificas" class="nav-link" [class.disabled]="!canWindowPermission('tpidentificas', 1)">
                 <i class="fa  fa-id-card nav-icon"></i>
                 <p class="text-warning">Tipos de identificación</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/tipopago" class="nav-link" [class.disabled]="!isOptionEnabled(0, 213)">
+              <a routerLink="/tipopago" class="nav-link" [class.disabled]="!canWindowPermission('tipopago', 1)">
                 <i class="fa fa-credit-card nav-icon"></i>
                 <p class="text-warning">Tipos de pago</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/tpreclamos" class="nav-link" [class.disabled]="!isOptionEnabled(0, 214)">
+              <a routerLink="/tpreclamos" class="nav-link" [class.disabled]="!canWindowPermission('tpreclamos', 1)">
                 <i class="fa fa-lemon nav-icon"></i>
                 <p class="text-warning">Tipos de reclamo</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/ubicacionm" class="nav-link" [class.disabled]="!isOptionEnabled(0, 215)">
+              <a routerLink="/ubicacionm" class="nav-link" [class.disabled]="!canWindowPermission('ubicacionm', 1)">
                 <i class="fa fa-qrcode nav-icon"></i>
                 <p class="text-warning">Ubicación medidores</p>
               </a>
@@ -390,7 +390,7 @@
         </li>
 
         <!-- =============== FINANCIERO ==================== -->
-        <li *ngIf="authService.modulo == 2" class="nav-item">
+        <li *ngIf="authService.modulo == 2 && canAnyWindowPermission(['cuentas', 'asientos', 'bancos', 'sinafip', 'niifcuentas', 'estsituacion', 'estresultados'], 1)" class="nav-item">
           <a href="#" class="nav-link bg-info">
             <i class="bi-app-indicator nav-icon text-warning"></i>
             <p> Contabilidad
@@ -399,32 +399,32 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('cuentas', 1)">
               <a routerLink="/cuentas" class="nav-link">
                 <i class="bi bi-book-half nav-icon text-info"></i>
                 <p>&nbsp; Cuentas</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('asientos', 1)">
               <a routerLink="/asientos" class="nav-link">
                 <i class="bi-calendar3-range-fill nav-icon text-info"></i>
                 <p> &nbsp;Diario general</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('bancos', 1)">
               <a routerLink="/bancos" class="nav-link">
                 <i class="bi-bank2 nav-icon text-info"></i>
                 <p> Control de bancos</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('sinafip', 1)">
               <a routerLink="/sinafip" class="nav-link">
                 <i class="bi-hurricane nav-icon text-info"></i>
                 <p> SINAFIP</p>
               </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canAnyWindowPermission(['niifcuentas', 'estsituacion', 'estresultados'], 1)">
               <a href="#" class="nav-link">
                 <i class="bi-back nav-icon text-info"></i>
                 <p class="font-weight-bold"> Homologación NIIFs
@@ -432,21 +432,21 @@
                 </p>
               </a>
               <ul class="nav nav-treeview">
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canWindowPermission('niifcuentas', 1)">
                   <a routerLink="/niifcuentas" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-book-half nav-icon text-info"></i>
                     <p class="small">&nbsp; Plan de cuentas NIIF</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canWindowPermission('estsituacion', 1)">
                   <a routerLink="/estsituacion" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-ruled-fill nav-icon text-info"></i>
                     <p class="small">&nbsp; Balance general</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canWindowPermission('estresultados', 1)">
                   <a routerLink="/estresultados" class="nav-link pt-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-diff-fill nav-icon text-info"></i>
@@ -457,7 +457,7 @@
             </li>
           </ul>
         </li>
-        <li *ngIf="authService.modulo == 2" class="nav-item">
+        <li *ngIf="authService.modulo == 2 && canAnyWindowPermission(['beneficiarios', 'egresos', 'regrecauda', 'retenciones'], 1)" class="nav-item">
           <a href="#" class="nav-link bg-info">
             <i class="bi-piggy-bank nav-icon text-warning"></i>
             <p> Tesorería
@@ -466,25 +466,25 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('beneficiarios', 1)">
               <a routerLink="/beneficiarios" class="nav-link">
                 <i class="bi-people nav-icon text-info"></i>
                 <p> Beneficiarios</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('egresos', 1)">
               <a routerLink="/egresos" class="nav-link">
                 <i class="bi-arrow-up-left-circle-fill nav-icon text-info"></i>
                 <p> Egresos</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('regrecauda', 1)">
               <a routerLink="/regrecauda" class="nav-link">
                 <i class="bi-arrow-down-right-circle-fill nav-icon text-info"></i>
                 <p> Recaudación</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('retenciones', 1)">
               <a routerLink="/retenciones" class="nav-link">
                 <i class="bi-scissors nav-icon text-info"></i>
                 <p> Retenciones</p>
@@ -492,7 +492,7 @@
             </li>
           </ul>
         </li>
-        <li *ngIf="authService.modulo == 2" class="nav-item">
+        <li *ngIf="authService.modulo == 2 && canAnyWindowPermission(['preingresos', 'pregastos', 'certipresu', 'reintegradas', 'tramipresu', 'reformas', 'clasificador'], 1)" class="nav-item">
           <a href="#" class="nav-link bg-info">
             <i class="bi-table nav-icon text-warning"></i>
             <p> Presupuesto
@@ -501,13 +501,13 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('preingresos', 1)">
               <a routerLink="/preingresos" class="nav-link">
                 <i class="bi-cone-striped nav-icon text-info"></i>
                 <p> Presupuesto de ingresos</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('pregastos', 1)">
               <a routerLink="/pregastos" class="nav-link">
                 <i class="bi-file-earmark-ppt-fill nav-icon text-info"></i>
                 <p> Presupuesto de gastos</p>
@@ -519,7 +519,7 @@
                         <p> </p>
                      </a>
                   </li> -->
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canAnyWindowPermission(['certipresu', 'reintegradas'], 1)">
               <a href="#" class="nav-link">
                 <i class="bi-bookmark-check-fill nav-icon text-info"></i>
                 <p class="font-weight-bold"> Certificaciones
@@ -527,14 +527,14 @@
                 </p>
               </a>
               <ul class="nav nav-treeview">
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canWindowPermission('certipresu', 1)">
                   <a routerLink="/certipresu" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-plus-fill nav-icon text-info"></i>
                     <p class="small">&nbsp; Certificar</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canWindowPermission('reintegradas', 1)">
                   <a routerLink="/reintegradas" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-minus-fill nav-icon text-info"></i>
@@ -543,19 +543,19 @@
                 </li>
               </ul>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('tramipresu', 1)">
               <a routerLink="/tramipresu" class="nav-link">
                 <i class="bi-badge-tm-fill nav-icon text-info"></i>
                 <p> Trámites presupuestarios</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('reformas', 1)">
               <a routerLink="/reformas" class="nav-link">
                 <i class="bi-bootstrap-reboot nav-icon text-info"></i>
                 <p> Reformas</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('clasificador', 1)">
               <a routerLink="/clasificador" class="nav-link">
                 <i class="bi-bezier nav-icon text-info"></i>
                 <p> Clasificador</p>
@@ -563,7 +563,7 @@
             </li>
           </ul>
         </li>
-        <li *ngIf="authService.modulo == 2" class="nav-item">
+        <li *ngIf="authService.modulo == 2 && canAnyWindowPermission(['comprobacion', 'estsituacion', 'estresultados', 'flujoefectivo', 'ejecupresup', 'unicostos'], 1)" class="nav-item">
           <a href="#" class="nav-link bg-info">
             <i class="bi-card-list nav-icon text-warning"></i>
             <p> Info financiera
@@ -572,37 +572,37 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('comprobacion', 1)">
               <a routerLink="/comprobacion" class="nav-link py-0">
                 <i class="bi-card-checklist nav-icon text-info"></i>
                 <p> Balance comprobación</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('estsituacion', 1)">
               <a routerLink="/estsituacion" class="nav-link py-0">
                 <i class="bi-card-list nav-icon text-info"></i>
                 <p> Estado de situación</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('estresultados', 1)">
               <a routerLink="/estresultados" class="nav-link py-0">
                 <i class="bi-card-heading nav-icon text-info"></i>
                 <p> Estado de resultados</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('flujoefectivo', 1)">
               <a routerLink="/flujoefectivo" class="nav-link py-0">
                 <i class="bi-cash-coin nav-icon text-info"></i>
                 <p> Flujo del efectivo</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('ejecupresup', 1)">
               <a routerLink="/ejecupresup" class="nav-link py-0">
                 <i class="bi-file-break nav-icon text-info"></i>
                 <p> Ejecución presupuestaria</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('unicostos', 1)">
               <a routerLink="/unicostos" class="nav-link py-0">
                 <i class="bi-currency-dollar nav-icon text-info"></i>
                 <p> Costos</p>
@@ -610,7 +610,7 @@
             </li>
           </ul>
         </li>
-        <li *ngIf="authService.modulo == 2" class="nav-item">
+        <li *ngIf="authService.modulo == 2 && canAnyWindowPermission(['estrfunc', 'ifinan'], 1)" class="nav-item">
           <a href="#" class="nav-link bg-info">
             <i class="fa fa-shopping-basket nav-icon text-warning"></i>
             <p> Catálogos
@@ -619,13 +619,13 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('estrfunc', 1)">
               <a routerLink="/estrfunc" class="nav-link">
                 <i class="bi-hdd-stack nav-icon text-info"></i>
                 <p> Estructura Funcional</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canWindowPermission('ifinan', 1)">
               <a routerLink="/ifinan" class="nav-link">
                 <i class="bi-bank2 nav-icon text-info"></i>
                 <p> Instituciones Financieras</p>
@@ -915,7 +915,7 @@
         <li
           *ngIf="authService.modulo == 7 && canAnySection(['AC_UTIL_DOCS','AC_UTIL_USUARIOS','AC_UTIL_REPORTES','AC_UTIL_ACCESS','AC_UTIL_SWAGGER','AC_UTIL_CORREOS'])"
           class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(5, 220)">
+          <a href="#" class="nav-link bg-info">
             <i class="bi-gear nav-icon"></i>
             <p> Utilería
               <i class="fas fa-angle-right right"></i>
@@ -923,45 +923,45 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item" *ngIf="canSection('AC_UTIL_DOCS')">
-              <a routerLink="/documentos" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_DOCS') && canWindowPermission('documentos', 1)">
+              <a routerLink="/documentos" class="nav-link" [class.disabled]="!canWindowPermission('documentos', 1)">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning"> Documentos de respaldo</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="canSection('AC_UTIL_USUARIOS')">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_USUARIOS') && canWindowPermission('usuarios', 1)">
               <a class="nav-link" (click)="navUsuario()" routerLink=""
-                [class.disabled]="!isOptionEnabled(5, 222)">
+                [class.disabled]="!canWindowPermission('usuarios', 1)">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Usuarios</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="canSection('AC_UTIL_REPORTES')">
-              <a routerLink="/reportesjr" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_REPORTES') && canWindowPermission('reportesjr', 1)">
+              <a routerLink="/reportesjr" class="nav-link" [class.disabled]="!canWindowPermission('reportesjr', 1)">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning">Cargar Reportes</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="canSection('AC_UTIL_REPORTES') || authService.idusuario == 1">
-              <a routerLink="/admin/configuracion-impresion" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+            <li class="nav-item" *ngIf="(canSection('AC_UTIL_REPORTES') || authService.idusuario == 1) && canWindowPermission('configuracion-impresion', 1)">
+              <a routerLink="/admin/configuracion-impresion" class="nav-link" [class.disabled]="!canWindowPermission('configuracion-impresion', 1)">
                 <i class="bi bi-printer-fill nav-icon"></i>
                 <p class="text-warning">Configuracion de impresion</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="authService.idusuario == 1">
-              <a routerLink="/admin/access-control" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+            <li class="nav-item" *ngIf="authService.idusuario == 1 || canWindowPermission('admin-access-control', 5)">
+              <a routerLink="/admin/access-control" class="nav-link" [class.disabled]="!(authService.idusuario == 1 || canWindowPermission('admin-access-control', 5))">
                 <i class="bi bi-shield-lock nav-icon"></i>
                 <p class="text-warning">Accesos y permisos</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="authService.idusuario == 1">
-              <a routerLink="/admin/correos" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+            <li class="nav-item" *ngIf="authService.idusuario == 1 || canWindowPermission('admin-correos', 5)">
+              <a routerLink="/admin/correos" class="nav-link" [class.disabled]="!(authService.idusuario == 1 || canWindowPermission('admin-correos', 5))">
                 <i class="fa fa-envelope-o" aria-hidden="true"> </i>
                 <p class="text-warning">Administracion de Correos</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="authService.idusuario == 1">
-              <a routerLink="/admin/mobile-apk" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+            <li class="nav-item" *ngIf="authService.idusuario == 1 || canWindowPermission('admin-mobile-apk', 5)">
+              <a routerLink="/admin/mobile-apk" class="nav-link" [class.disabled]="!(authService.idusuario == 1 || canWindowPermission('admin-mobile-apk', 5))">
                 <i class="bi bi-phone nav-icon"></i>
                 <p class="text-warning">Versiones APK Mobile</p>
               </a>
@@ -1075,7 +1075,7 @@
         </li>
 
         <li *ngIf="authService.modulo == 7 && canAnySection(['AC_SRI_COMPROB','AC_SRI_FIRMA'])" class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(5, 223)">
+          <a href="#" class="nav-link bg-info">
             <i class="bi bi-scissors nav-icon"></i>
             <p> SRI
               <i class="fas fa-angle-right right"></i>
@@ -1083,14 +1083,14 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item" *ngIf="canSection('AC_SRI_COMPROB')">
-              <a routerLink="/tabla4" class="nav-link" [class.disabled]="!isOptionEnabled(5, 224)">
+            <li class="nav-item" *ngIf="canSection('AC_SRI_COMPROB') && canWindowPermission('tabla4', 1)">
+              <a routerLink="/tabla4" class="nav-link" [class.disabled]="!canWindowPermission('tabla4', 1)">
                 <i class="bi bi-eraser nav-icon"></i>
                 <p class="text-warning"> Comprobantes SRI</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="canSection('AC_SRI_FIRMA')">
-              <a class="nav-link" routerLink="/definir" [class.disabled]="!isOptionEnabled(5, 224)">
+            <li class="nav-item" *ngIf="canSection('AC_SRI_FIRMA') && canWindowPermission('definir', 1)">
+              <a class="nav-link" routerLink="/definir" [class.disabled]="!canWindowPermission('definir', 1)">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Firma Electrónica</p>
               </a>

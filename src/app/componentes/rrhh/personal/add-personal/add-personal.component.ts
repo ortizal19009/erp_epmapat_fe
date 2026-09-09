@@ -184,7 +184,7 @@ export class AddPersonalComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'abonados');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'abonados');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/abonados', coloresJSON);
       this.colocaColor(datos);

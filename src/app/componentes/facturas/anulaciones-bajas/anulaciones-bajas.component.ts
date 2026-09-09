@@ -1385,9 +1385,9 @@ export class AnulacionesBajasComponent implements OnInit {
                 item.idrubro_rubros.descripcion,
                 item.cantidad,
                 item.valorunitario.toFixed(2),
-                (item.cantidad * item.valorunitario).toFixed(2),
+                (Math.round((Number(item.cantidad) * Number(item.valorunitario) + Number.EPSILON) * 100) / 100).toFixed(2),
               ]);
-              sumaRubros += item.cantidad * item.valorunitario;
+              sumaRubros += Math.round((Number(item.cantidad) * Number(item.valorunitario) + Number.EPSILON) * 100) / 100;
             });
             _rubros.push(['', 'TOTAL: ', '', '', sumaRubros.toFixed(2)]);
             this.reporteeliminacion(cabeceraCliente, cabeceraAbonado, _rubros);

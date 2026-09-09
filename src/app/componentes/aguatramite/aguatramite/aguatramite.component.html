@@ -56,7 +56,7 @@
                         <i class="bi-menu-button-wide text-white"></i>
                      </button>
                      <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#optTramites">
+                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#optTramites" [disabled]="!canEditarAguaTramite()">
                            <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
                         </button>
                         <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf"
@@ -160,8 +160,8 @@
             </div>
          </div>
          <div class='modal-footer justify-content-center detalle border py-1'>
-            <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
-               (click)="addAguaTramite()">
+             <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
+                (click)="addAguaTramite()" [disabled]="!canEditarAguaTramite()">
                <i class="fa fa-check-circle"></i> Aceptar
             </button>
             <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>

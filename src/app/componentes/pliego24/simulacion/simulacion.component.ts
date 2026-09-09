@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { delay } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Pliego24 } from 'src/app/modelos/pliego24.model';
 import { Pliego24Service } from 'src/app/servicios/pliego24.service';
@@ -30,7 +31,7 @@ export class SimulacionComponent implements OnInit {
       0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7]
 
    constructor(public fb: FormBuilder, private pli24Service: Pliego24Service, private coloresService: ColoresService,
-      private router: Router) { }
+      private router: Router, private authService: AutorizaService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/simulacion');
@@ -49,7 +50,7 @@ export class SimulacionComponent implements OnInit {
 
    async buscaColor() {
       try {
-         const datos = await this.coloresService.setcolor(1, 'transaci');
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'transaci');
          const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/transaci', coloresJSON);
          this.colocaColor(datos);

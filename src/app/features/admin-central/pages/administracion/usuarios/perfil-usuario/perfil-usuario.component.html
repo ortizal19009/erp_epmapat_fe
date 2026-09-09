@@ -14,13 +14,14 @@
               <input class="form-control form-control-sm text-center" formControlName="nomusu" readonly>
             </div>
             <div class="col-sm-5">
-              <button type='button' class='btn btn-outline-success btn-sm mx-1'><i class="bi-check-all"></i>
-                Todas</button>
-              <button type='button' class='btn btn-outline-success btn-sm mx-1'><i class="bi-battery"></i>
-                Ninguna</button>
-              <button type='button' class='btn btn-success btn-sm mx-1' (click)="guardar()"><i
-                  class="fa fa-check-circle"></i>
-                Aceptar</button>
+              <button type="button" class="btn btn-success btn-sm mx-1" (click)="guardarPerfil()">
+                <i class="fa fa-check-circle"></i>
+                Guardar perfil
+              </button>
+              <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="guardarPermisosVentana()">
+                <i class="bi bi-shield-check"></i>
+                Guardar permisos
+              </button>
             </div>
           </div>
         </form>
@@ -37,35 +38,73 @@
 <div class="content">
   <div class="container-fluid">
     <div class="row justify-content-center">
-      <div class="card card-body col-sm-5 detalle m-0 p-0">
-        <table class="table table-hover table-bordered table-sm sombra">
-          <thead>
-            <tr class="text-center cabecera">
-              <th>Opción</th>
-              <th>
-                <button class="btn btn-xs btn-outline-success" data-toggle="modal" data-target="#modulos">
-                  <i class="fa fa-modx" aria-hidden="true"></i>
-                </button>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="detalle">
-            <tr *ngFor="let opcion of _acceso | filter: filtro; let i = index">
-              <td [ngClass]="{'font-weight-bold': opcion.largo == 2 }" class="py-0">
-                <span class="transparente">{{ opcion.espacios }} </span>&nbsp;&nbsp;
-                {{ opcion.nomacc }}
-              </td>
-              <td class="text-center py-0"> <input type="checkbox" [(ngModel)]="opcion.selec" class="cursor">
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="card card-body col-sm-10 detalle m-0 p-3 sombra permissions-card">
+        <div class="row">
+          <div class="col-lg-4 mb-3">
+            <label class="font-weight-bold">Perfil</label>
+            <select class="custom-select" [(ngModel)]="selectedPerfil">
+              <option *ngFor="let role of roleOptions" [ngValue]="role">{{ role }}</option>
+            </select>
+            <div class="small text-muted mt-2 permission-help">
+              Usa el perfil como clasificacion general y complementa con permisos por ventana.
+            </div>
+          </div>
+          <div class="col-lg-8 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div>
+                <label class="font-weight-bold m-0 d-block">Permisos por ventana</label>
+                <small class="text-muted">Solo se muestran las ventanas de los módulos habilitados.</small>
+              </div>
+              <button class="btn btn-sm btn-outline-success" data-toggle="modal" data-target="#modulos">
+                <i class="bi bi-grid-3x3-gap"></i> Módulos
+              </button>
+            </div>
+            <div class="permissions-summary" *ngIf="!cargandoPermisos">
+              <span class="permissions-count">{{ permisosVentana.length }} ventanas disponibles</span>
+              <span class="module-chip" *ngFor="let modulo of modulosHabilitados">{{ modulo }}</span>
+              <span class="text-muted small" *ngIf="!modulosHabilitados.length">Sin módulos WEB habilitados</span>
+            </div>
+            <div *ngIf="cargandoPermisos" class="alert alert-info py-2">
+              Cargando permisos...
+            </div>
+            <div class="table-responsive" *ngIf="!cargandoPermisos">
+              <table class="table table-hover table-bordered table-sm sombra permissions-table">
+                <thead>
+                  <tr class="text-center cabecera">
+                    <th style="width: 180px;">Módulo</th>
+                    <th>Ventana</th>
+                    <th style="width: 220px;">Nivel</th>
+                    <th>Descripcion</th>
+                  </tr>
+                </thead>
+                <tbody class="detalle">
+                  <tr *ngFor="let permiso of permisosVentana">
+                    <td><span class="window-module">{{ permiso.modulo }}</span></td>
+                    <td class="font-weight-bold">{{ permiso.nombre }}</td>
+                    <td>
+                      <select class="custom-select custom-select-sm" [(ngModel)]="permiso.permissions">
+                        <option *ngFor="let level of permissionLevels" [ngValue]="level.value">
+                          {{ level.value }} - {{ level.label }}
+                        </option>
+                      </select>
+                    </td>
+                    <td class="small text-muted">{{ getPermissionLabel(permiso.permissions) }}</td>
+                  </tr>
+                  <tr *ngIf="!permisosVentana.length">
+                    <td colspan="4" class="text-center text-muted py-3">
+                      No hay ventanas disponibles. Habilite un módulo WEB para este usuario.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
 <div class="modal fade" id="modulos" data-backdrop="static" data-keyboard="false" tabindex="-1"
   aria-labelledby="modulosLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -78,11 +117,11 @@
       </div>
       <div class="modal-body">
         <div *ngIf="idusuario == 1" class="p-2 border rounded mb-2 bg-light">
-          <div class="small font-weight-bold mb-2">Administrador: crear nuevo módulo</div>
+          <div class="small font-weight-bold mb-2">Administrador: crear nuevo modulo</div>
           <div class="form-row">
             <div class="col-sm-6 mb-2">
               <input class="form-control form-control-sm" [(ngModel)]="adminNewModulo.descripcion"
-                placeholder="Descripción módulo">
+                placeholder="Descripcion modulo">
             </div>
             <div class="col-sm-3 mb-2">
               <select class="custom-select custom-select-sm" [(ngModel)]="adminNewModulo.platform">
@@ -93,7 +132,7 @@
             </div>
             <div class="col-sm-3 mb-2">
               <button class="btn btn-sm btn-success btn-block" type="button" (click)="saveNewModulo()">
-                <i class="bi bi-plus-circle"></i> Guardar módulo
+                <i class="bi bi-plus-circle"></i> Guardar modulo
               </button>
             </div>
           </div>
@@ -102,8 +141,8 @@
         <table class="table table-sm table-hover table-bordered sombra">
           <thead class="cabecera">
             <tr>
-              <th>N°</th>
-              <th>Descripción</th>
+              <th>No</th>
+              <th>Descripcion</th>
               <th>Plataforma</th>
               <th></th>
             </tr>
@@ -111,16 +150,15 @@
           <tbody>
             <ng-container *ngFor="let modulo of _usrxmodulo; let i = index">
               <tr>
-                <td class="font-weight-bold">{{i+1}}</td>
+                <td class="font-weight-bold">{{i + 1}}</td>
                 <td>{{modulo.iderpmodulo_erpmodulos.descripcion}}</td>
                 <td class="text-center">{{modulo.iderpmodulo_erpmodulos.platform}}</td>
-
                 <td class="text-center">
                   <div class="input-group mb-1">
                     <div class="input-group-prepend">
                       <div class="input-group-text">
                         <input type="checkbox" [checked]="modulo.enabled" (change)="setModuloToUser($event, modulo)"
-                          [disabled]="modulo.saving" aria-label="Checkbox for following text input">
+                          [disabled]="modulo.saving" aria-label="Checkbox for module">
                         <i *ngIf="modulo.saving" class="fas fa-spinner fa-spin ml-1 text-primary"></i>
                       </div>
                     </div>
@@ -129,7 +167,7 @@
               </tr>
               <tr *ngFor="let sec of (modulo.secciones || [])" class="bg-light">
                 <td></td>
-                <td class="small pl-4">↳ {{ sec.descripcion }} <small class="text-muted"
+                <td class="small pl-4">-> {{ sec.descripcion }} <small class="text-muted"
                     *ngIf="sec.ruta">({{sec.ruta}})</small></td>
                 <td>
                   <div class="input-group mb-1">
@@ -145,14 +183,14 @@
               </tr>
             </ng-container>
             <tr *ngIf="(_usrxmodulo || []).length === 0">
-              <td colspan="3" class="text-center text-muted py-2">No hay módulos para este usuario/plataforma.</td>
+              <td colspan="4" class="text-center text-muted py-2">No hay modulos para este usuario/plataforma.</td>
             </tr>
           </tbody>
         </table>
 
         <div *ngIf="idusuario == 1" class="mt-2 alert alert-info py-2">
-          La administración del catálogo de módulos/secciones/subsecciones fue movida a:
-          <b>Utilería → Accesos y permisos</b>.
+          La administracion del catalogo de modulos y secciones fue movida a:
+          <b>Utileria -> Accesos y permisos</b>.
         </div>
       </div>
       <div class="modal-footer">

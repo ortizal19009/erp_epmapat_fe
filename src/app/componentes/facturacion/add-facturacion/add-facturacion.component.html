@@ -296,7 +296,7 @@
                </form>
             </div>
             <div class="modal-footer justify-content-center">
-               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" [disabled]="!formCuotas.valid"
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" [disabled]="!formCuotas.valid || !canEditarFacturacion()"
                   (click)="guardar()"><i class="fa fa-check-circle"></i> Aceptar</button>
                <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal"><i
                      class="bi bi-x-circle"></i> Cancelar</button>

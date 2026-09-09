@@ -62,7 +62,8 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table class="table table-hover table-bordered table-sm sombra">
+         <div class="table-responsive certipresu-tabla sombra">
+         <table class="table table-hover table-bordered table-sm mb-0">
             <thead class="text-center cabecera">
                <tr class="pad0">
                   <th>Nro.</th>
@@ -88,12 +89,12 @@
                   <td class="text-right" [ngClass]="{'transparente': certificacion.valor == 0}">{{ certificacion.valor |
                      number:'1.2-2' }}</td>
                   <!-- <td>{{ certificacion.idbeneres.nomben}}</td> -->
-                  <td class="text-truncate ancho300" data-toggle="tooltip"
+                  <td class="text-truncate" data-toggle="tooltip"
                      [ngClass]="{'toolt': (certificacion.idbeneres?.nomben?.length || 0) > 40}"
                      [title]="(certificacion.idbeneres?.nomben?.length || 0) > 40 ? certificacion.idbeneres?.nomben : ''">
                      {{ certificacion.idbeneres?.nomben || 'Sin responsable' }}
                   </td>
-                  <td class="text-truncate ancho300" data-toggle="tooltip"
+                  <td class="text-truncate" data-toggle="tooltip"
                      [ngClass]="{'toolt': (certificacion.descripcion?.length || 0) > 50}"
                      [title]="(certificacion.descripcion?.length || 0) > 50 ? certificacion.descripcion : ''">
                      {{ certificacion.descripcion || '' }}
@@ -124,6 +125,7 @@
                </tr>
             </tfoot>
          </table>
+         </div>
       </div>
    </div>
 </div>

@@ -127,6 +127,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   private rutasRefreshSub?: Subscription;
   private mobileSocketSub?: Subscription;
   idusuario: number;
+  rolepermission = 1;
+  readonly ventana = 'emisiones';
   auditoriaEmision: EmisionAuditViewRow[] = [];
   auditoriaEmisionCargando = false;
   auditoriaEmisionError = '';
@@ -199,6 +201,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
     this.idusuario = this.authService.idusuario;
+    void this.loadRolePermission();
 
     this.formBuscar = this.fb.group({
       desde: '',
@@ -391,6 +394,32 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async loadRolePermission(): Promise<void> {
+    if (this.authService.idusuario === 1) {
+      this.rolepermission = 3;
+      return;
+    }
+
+    this.rolepermission = await this.coloresService.getRolePermission(
+      this.authService.idusuario,
+      this.ventana,
+    );
+  }
+
+  canEditarEmision(): boolean {
+    return this.authService.idusuario === 1 || this.rolepermission >= 2;
+  }
+
+  private bloquearEdicion(): boolean {
+    if (this.canEditarEmision()) return false;
+
+    this.authService.swal(
+      'warning',
+      'Tu nivel de acceso es solo lectura. No tienes permiso para crear o modificar emisiones.',
+    );
+    return true;
+  }
+
   private onLecturaSocketUpdate(event: any): void {
     const idemision = Number(event?.idemision ?? 0);
     if (!idemision || idemision !== Number(this.idemision || 0)) {
@@ -525,6 +554,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   abrirModalAnularEmision() {
+    if (this.bloquearEdicion()) return;
+
     if (!this.idemision) {
       this.authService.swal('warning', 'Selecciona primero una emisión.');
       return;
@@ -969,6 +1000,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   modificar(idemision: number) {
+    if (this.bloquearEdicion()) return;
     this.router.navigate(['modiemision', idemision]);
   }
 
@@ -1107,11 +1139,14 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   generar() {
+    if (this.bloquearEdicion()) return;
     sessionStorage.setItem('idemisionToGenerar', this.idemision.toString());
     this.router.navigate(['gene-emision']);
   }
 
   async validarORevalidarApertura() {
+    if (this.bloquearEdicion()) return;
+
     if (!this.idemision) {
       this.authService.swal('warning', 'Selecciona primero una emisión.');
       return;
@@ -1362,6 +1397,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   cerrarEmision() {
+    if (this.bloquearEdicion()) return;
+
     this.emiService.getByIdemision(this.idemision).subscribe({
       next: (datos) => {
         datos.m3 = this.subtotal;
@@ -1383,6 +1420,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   nuevo() {
+    if (this.bloquearEdicion()) return;
+
     this.emiService.ultimo().subscribe({
       next: (datos) => {
         let nuevoAnio: string;
@@ -1404,6 +1443,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   saveEmision() {
+    if (this.bloquearEdicion()) return;
+
     this.emiService.saveEmision(this.formAddEmision.value).subscribe({
       next: (dato) => {
         const idRegistroCreado = dato;
@@ -1484,6 +1525,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
   //Generar nueva emision individual(){
   saveEmisionIndividual() {
+    if (this.bloquearEdicion()) return;
     this.generaRutaxemisionIndividual();
     this.listar = true;
     setTimeout(() => {
@@ -1516,6 +1558,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     });
   }
   async generaRutaxemisionIndividual() {
+    if (this.bloquearEdicion()) return;
+
     if (this.cerrado === 0) {
       this.lecturaestado = 0;
       let novedad: Novedad = new Novedad();
@@ -2565,7 +2609,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
         item.cantidad,
         item.valorunitario.toFixed(2),
       ]);
-      sum_anterior += item.cantidad * item.valorunitario;
+      sum_anterior += Math.round((Number(item.cantidad) * Number(item.valorunitario) + Number.EPSILON) * 100) / 100;
     });
     autoTable(doc, {
       headStyles: {
@@ -2634,7 +2678,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
         item.cantidad,
         item.valorunitario.toFixed(2),
       ]);
-      sum_nuevos += item.cantidad * item.valorunitario;
+      sum_nuevos += Math.round((Number(item.cantidad) * Number(item.valorunitario) + Number.EPSILON) * 100) / 100;
     });
     let m3_nuevo: number =
       emisionIndividual.idlecturanueva.lecturaactual -
@@ -3019,6 +3063,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
   /** Lanza el cierre de TODAS las rutas abiertas en paralelo (concurrencia limitada) */
   async cerrarRutas() {
+    if (this.bloquearEdicion()) return;
     if (!this._rutasxemi?.length) return;
 
     let lecturasNegativasPorRuta: RutaLecturasNegativas[] = [];
@@ -3235,11 +3280,12 @@ export class EmisionesComponent implements OnInit, OnDestroy {
           return this.cerrarRutaPersistiendo(ruta, 0);
         }
 
-        const totalLecturas = lecturas.length;
-        let procesadas = 0;
-        let sumaM3 = 0;
+        return from(this.obtenerResumenPendientesPorCuenta(lecturas)).pipe(mergeMap((resumenesPendientes) => {
+          const totalLecturas = lecturas.length;
+          let procesadas = 0;
+          let sumaM3 = 0;
 
-        return from(lecturas).pipe(
+          return from(lecturas).pipe(
           mergeMap((lectura: Lecturas) => {
             const actual = lectura!.lecturaactual ?? 0;
             const anterior = lectura!.lecturaanterior ?? 0;
@@ -3264,9 +3310,17 @@ export class EmisionesComponent implements OnInit, OnDestroy {
               mergeMap((totalCalculado: number) => {
                 sumaM3 += m3;
                 const patch = { ...lectura, total1: totalCalculado, estado: 1 };
-                return this.s_lecturas.updateLectura(lectura.idlectura, patch);
+                return this.s_lecturas.updateLectura(lectura.idlectura, patch).pipe(
+                  map(() => totalCalculado),
+                );
               }),
-              tap(() => {
+              tap((totalCalculado) => {
+                const cuenta = Number(lectura?.idabonado_abonados?.idabonado ?? 0);
+                this.registrarCuentaProcesadaAlCerrarRuta(
+                  lectura,
+                  totalCalculado,
+                  resumenesPendientes.get(cuenta),
+                );
                 procesadas++;
                 ruta.progreso = Math.round((procesadas / totalLecturas) * 100);
               }),
@@ -3283,7 +3337,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
           }, 10),
           toArray(),
           mergeMap(() => this.cerrarRutaPersistiendo(ruta, sumaM3)),
-        );
+          );
+        }));
       }),
       catchError((err) => {
         console.error('Error al procesar ruta', { err, ruta });
@@ -3293,6 +3348,110 @@ export class EmisionesComponent implements OnInit, OnDestroy {
         return of(null);
       }),
     );
+  }
+
+  private async obtenerResumenPendientesPorCuenta(lecturas: any[]): Promise<Map<number, any>> {
+    const cuentas = lecturas
+      .map((lectura) => Number(lectura?.idabonado_abonados?.idabonado ?? 0))
+      .filter((cuenta) => cuenta > 0);
+    const facturasExcluidas = lecturas
+      .map((lectura) => Number(lectura?.idfactura ?? 0))
+      .filter((factura) => factura > 0);
+    try {
+      const resumenes = await this.facService.getResumenPendientesPorCuentas(cuentas, facturasExcluidas);
+      return new Map(resumenes.map((resumen) => [Number(resumen.cuenta), resumen]));
+    } catch (error) {
+      console.error('No se pudo obtener el resumen de facturas pendientes de la ruta', error);
+      return new Map();
+    }
+  }
+
+  private registrarCuentaProcesadaAlCerrarRuta(
+    lectura: any,
+    totalCalculado: number,
+    resumenPendientes?: any,
+  ): void {
+    const abonado = lectura?.idabonado_abonados ?? {};
+    const titular = abonado?.idcliente_clientes ?? {};
+    const responsable = abonado?.idresponsable ?? titular;
+    const m3Emitidos = Math.max(
+      Number(lectura?.lecturaactual ?? 0) - Number(lectura?.lecturaanterior ?? 0),
+      0,
+    );
+    const categoria = abonado?.idcategoria_categorias?.descripcion ?? '';
+    const promedioM3 = Number(abonado?.promedio ?? 0);
+
+    console.log('[Cierre de ruta - Emisiones] Cuenta procesada', {
+      idlectura: lectura?.idlectura ?? null,
+      idfactura: lectura?.idfactura ?? null,
+      cuenta: abonado?.idabonado ?? lectura?.idabonado ?? null,
+      responsablePago: responsable?.nombre ?? titular?.nombre ?? '',
+      nombre: titular?.nombre ?? responsable?.nombre ?? '',
+      telefono: responsable?.telefono ?? titular?.telefono ?? '',
+      correoElectronico: responsable?.email ?? titular?.email ?? '',
+      categoria,
+      nuevoValor: totalCalculado,
+      m3Emitidos,
+      promedioM3,
+      novedades: this.getNovedadesCierre(lectura, m3Emitidos, promedioM3, categoria),
+      facturasPendientes: resumenPendientes?.totalFacturasPendientes ?? null,
+      valoresPendientes: resumenPendientes ? {
+        consumoAgua: {
+          facturas: resumenPendientes.facturasConsumo,
+          capital: resumenPendientes.capitalConsumo,
+          interes: resumenPendientes.interesConsumo,
+          valor: resumenPendientes.valorConsumo,
+        },
+        servicios: {
+          facturas: resumenPendientes.facturasServicios,
+          capital: resumenPendientes.capitalServicios,
+          interes: resumenPendientes.interesServicios,
+          valor: resumenPendientes.valorServicios,
+        },
+        convenios: {
+          facturas: resumenPendientes.facturasConvenios,
+          capital: resumenPendientes.capitalConvenios,
+          interes: resumenPendientes.interesConvenios,
+          valor: resumenPendientes.valorConvenios,
+        },
+        intereses: resumenPendientes.totalIntereses,
+        total: resumenPendientes.totalPendiente,
+      } : null,
+    });
+  }
+
+  private getNovedadesCierre(
+    lectura: any,
+    m3Emitidos: number,
+    promedioM3: number,
+    categoria: string,
+  ): string[] {
+    const novedades: string[] = [];
+    const consumoOriginal = Number(lectura?.lecturaactual ?? 0) - Number(lectura?.lecturaanterior ?? 0);
+    const novedadRegistrada = lectura?.idnovedad_novedades;
+    const idNovedad = Number(novedadRegistrada?.idnovedad ?? 0);
+    const descripcionNovedad = String(novedadRegistrada?.descripcion ?? '').trim();
+    const categoriaNormalizada = categoria.toLowerCase();
+    const idCategoria = Number(lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria ?? 0);
+
+    if (idNovedad > 0 && idNovedad !== 1 && descripcionNovedad) {
+      novedades.push(`Novedad registrada: ${descripcionNovedad}`);
+    }
+    if (consumoOriginal < 0) {
+      novedades.push(`Consumo negativo: ${consumoOriginal} m3`);
+    }
+    if (promedioM3 > 0 && consumoOriginal >= 0 && m3Emitidos > promedioM3 * 2) {
+      novedades.push(`Consumo sobre promedio: ${m3Emitidos} m3 vs ${promedioM3} m3`);
+    }
+    if ((categoriaNormalizada.includes('resid') || idCategoria === 1) && m3Emitidos > 70) {
+      novedades.push(`Residencial supera 70 m3: ${m3Emitidos} m3`);
+    }
+    if (Boolean(lectura?.idabonado_abonados?.adultomayor)
+      && (categoriaNormalizada.includes('especial') || idCategoria === 9)
+      && m3Emitidos > 34) {
+      novedades.push(`Especial adulto mayor supera 34 m3: ${m3Emitidos} m3`);
+    }
+    return novedades;
   }
 
   /** Persiste el cierre de la ruta y actualiza la UI */
@@ -3369,6 +3528,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
 
   }
   async confirmarReabrirEmision() {
+    if (this.bloquearEdicion()) return;
+
     if (!this.idemision) {
       this.authService.swal('warning', 'Selecciona primero una emisión.');
       return;

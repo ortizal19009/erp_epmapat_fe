@@ -282,12 +282,12 @@ export class ImpEmisionesComponent implements OnInit {
     let body3: any = [];
     let head = [
       ['Valores emitidos por rubros'],
-      ['Id', 'Descripción', 'Abonados', 'Valor'],
+      ['N°', 'Id', 'Descripción', 'Abonados', 'Valor'],
     ];
-    let head2 = [['Detalles'], ['Nro. Cuentas', 'M3']];
+    let head2 = [['Detalles'], ['N°', 'Nro. Cuentas', 'M3']];
     let head3 = [
       ['Cuentas sin rubros'],
-      ['Cuenta', 'Planilla', 'Lec.Anterior', 'Lec.Actual', 'm3', 'Nro. Rubros'],
+      ['N°', 'Cuenta', 'Planilla', 'Lec.Anterior', 'Lec.Actual', 'm3', 'Nro. Rubros'],
     ];
     let suma: number = 0;
     let emision: any = await this.getEmision(idemision);
@@ -301,10 +301,12 @@ export class ImpEmisionesComponent implements OnInit {
       ]);
       suma += item.total;
     });
-    body.push(['', '', 'Total', suma.toFixed(2)]);
+    body = this.agregarTotalRegistros(this.agregarNumeracion(body), body.length);
+    body.push(['', '', '', 'Total', suma.toFixed(2)]);
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
     });
+    body2 = this.agregarTotalRegistros(this.agregarNumeracion(body2), body2.length);
     if (count.length > 0) {
       count.forEach((item: any) => {
         body3.push([
@@ -316,9 +318,8 @@ export class ImpEmisionesComponent implements OnInit {
           item.rubros_count,
         ]);
       });
-    } else {
-      body3.push(['', '', '', '', '', '']);
     }
+    body3 = this.agregarTotalRegistros(this.agregarNumeracion(body3), body3.length);
 
     /*    this.s_pdf.bodyOneTable(
       `Emisión Inicial ${emision.emision}`,
@@ -345,7 +346,7 @@ export class ImpEmisionesComponent implements OnInit {
     let eliminados: any = await this.getRubLectEliminados(idemision);
     let actuales: any = await this.getRubLectActual(idemision);
     let cm3inicial: any = await this.getCM3Inicial(idemision);
-    let head2 = [['Detalles'], ['Nro. Cuentas', 'M3']];
+    let head2 = [['Detalles'], ['N°', 'Nro. Cuentas', 'M3']];
     let body2: any = [];
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
@@ -360,19 +361,19 @@ export class ImpEmisionesComponent implements OnInit {
     let a_suma: number = 0;
     let i_head: any = [
       'Emisión Inicial',
-      ['Id', 'Descripción', 'Abonados', 'Valor'],
+      ['N°', 'Id', 'Descripción', 'Abonados', 'Valor'],
     ];
     let n_head: any = [
       'Emisiones Nuevas',
-      ['Id', 'Descripción', 'Abonados', 'Valor'],
+      ['N°', 'Id', 'Descripción', 'Abonados', 'Valor'],
     ];
     let e_head: any = [
       'Emisiones Eliminadas',
-      ['Id', 'Descripción', 'Abonados', 'Valor'],
+      ['N°', 'Id', 'Descripción', 'Abonados', 'Valor'],
     ];
     let a_head: any = [
       'Emisión Acutal',
-      ['Id', 'Descripción', 'Abonados', 'Valor'],
+      ['N°', 'Id', 'Descripción', 'Abonados', 'Valor'],
     ];
     let emision: any = await this.getEmision(idemision);
     inicial.forEach((item: any) => {
@@ -386,7 +387,8 @@ export class ImpEmisionesComponent implements OnInit {
       ]);
       i_suma += item.total;
     });
-    i_body.push(['', 'Total', i_suma.toFixed(2)]);
+    i_body = this.agregarTotalRegistros(this.agregarNumeracion(i_body), i_body.length);
+    i_body.push(['', '', 'Total', '', i_suma.toFixed(2)]);
     nuevos.forEach((item: any) => {
       item.abonados === null ? (item.abonados = 0) : item.abonados;
       n_body.push([
@@ -397,7 +399,8 @@ export class ImpEmisionesComponent implements OnInit {
       ]);
       n_suma += item.total;
     });
-    n_body.push(['', 'Total', n_suma.toFixed(2)]);
+    n_body = this.agregarTotalRegistros(this.agregarNumeracion(n_body), n_body.length);
+    n_body.push(['', '', 'Total', '', n_suma.toFixed(2)]);
     eliminados.forEach((item: any) => {
       item.abonados === null ? (item.abonados = 0) : item.abonados;
       e_body.push([
@@ -408,7 +411,8 @@ export class ImpEmisionesComponent implements OnInit {
       ]);
       e_suma += item.total;
     });
-    e_body.push(['', 'Total', e_suma.toFixed(2)]);
+    e_body = this.agregarTotalRegistros(this.agregarNumeracion(e_body), e_body.length);
+    e_body.push(['', '', 'Total', '', e_suma.toFixed(2)]);
     actuales.forEach((item: any) => {
       item.abonados === null ? (item.abonados = 0) : item.abonados;
       a_body.push([
@@ -419,7 +423,10 @@ export class ImpEmisionesComponent implements OnInit {
       ]);
       a_suma += item.total;
     });
-    a_body.push(['', 'Total', a_suma.toFixed(2)]);
+    a_body = this.agregarTotalRegistros(this.agregarNumeracion(a_body), a_body.length);
+    a_body.push(['', '', 'Total', '', a_suma.toFixed(2)]);
+
+    body2 = this.agregarTotalRegistros(this.agregarNumeracion(body2), body2.length);
 
     this.s_pdf.bodyFiveTables(
       `Emisión final ${emision.emision}`,
@@ -444,7 +451,7 @@ export class ImpEmisionesComponent implements OnInit {
         let body: any[] = [];
         let suma: any = 0;
         let head: any = [
-          ['Lectura', 'Emisión', 'Cuenta', 'Responsable P.', 'Ruta', 'Valor'],
+          ['N°', 'Lectura', 'Emisión', 'Cuenta', 'Responsable P.', 'Ruta', 'Valor'],
         ];
         lecturas.forEach((lectura: any) => {
           body.push([
@@ -457,7 +464,8 @@ export class ImpEmisionesComponent implements OnInit {
           ]);
           suma += lectura.suma;
         });
-        body.push(['', '', '', '', 'TOTAL', suma.toFixed(2)]);
+        body = this.agregarTotalRegistros(this.agregarNumeracion(body), body.length);
+        body.push(['', '', '', '', '', 'TOTAL', suma.toFixed(2)]);
         this.s_pdf.bodyOneTable(
           `Facturas eliminadas - Emisión: ${lecturas[0].emision}`,
           head,
@@ -613,7 +621,7 @@ export class ImpEmisionesComponent implements OnInit {
     this.s_loading.showLoading();
     let emision = await this.getEmision(idemision);
     let head = [
-      ['CUENTA', 'NOMBRE Y APELLIDO', 'CATEGORIA', 'M3', 'VAL.EMITIDO'],
+      ['N°', 'CUENTA', 'NOMBRE Y APELLIDO', 'CATEGORIA', 'M3', 'VAL.EMITIDO'],
     ];
     let doc = new jsPDF();
     let valoresEmitidos: any = await this.getValoresEmitidos(idemision);
@@ -627,6 +635,7 @@ export class ImpEmisionesComponent implements OnInit {
         item.valemitido.toFixed(2),
       ]);
     });
+    body = this.agregarTotalRegistros(this.agregarNumeracion(body), body.length);
 
     //this.pdfview = this.s_loading.showLoading();
     this.s_pdf._bodyOneTable(
@@ -641,7 +650,7 @@ export class ImpEmisionesComponent implements OnInit {
     let emision = await this.getEmision(idemision);
     let datos: any = await this.getConsumoXCategoria(idemision);
     let doc = new jsPDF();
-    let head = [['N° CUENTAS', 'DESCRIPCIÓN', 'M3', 'TOTAL']];
+    let head = [['N°', 'N° CUENTAS', 'DESCRIPCIÓN', 'M3', 'TOTAL']];
     let body: any = [];
     let s_m3: number = 0;
     let s_total: number = 0;
@@ -655,7 +664,8 @@ export class ImpEmisionesComponent implements OnInit {
       s_m3 += item.m3;
       s_total += item.total;
     });
-    body.push(['', 'TOTAL: ', s_m3.toFixed(2), s_total.toFixed(2)]);
+    body = this.agregarTotalRegistros(this.agregarNumeracion(body), body.length);
+    body.push(['', '', 'TOTAL: ', s_m3.toFixed(2), s_total.toFixed(2)]);
 
     this.s_pdf.bodyOneTable(
       `REPORTE DE CONSUMO POR CATEGORIA - EMISION ${emision?.emision}`,
@@ -669,7 +679,6 @@ export class ImpEmisionesComponent implements OnInit {
     let emision = await this.getEmision(idemision);
     let obj: any = await this.getRefacturacionxEmision(idemision);
     let eliminadas: any = await this.getFacElimByEmision(idemision);
-    console.log(eliminadas);
     let doc = new jsPDF();
     let n_suma: number = 0;
     let a_suma: number = 0;
@@ -677,6 +686,7 @@ export class ImpEmisionesComponent implements OnInit {
     let head = [
       [`REFACTURACIÓN DE LA EMISION ${emision?.emision} `],
       [
+        'N°',
         'CUENTA',
         'NOMBRE',
         'RAZON REFACTURACIÓN',
@@ -689,6 +699,7 @@ export class ImpEmisionesComponent implements OnInit {
     let head2 = [
       [`BAJAS DE LA EMISION ${emision?.emision}`],
       [
+        'N°',
         'CUENTA',
         'NOMBRE',
         'PLANILLA',
@@ -719,7 +730,9 @@ export class ImpEmisionesComponent implements OnInit {
       a_suma += item.valoranterior;
       diferencia = a_suma - n_suma;
     });
+    body = this.agregarTotalRegistros(this.agregarNumeracion(body), body.length);
     body.push([
+      '',
       '',
       '',
       '',
@@ -741,7 +754,8 @@ export class ImpEmisionesComponent implements OnInit {
       ]);
       sum_eliminadas += va;
     });
-    body2.push(['', '', '', '', 'TOTAL', sum_eliminadas.toFixed(2), '']);
+    body2 = this.agregarTotalRegistros(this.agregarNumeracion(body2), body2.length);
+    body2.push(['', '', '', '', '', 'TOTAL', sum_eliminadas.toFixed(2), '']);
     this.s_pdf._bodyShowTwoTables(
       `Refacturación y bajas de la emisión ${emision?.emision}`,
       head,
@@ -763,6 +777,7 @@ export class ImpEmisionesComponent implements OnInit {
     let head = [
       ['LISTADO DE REFACTURACIONES'],
       [
+        'N°',
         'CUENTA',
         'NOMBRE',
         'RAZON REFACTURACIÓN',
@@ -777,6 +792,7 @@ export class ImpEmisionesComponent implements OnInit {
     let head2 = [
       [`LISTADO DE BAJAS`],
       [
+        'N°',
         'CUENTA',
         'NOMBRE',
         'PLANILLA',
@@ -810,7 +826,9 @@ export class ImpEmisionesComponent implements OnInit {
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
     });
+    body = this.agregarTotalRegistros(this.agregarNumeracion(body), body.length);
     body.push([
+      '',
       '',
       '',
       '',
@@ -834,7 +852,8 @@ export class ImpEmisionesComponent implements OnInit {
       ]);
       sum_eliminadas += va;
     });
-    body2.push(['', '', '', '', 'TOTAL', sum_eliminadas.toFixed(2), '']);
+    body2 = this.agregarTotalRegistros(this.agregarNumeracion(body2), body2.length);
+    body2.push(['', '', '', '', '', 'TOTAL', sum_eliminadas.toFixed(2), '']);
     this.s_pdf._bodyShowTwoTables(
       `Refacturación y bajas ${d} - ${h}`,
       head,
@@ -856,11 +875,11 @@ export class ImpEmisionesComponent implements OnInit {
       await this.s_emisionindividual.getRefacturacionRubrosNuevos(idemision);
     let headAnteriores: any = [
       ['Rubros eliminados'],
-      ['Código', 'Descripción', 'Total'],
+      ['N°', 'Código', 'Descripción', 'Total'],
     ];
     let headNuevos: any = [
       ['Rubros generados'],
-      ['Código', 'Descripción', 'Total'],
+      ['N°', 'Código', 'Descripción', 'Total'],
     ];
     let bodyAnteriores: any = [];
     let bodyNuevos: any = [];
@@ -870,14 +889,22 @@ export class ImpEmisionesComponent implements OnInit {
       bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum]);
       sumaAnteriores += item.sum;
     });
-    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)]);
+    bodyAnteriores = this.agregarTotalRegistros(
+      this.agregarNumeracion(bodyAnteriores),
+      bodyAnteriores.length
+    );
+    bodyAnteriores.push(['', '', 'TOTAL', sumaAnteriores.toFixed(2)]);
     valoresNuevos.forEach((item: any) => {
       bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum]);
       sumaNuevos += item.sum;
     });
+    bodyNuevos = this.agregarTotalRegistros(
+      this.agregarNumeracion(bodyNuevos),
+      bodyNuevos.length
+    );
     bodyNuevos.push(
-      ['', 'TOTAL', sumaNuevos.toFixed(2)],
-      ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)]
+      ['', '', 'TOTAL', sumaNuevos.toFixed(2)],
+      ['', '', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)]
     );
     this.s_pdf.bodyTwoTables(
       `Refacturaciones por rubros emision: ${emision?.emision}`,
@@ -900,11 +927,11 @@ export class ImpEmisionesComponent implements OnInit {
       await this.s_emisionindividual.getRefacturacionxFechaRubrosNuevos(d, h);
     let headAnteriores: any = [
       ['Rubros eliminados'],
-      ['Código', 'Descripción', 'Total'],
+      ['N°', 'Código', 'Descripción', 'Total'],
     ];
     let headNuevos: any = [
       ['Rubros generados'],
-      ['Código', 'Descripción', 'Total'],
+      ['N°', 'Código', 'Descripción', 'Total'],
     ];
     let bodyAnteriores: any = [];
     let bodyNuevos: any = [];
@@ -914,14 +941,22 @@ export class ImpEmisionesComponent implements OnInit {
       bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum]);
       sumaAnteriores += item.sum;
     });
-    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)]);
+    bodyAnteriores = this.agregarTotalRegistros(
+      this.agregarNumeracion(bodyAnteriores),
+      bodyAnteriores.length
+    );
+    bodyAnteriores.push(['', '', 'TOTAL', sumaAnteriores.toFixed(2)]);
     valoresNuevos.forEach((item: any) => {
       bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum]);
       sumaNuevos += item.sum;
     });
+    bodyNuevos = this.agregarTotalRegistros(
+      this.agregarNumeracion(bodyNuevos),
+      bodyNuevos.length
+    );
     bodyNuevos.push(
-      ['', 'TOTAL', sumaNuevos.toFixed(2)],
-      ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)]
+      ['', '', 'TOTAL', sumaNuevos.toFixed(2)],
+      ['', '', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)]
     );
     this.s_pdf.bodyTwoTables(
       `Refacturaciones por fecha ${d} - ${h}`,
@@ -946,13 +981,15 @@ export class ImpEmisionesComponent implements OnInit {
     let nuevas: any = await this.getEmisionesNuevas(idemision);
     let headAnteriores: any = [
       ['Facturas eliminadas'],
-      ['Cuenta', 'Emision', 'Planilla', 'Total'],
+      ['N°', 'Cuenta', 'Emision', 'Planilla', 'Total'],
     ];
     let headNuevas: any = [
       ['Facturas emitidas'],
-      ['Cuenta', 'Emision', 'Planilla', 'Total'],
+      ['N°', 'Cuenta', 'Emision', 'Planilla', 'Total'],
     ];
     let bodyAnteriores: any = [];
+    headAnteriores[1] = ['N', 'Cuenta', 'Cliente', 'Emision', 'Planilla', 'Fecha eliminacion', 'Total'];
+    headNuevas[1] = ['N', 'Cuenta', 'Cliente', 'Emision', 'Planilla', 'Total'];
     let bodyNuevas: any = [];
     let sumant: number = 0;
     let sumnev: number = 0;
@@ -960,23 +997,34 @@ export class ImpEmisionesComponent implements OnInit {
       sumant += +iAnteriores.tanterior.toFixed(2);
       bodyAnteriores.push([
         iAnteriores.cuenta,
+        iAnteriores.nombrecliente,
         iAnteriores.emisiona,
         iAnteriores.facturaa,
+        iAnteriores.fechaeliminacion,
         iAnteriores.tanterior.toFixed(2),
       ]);
     });
-    bodyAnteriores.push(['', 'TOTAL', '', sumant.toFixed(2)]);
+    bodyAnteriores = this.agregarTotalRegistros(
+      this.agregarNumeracion(bodyAnteriores),
+      bodyAnteriores.length
+    );
+    bodyAnteriores.push(['', '', '', '', '', 'TOTAL', sumant.toFixed(2)]);
     nuevas.forEach((iNuevas: any) => {
       sumnev += +iNuevas.tnuevo.toFixed(2);
       bodyNuevas.push([
         iNuevas.cuenta,
+        iNuevas.nombrecliente,
         iNuevas.emisionn,
         iNuevas.facturan,
         iNuevas.tnuevo.toFixed(2),
       ]);
     });
-    bodyNuevas.push(['', 'TOTAL', '', sumnev.toFixed(2)]);
-    this.s_pdf.bodyTwoTables(
+    bodyNuevas = this.agregarTotalRegistros(
+      this.agregarNumeracion(bodyNuevas),
+      bodyNuevas.length
+    );
+    bodyNuevas.push(['', '', '', '', 'TOTAL', sumnev.toFixed(2)]);
+    this.s_pdf.bodyTwoTablesVertical(
       `REPORTE EMISIONES NUEVAS ${emision.emision}`,
       headAnteriores,
       bodyAnteriores,
@@ -1098,7 +1146,7 @@ export class ImpEmisionesComponent implements OnInit {
   impListaEmisiones() {
     let doc = new jsPDF();
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
-    let head = [['Emision', 'm3', 'Fecha Cierre']];
+    let head = [['N°', 'Emision', 'm3', 'Fecha Cierre']];
     var datos: any = [];
     var i = 0;
     this._emisiones.forEach((item: any) => {
@@ -1112,6 +1160,7 @@ export class ImpEmisionesComponent implements OnInit {
       i++;
     });
     // datos.push(['', 'TOTAL', '', '', '', this.sumtotal.toLocaleString('en-US')]);
+    datos = this.agregarTotalRegistros(this.agregarNumeracion(datos), datos.length);
     this.s_pdf.bodyOneTable('Listado de emisiones', head, datos, doc);
     this.s_loading.hideLoading();
   }
@@ -1126,5 +1175,23 @@ export class ImpEmisionesComponent implements OnInit {
     }
 
     return registros.filter((item: any) => item?.estado !== 0) as T;
+  }
+
+  private agregarNumeracion(filas: any[]): any[] {
+    return (filas || []).map((fila: any[], index: number) => [index + 1, ...fila]);
+  }
+
+  private agregarTotalRegistros(filas: any[], totalRegistros: number): any[] {
+    const cantidadColumnas = filas[0]?.length ?? 1;
+    const resumen = Array(cantidadColumnas).fill('');
+
+    if (cantidadColumnas === 1) {
+      resumen[0] = `Registros: ${totalRegistros}`;
+    } else {
+      resumen[cantidadColumnas - 2] = 'Registros:';
+      resumen[cantidadColumnas - 1] = totalRegistros;
+    }
+
+    return [...filas, resumen];
   }
 }

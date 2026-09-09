@@ -1,0 +1,13 @@
+.cabecera {
+  background-color: var(--bgcolor1);
+  color: white;
+}
+
+.detalle {
+  background-color: var(--bgcolor2);
+}
+
+dt,
+dd {
+  margin-bottom: 0.75rem;
+}

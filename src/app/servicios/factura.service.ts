@@ -299,6 +299,25 @@ export class FacturaService {
     return this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
   }
 
+  async getResumenPendientesPorCuentas(
+    cuentas: number[],
+    facturasExcluidas: number[] = [],
+  ): Promise<ResumenPendientesCuenta[]> {
+    const cuentasValidas = [...new Set(cuentas.filter((cuenta) => Number.isFinite(Number(cuenta)) && Number(cuenta) > 0))];
+    if (!cuentasValidas.length) {
+      return [];
+    }
+    const facturasValidas = [...new Set(facturasExcluidas.filter(
+      (factura) => Number.isFinite(Number(factura)) && Number(factura) > 0,
+    ))];
+    return await firstValueFrom(
+      this.http.post<ResumenPendientesCuenta[]>(`${baseUrl}/resumen-pendientes/cierre`, {
+        cuentas: cuentasValidas,
+        facturasExcluidas: facturasValidas,
+      }),
+    );
+  }
+
   getDetalleAnulacionBaja(idfactura: number) {
     return this.http.get<any>(`${baseUrl}/${idfactura}/anulacion-baja-detalle`);
   }
@@ -569,4 +588,22 @@ export class FacturaService {
     return this.http.get<any[]>(`${baseUrl}/set_multas?idfactura=${idfactura}`)
 
   }
+}
+export interface ResumenPendientesCuenta {
+  cuenta: number;
+  facturasConsumo: number;
+  capitalConsumo: number;
+  interesConsumo: number;
+  valorConsumo: number;
+  facturasServicios: number;
+  capitalServicios: number;
+  interesServicios: number;
+  valorServicios: number;
+  facturasConvenios: number;
+  capitalConvenios: number;
+  interesConvenios: number;
+  valorConvenios: number;
+  totalFacturasPendientes: number;
+  totalIntereses: number;
+  totalPendiente: number;
 }

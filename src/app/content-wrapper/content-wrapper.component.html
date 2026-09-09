@@ -45,8 +45,10 @@
                            </div>
                            <div class="text-center">
                               <button class="btn btn-success btn-sm mx-1 mt-1" (click)="login()"
-                                 [disabled]="kont >= 4 || !formLogin.valid ">
-                                 <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                                 [disabled]="kont >= 4 || !formLogin.valid || iniciandoSesion">
+                                 <i [class.fa-check-circle]="!iniciandoSesion" [class.fa-spinner]="iniciandoSesion"
+                                    [class.fa-spin]="iniciandoSesion" class="fa"></i>&nbsp;
+                                 {{ iniciandoSesion ? 'Validando permisos...' : 'Aceptar' }}</button>
                            </div>
                         </form>
                         <div class="text-center" *ngIf="msg">

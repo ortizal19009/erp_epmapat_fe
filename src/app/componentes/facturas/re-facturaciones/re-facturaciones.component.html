@@ -35,7 +35,7 @@
         </button>
 
         <div class="dropdown-menu dropdown-menu-right shadow-sm">
-          <button class="dropdown-item" type="button" (click)="irNueva()">
+          <button class="dropdown-item" type="button" (click)="irNueva()" [disabled]="!canCrearEmisionIndividual()">
             <i class="bi bi-plus-circle mr-2 text-success"></i> Nuevo
           </button>
 
@@ -334,7 +334,7 @@
               <hr class="my-3" />
 
               <div class="text-center">
-                <button class="btn btn-success btn-sm px-4 mr-2" (click)="guardarRefacturacion()" [disabled]="!puedeGuardar">
+                <button class="btn btn-success btn-sm px-4 mr-2" (click)="guardarRefacturacion()" [disabled]="!puedeGuardar || !canCrearEmisionIndividual()">
                   <i class="fa fa-check-circle mr-1"></i> Guardar
                 </button>
 

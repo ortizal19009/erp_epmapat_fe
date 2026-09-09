@@ -70,7 +70,7 @@ export class RutasComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'rutas');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'rutas');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/rutas', coloresJSON);
       this.colocaColor(datos);

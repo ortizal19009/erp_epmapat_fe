@@ -40,9 +40,11 @@
          </a>
          <div class="dropdown-menu navbar-dark" [ngClass]="{'fondo1-background': fondo1 == 1}"
             aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" *ngFor="let m of modules; let i = index" [ngClass]="{'disabled' : !m.enabled}" href="#"
-               (click)="selectModule(m, i)"> <i
-                  class="bi-file-earmark-binary nav-icon"></i>&nbsp;&nbsp;{{m.descripcion}}</a>
+            <ng-container *ngFor="let m of modules; let i = index">
+               <a *ngIf="canAccessModule(m, i)" class="dropdown-item" href="#"
+                  (click)="selectModule($event, m, i)"> <i
+                     class="bi-file-earmark-binary nav-icon"></i>&nbsp;&nbsp;{{m.descripcion}}</a>
+            </ng-container>
          </div>
       </li>
    </ul>

@@ -78,7 +78,7 @@ export class AddNtacreditoComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'add-ntacredito');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'add-ntacredito');
       sessionStorage.setItem('/add-ntacredito', JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) {

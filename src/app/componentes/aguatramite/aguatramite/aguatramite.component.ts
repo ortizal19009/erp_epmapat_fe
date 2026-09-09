@@ -12,6 +12,8 @@ import { LoadingService } from 'src/app/servicios/loading.service';
 import { TipoTramiteService } from 'src/app/servicios/tipo-tramite.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 
 @Component({
    selector: 'app-aguatramite',
@@ -54,16 +56,22 @@ export class AguatramiteComponent implements OnInit {
    private pdfObjectUrl: string | null = null;
    private clientesCache = new Map<number, Clientes>();
    private cuentaTramiteCache = new Map<number, string>();
+   rolepermission = 1;
+   readonly ventana = 'aguatramite';
 
    constructor(private router: Router, private fb: FormBuilder, private aguatramiService: AguatramiteService,
       private tipotramiService: TipoTramiteService, private tramitenuevoService: TramiteNuevoService,
       private s_genpdf: TramitesAguaService,
       private sanitizer: DomSanitizer,
-      private s_loading: LoadingService,
-      private clientesService: ClientesService
+       private s_loading: LoadingService,
+       private clientesService: ClientesService,
+       private authService: AutorizaService,
+       private coloresService: ColoresService,
    ) { }
 
    ngOnInit(): void {
+      sessionStorage.setItem('ventana', `/${this.ventana}`);
+      void this.loadRolePermission();
       this.restaurarOrdenGuardado();
       this.f_Tipotramite = this.fb.group({
          idtitpotramite: 1,
@@ -396,10 +404,12 @@ export class AguatramiteComponent implements OnInit {
    }
 
    addAguaTramite() {
+      if (this.bloquearEdicion()) return;
       this.router.navigate(['forms-aguatramite', +this.f_Tipotramite.value.idtitpotramite!,]);
    }
 
    modificarAguaTramite(aguatramite: Aguatramite) {
+      if (this.bloquearEdicion()) return;
       localStorage.setItem('idaguatramite', aguatramite.idaguatramite.toString());
       this.router.navigate(['/modificar-aguatramite']);
    }
@@ -438,7 +448,29 @@ export class AguatramiteComponent implements OnInit {
    }
 
    eliminarAguaTramite(idaguatramite: number) {
+      if (this.bloquearEdicion()) return;
       localStorage.setItem('idAguaTramiteToDelete', idaguatramite.toString());
+   }
+
+   private async loadRolePermission(): Promise<void> {
+      if (this.authService.idusuario === 1) {
+         this.rolepermission = 3;
+         return;
+      }
+      this.rolepermission = await this.coloresService.getRolePermission(
+         this.authService.idusuario,
+         this.ventana,
+      );
+   }
+
+   canEditarAguaTramite(): boolean {
+      return this.authService.idusuario === 1 || this.rolepermission >= 2;
+   }
+
+   private bloquearEdicion(): boolean {
+      if (this.canEditarAguaTramite()) return false;
+      this.authService.swal('warning', 'Tu nivel de acceso es solo lectura. No tienes permiso para crear o modificar trámites de agua.');
+      return true;
    }
 
    infoNuevoTramite(aguatramite: any) {

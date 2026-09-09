@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/usuarios`;
-const authUrl = `${apiUrl}/api/auth`;
+const authUrl = baseUrl;
 
 @Injectable({
   providedIn: 'root',
@@ -53,6 +53,13 @@ export class UsuarioService {
     return this.http.put(baseUrl + '/' + idusuario, usuario);
   }
 
+  updatePerfil(idusuario: number, perfil: string, usumodi?: number): Observable<any> {
+    return this.http.put(`${baseUrl}/${idusuario}/perfil`, {
+      perfil,
+      usumodi: usumodi ?? null,
+    });
+  }
+
   linkPersonal(idusuario: number, idpersonal: number, usumodi?: number) {
     return this.http.patch(`${baseUrl}/${idusuario}/personal`, { idpersonal, usumodi: usumodi || null });
   }
@@ -78,6 +85,10 @@ getByCargos(ids: number[]): Observable<any> {
 
 loginAuth(payload: { username: string; password: string; platform?: string }) {
   return this.http.post<any>(`${authUrl}/login`, payload);
+}
+
+validateWebSession() {
+  return this.http.get<{ userId: number }>(`${authUrl}/session`);
 }
 
 }

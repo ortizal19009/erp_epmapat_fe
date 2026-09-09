@@ -1,0 +1,62 @@
+<div class="content mt-1 pt-1 px-2">
+  <div class="container-fluid">
+    <div class="row px-1 py-1 cabecera border sombra align-items-center">
+      <h4 class="ml-2 mb-0 font-weight-bold">Institucion financiera</h4>
+      <button type="button" class="btn btn-sm btn-outline-light ml-auto mr-2" (click)="regresar()">
+        Regresar
+      </button>
+    </div>
+
+    <div class="row justify-content-center mt-3" *ngIf="loading">
+      <span class="text-muted">Cargando informacion...</span>
+    </div>
+
+    <div class="row justify-content-center mt-3" *ngIf="ifinan">
+      <div class="col-lg-9">
+        <div class="card sombra detalle">
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4">Codigo</dt>
+              <dd class="col-sm-8">{{ ifinan.codifinan }}</dd>
+              <dt class="col-sm-4">Nombre</dt>
+              <dd class="col-sm-8">{{ ifinan.nomifinan }}</dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="card sombra mt-3">
+          <div class="card-header detalle font-weight-bold">
+            Beneficiarios vinculados ({{ beneficiarios.length }})
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="cabecera">
+                <tr>
+                  <th>Codigo</th>
+                  <th>Beneficiario</th>
+                  <th>Identificacion</th>
+                  <th>Cuenta bancaria</th>
+                  <th>Telefono</th>
+                  <th>Correo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let beneficiario of beneficiarios">
+                  <td>{{ beneficiario.codben }}</td>
+                  <td>{{ beneficiario.nomben }}</td>
+                  <td>{{ beneficiario.rucben || beneficiario.ciben || '-' }}</td>
+                  <td>{{ beneficiario.cuebanben || '-' }}</td>
+                  <td>{{ beneficiario.tlfben || '-' }}</td>
+                  <td>{{ beneficiario.mailben || '-' }}</td>
+                </tr>
+                <tr *ngIf="beneficiarios.length === 0">
+                  <td colspan="6" class="text-center text-muted py-3">No hay beneficiarios vinculados.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -126,8 +126,8 @@
           <div class="text-center small text-muted mb-2" *ngIf="_cliente?.direccion">
             <i class="bi bi-geo-alt mr-1"></i>{{ _cliente?.direccion }}
           </div>
-          <div *ngIf="mensajeNotaCredito" class="alert mb-0 py-2 text-center rounded-pill filter-chip"
-            [ngClass]="tieneNotaCredito ? 'alert-info' : 'alert-light border'">
+          <div *ngIf="mensajeNotaCredito" class="alert mb-0 text-center filter-chip nota-credito-alert"
+            [ngClass]="tieneNotaCredito ? 'nota-credito-alert--active' : 'alert-light border'">
             <small class="font-weight-bold">{{ mensajeNotaCredito }}</small>
 
           </div>
@@ -186,10 +186,10 @@
                   <td class="text-center">{{factura.cuenta || factura.idabonado}}</td>
                   <td class="truncate-text" [attr.title]="factura.nombre">{{factura.nombre}}</td>
                   <td>{{factura.idfactura}}</td>
-                  <td class="truncate-text" [attr.title]="factura.direccionubicacion || factura.direccion">
+                  <td class="direccion-cell" [attr.title]="factura.direccionubicacion || factura.direccion">
                     {{factura.direccionubicacion || factura.direccion}}
                   </td>
-                  <td class="description text-capitalize">{{ formatPeriodoFactura(factura) }}</td>
+                  <td class="description text-capitalize fecha-cell">{{ formatPeriodoFactura(factura) }}</td>
                   <td class="text-left description">{{factura.idmodulo}}</td>
                   <td class="text-right">
                     {{ sumaIndividual(factura.total, factura.interes, factura.iva == null ? 0 : factura.iva) }}
@@ -371,8 +371,8 @@
         <div class="modal-body col-md-12">
           <form [formGroup]="f_cobrar">
             <div class="col-md-12">
-              <div *ngIf="mensajeNotaCredito" class="alert py-2 mb-2 text-center"
-                [ngClass]="tieneNotaCredito ? 'alert-info' : 'alert-light border'">
+              <div *ngIf="mensajeNotaCredito" class="alert mb-2 text-center nota-credito-alert"
+                [ngClass]="tieneNotaCredito ? 'nota-credito-alert--active' : 'alert-light border'">
                 <small>{{ mensajeNotaCredito }}</small>
               </div>
               <div class="input-group input-group-sm">

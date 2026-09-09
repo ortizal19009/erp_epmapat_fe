@@ -29,7 +29,6 @@ import { ColorService } from 'src/app/servicios/administracion/color.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { FormacobroService } from 'src/app/servicios/formacobro.service';
-import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { CajaService } from 'src/app/servicios/caja.service';
@@ -134,7 +133,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   filtro: string = ''; // para el modal de clientes
   private cajaEstadoEventSource: EventSource | null = null;
   private streamCajaActivo = true;
-  private streamCajaReconnectTimeout: number | null = null;
   constructor(
     public fb: FormBuilder,
     public fb1: FormBuilder,
@@ -142,7 +140,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     private clieService: ClientesService,
     private facService: FacturaService,
     private rubxfacService: RubroxfacService,
-    private lecService: LecturasService,
     private coloService: ColorService,
     private fcobroService: FormacobroService,
     private authService: AutorizaService,
@@ -244,7 +241,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.streamCajaActivo = false;
-    this.cancelarReconexionStreamCaja();
     this.cerrarStreamCaja();
   }
 
@@ -368,12 +364,8 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     }) as EventListener);
 
     this.cajaEstadoEventSource.onerror = () => {
-      this.cerrarStreamCaja();
-      if (!this.streamCajaActivo) {
-        return;
-      }
-      this.cancelarReconexionStreamCaja();
-      this.streamCajaReconnectTimeout = window.setTimeout(() => this.iniciarStreamCaja(), 3000);
+      // EventSource reintenta automaticamente sin cerrar el canal actual.
+      // Cerrarlo aqui generaba un segundo ciclo de reconexion y reseteaba el socket.
     };
   }
 
@@ -381,13 +373,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     if (this.cajaEstadoEventSource) {
       this.cajaEstadoEventSource.close();
       this.cajaEstadoEventSource = null;
-    }
-  }
-
-  private cancelarReconexionStreamCaja(): void {
-    if (this.streamCajaReconnectTimeout !== null) {
-      window.clearTimeout(this.streamCajaReconnectTimeout);
-      this.streamCajaReconnectTimeout = null;
     }
   }
 
@@ -809,26 +794,43 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // La consulta de pendientes ya trae cuenta, direccion, cliente y fecha. Se conserva
+    // el respaldo para respuestas antiguas, agrupado por cuenta para evitar el patron N+1.
+    const abonadosPendientes = new Map<number, Promise<Abonados | null>>();
+    const clientesPendientes = new Map<number, Promise<Clientes | null>>();
+
+    const obtenerAbonado = (idAbonado: number): Promise<Abonados | null> => {
+      if (!abonadosPendientes.has(idAbonado)) {
+        abonadosPendientes.set(idAbonado, this.getAbonado(idAbonado));
+      }
+      return abonadosPendientes.get(idAbonado)!;
+    };
+    const obtenerCliente = (idCliente: number): Promise<Clientes | null> => {
+      if (!clientesPendientes.has(idCliente)) {
+        clientesPendientes.set(idCliente, this.getCliente(idCliente));
+      }
+      return clientesPendientes.get(idCliente)!;
+    };
+
     await Promise.all(
       sincobrar.map(async (item: any) => {
-        const idAbonado = Number(item.idAbonado ?? item.idabonado ?? 0);
+        const idAbonado = Number(item.idAbonado ?? item.idabonado ?? item.cuenta ?? 0);
         const idCliente = Number(item.idCliente ?? item.idcliente ?? 0);
 
         item.idAbonado = idAbonado;
         item.idCliente = idCliente;
         item.interes = this.normalizarValorMonetario(item.interes);
+        item.direccion = item.direccion ?? item.direccionubicacion ?? '';
+        item.fechaemision = item.fechaemision ?? item.feccrea;
         if (idAbonado > 0 && item.idmodulo !== 27) {
-          const abonado: Abonados | null = await this.getAbonado(idAbonado);
-          item.direccion = abonado?.direccionubicacion ?? item.direccion ?? '';
-          item.responsablePago = abonado?.idresponsable?.nombre ?? item.responsablePago ?? '';
-          const emision: any = await this.getEmision(item.idfactura);
-          item.fechaemision = emision ?? item.fechaemision ?? item.feccrea;
+          const abonado: Abonados | null = await obtenerAbonado(idAbonado);
+          item.direccion = item.direccion || abonado?.direccionubicacion || '';
+          item.responsablePago = abonado?.idresponsable?.nombre ?? item.responsablePago ?? item.nombre ?? '';
           item.iva = Number(item.iva ?? 0);
         } else {
-          const cliente: Clientes | null = idCliente > 0 ? await this.getCliente(idCliente) : null;
-          item.direccion = cliente?.direccion ?? item.direccion ?? '';
-          item.responsablePago = cliente?.nombre ?? item.responsablePago ?? '';
-          item.fechaemision = item.feccrea;
+          const cliente: Clientes | null = !item.nombre && idCliente > 0 ? await obtenerCliente(idCliente) : null;
+          item.direccion = item.direccion || cliente?.direccion || '';
+          item.responsablePago = item.responsablePago ?? item.nombre ?? cliente?.nombre ?? '';
           item.iva = Number(item.iva ?? 0);
         }
         item.total = Number(item.total ?? 0);
@@ -889,10 +891,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       return null as any;
     }
     return this.clieService.getListaById(idcliente).toPromise();
-  }
-
-  async getEmision(idfactura: number) {
-    return this.lecService.findDateByIdfactura(idfactura).toPromise();
   }
 
   reset() {

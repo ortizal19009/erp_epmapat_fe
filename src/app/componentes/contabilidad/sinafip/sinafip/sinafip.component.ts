@@ -34,7 +34,8 @@ export class SinafipComponent implements OnInit {
       private s_transaci: TransaciService,
       private s_ejecucion: EjecucionService,
       // private fs: FileSaverService,
-      private s_cuentas: CuentasService
+      private s_cuentas: CuentasService,
+      private authService: AutorizaService
    ) { }
 
    ngOnInit(): void {
@@ -59,7 +60,7 @@ export class SinafipComponent implements OnInit {
 
    async buscaColor() {
       try {
-         const datos = await this.coloresService.setcolor(1, 'sinafip');
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'sinafip');
          const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/sinafip', coloresJSON);
          this.colocaColor(datos);

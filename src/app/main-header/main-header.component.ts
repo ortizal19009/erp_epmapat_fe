@@ -5,6 +5,7 @@ import { AutorizaService } from '../compartida/autoriza.service';
 import { UsuarioService } from '../servicios/administracion/usuario.service';
 import { Router } from '@angular/router';
 import { ErpmodulosService } from '../servicios/administracion/erpmodulos.service';
+import { PerfilAccesoService } from '../servicios/administracion/perfil-acceso.service';
 
 @Component({
   selector: 'app-main-header',
@@ -26,7 +27,8 @@ export class MainHeaderComponent implements OnInit {
     public authService: AutorizaService,
     private usuService: UsuarioService,
     private router: Router,
-    private s_erpmodulos: ErpmodulosService
+    private s_erpmodulos: ErpmodulosService,
+    private perfilAcceso: PerfilAccesoService,
   ) {}
 
   ngOnInit(): void {
@@ -53,6 +55,13 @@ export class MainHeaderComponent implements OnInit {
 
     // console.log('Esta en ngOnInit() de header')
     this.authService.valsession();
+    this.perfilAcceso.modules$.subscribe((modules) => {
+      this.modules = modules;
+      this.syncModuleName();
+    });
+    if (this.authService.sessionlog) {
+      this.perfilAcceso.loadForCurrentUser().subscribe();
+    }
     this.syncModuleName();
 
     this.formDefinir = this.fb.group({
@@ -95,7 +104,14 @@ export class MainHeaderComponent implements OnInit {
     }
   }
 
-  selectModule(module: any, index: number): void {
+  canAccessModule(module: any, index: number): boolean {
+    const moduleId = this.getModuleId(module, index);
+    return module?.enabled !== false && this.perfilAcceso.hasModule(moduleId);
+  }
+
+  selectModule(event: Event, module: any, index: number): void {
+    event.preventDefault();
+    if (!this.canAccessModule(module, index)) return;
     const moduleId = this.getModuleId(module, index);
     this.authService.selecModulo(moduleId);
     if (module?.descripcion) {

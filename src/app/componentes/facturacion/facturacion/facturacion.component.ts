@@ -6,6 +6,8 @@ import autoTable from 'jspdf-autotable';
 import { FacturacionCuotasPendientes } from 'src/app/interfaces/facturacion/facturacion-cuotas-pendientes';
 import { Facturacion } from 'src/app/modelos/facturacion.model';
 import { FacturacionService } from 'src/app/servicios/facturacion.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 import * as ExcelJS from 'exceljs';
 
 @Component({
@@ -33,14 +35,21 @@ export class FacturacionComponent implements OnInit {
   readonly pageSizeOptions = [10, 25, 50, 100];
   sortColumn = 'idfacturacion';
   sortDirection: 'asc' | 'desc' = 'desc';
+  rolepermission = 1;
+  readonly ventana = 'facturacion';
 
   constructor(
     private factuServicio: FacturacionService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private coloresService: ColoresService,
+    private authService: AutorizaService,
   ) { }
 
   ngOnInit(): void {
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    void this.loadRolePermission();
+
     this.formBuscar = this.fb.group({
       desde: '',
       hasta: '',
@@ -169,10 +178,12 @@ export class FacturacionComponent implements OnInit {
   }
 
   public modificar(idfacturacion: number) {
+    if (this.bloquearEdicion()) return;
     this.router.navigate(['modifacturacion', idfacturacion]);
   }
 
   eliminar(idfacturacion: number, numero: number) {
+    if (this.bloquearEdicion()) return;
     localStorage.setItem('ifacturacionToDelete', idfacturacion.toString());
     this.numero = numero;
     this.rtn = 0;
@@ -182,6 +193,8 @@ export class FacturacionComponent implements OnInit {
   }
 
   confirmaEliminar() {
+    if (this.bloquearEdicion()) return;
+
     let idc = localStorage.getItem('ifacturacionToDelete');
     if (idc != null) {
       this.factuServicio.delete(+idc!).subscribe({
@@ -200,7 +213,34 @@ export class FacturacionComponent implements OnInit {
   }
 
   public nuevo() {
+    if (this.bloquearEdicion()) return;
     this.router.navigate(['/add-facturacion']);
+  }
+
+  private async loadRolePermission(): Promise<void> {
+    if (this.authService.idusuario === 1) {
+      this.rolepermission = 3;
+      return;
+    }
+
+    this.rolepermission = await this.coloresService.getRolePermission(
+      this.authService.idusuario,
+      this.ventana,
+    );
+  }
+
+  canEditarFacturacion(): boolean {
+    return this.authService.idusuario === 1 || this.rolepermission >= 2;
+  }
+
+  private bloquearEdicion(): boolean {
+    if (this.canEditarFacturacion()) return false;
+
+    this.authService.swal(
+      'warning',
+      'Tu nivel de acceso es solo lectura. No tienes permiso para crear o modificar facturaciones.',
+    );
+    return true;
   }
 
   total() {

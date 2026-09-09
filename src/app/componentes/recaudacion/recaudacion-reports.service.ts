@@ -188,7 +188,7 @@ export class RecaudacionReportsService {
         let rubros: any = [];
         rubrosActivos.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
-            this.iva += item.valorunitario * item.cantidad * 0.15;
+            this.iva += this.redondearValorRubro(item) * 0.15;
           }
           if (
             item.idrubro_rubros.idrubro != 5 &&
@@ -199,7 +199,7 @@ export class RecaudacionReportsService {
               item.idrubro_rubros.idrubro === 6
             ) {
             } else {
-              this.total += +item.valorunitario! * item.cantidad;
+              this.total += this.redondearValorRubro(item);
               rubros.push([
                 item.idrubro_rubros.descripcion,
                 item.cantidad.toFixed(0),
@@ -346,7 +346,7 @@ export class RecaudacionReportsService {
         let rubros: any = [];
         rubrosActivos.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
-            this.iva += item.valorunitario * item.cantidad * 0.15;
+            this.iva += this.redondearValorRubro(item) * 0.15;
           }
           if (
             item.idrubro_rubros.idrubro != 5 &&
@@ -357,7 +357,7 @@ export class RecaudacionReportsService {
               item.idrubro_rubros.idrubro === 6
             ) {
             } else {
-              this.total += +item.valorunitario! * item.cantidad;
+              this.total += this.redondearValorRubro(item);
               rubros.push([
                 item.idrubro_rubros.descripcion,
                 item.cantidad.toFixed(0),
@@ -529,13 +529,13 @@ export class RecaudacionReportsService {
               let rubros: any = [];
               rubrosActivos.forEach((item: any) => {
                 if (item.idrubro_rubros.swiva === true) {
-                  this.iva += item.valorunitario * item.cantidad * 0.15;
+                  this.iva += this.redondearValorRubro(item) * 0.15;
                 }
                 if (item.idrubro_rubros.idrubro != 5 && item.idrubro_rubros.idrubro != 165) {
                   if (
                     !(item.idfactura_facturas.swcondonar === true && item.idrubro_rubros.idrubro === 6)
                   ) {
-                    this.total += +item.valorunitario! * item.cantidad;
+                    this.total += this.redondearValorRubro(item);
                     rubros.push([
                       item.idrubro_rubros.descripcion,
                       item.cantidad.toFixed(0),
@@ -707,5 +707,10 @@ export class RecaudacionReportsService {
   async getEmisionByid(idemision: number) {
     const emision = this.s_emision.getByIdemision(idemision).toPromise();
     return emision;
+  }
+
+  private redondearValorRubro(item: any): number {
+    const valor = Number(item?.valorunitario || 0) * Number(item?.cantidad || 0);
+    return Math.round((valor + Number.EPSILON) * 100) / 100;
   }
 }

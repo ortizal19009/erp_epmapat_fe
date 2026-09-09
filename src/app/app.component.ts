@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AutorizaService } from './compartida/autoriza.service';
+import { ReadOnlyUiService } from './compartida/read-only-ui.service';
 
 @Component({
   selector: 'app-root',
@@ -8,12 +9,17 @@ import { AutorizaService } from './compartida/autoriza.service';
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
 
   title = 'EpmapaT';
   isLoginSuccessful: Boolean = false;
 
-  constructor (private router:Router, public authService: AutorizaService ){ 
+  constructor (private router:Router, public authService: AutorizaService,
+    private readOnlyUiService: ReadOnlyUiService ){ 
+  }
+
+  ngOnInit(): void {
+    this.readOnlyUiService.start();
   }
 
 }

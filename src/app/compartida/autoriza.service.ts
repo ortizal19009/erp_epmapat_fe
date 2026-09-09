@@ -23,7 +23,6 @@ export class AutorizaService implements OnDestroy, CanActivate {
   sessionlog: boolean;
   idusuario: number;
   alias: string;
-  priusu: string;
   perfil: string;
   msgval: boolean = true;
   modules: any;
@@ -61,7 +60,6 @@ export class AutorizaService implements OnDestroy, CanActivate {
         retrievedValues?.object?.moduloActual ??
         retrievedValues?.moduActual ??
         this.modulo;
-      this.priusu = retrievedValues.priusu;
       this.modules =
         retrievedValues.modules ??
         JSON.parse(sessionStorage.getItem('modulos') || '[]');
@@ -77,12 +75,41 @@ export class AutorizaService implements OnDestroy, CanActivate {
     localStorage.removeItem('sessionlog');
     sessionStorage.removeItem('abc');
     sessionStorage.removeItem('modulos');
+    sessionStorage.removeItem('webJwt');
   }
 
   public enabModulos(): void {
     if (!this.sessionlog) {
       this.router.navigate(['/inicio']);
     }
+
+    const source = Array.isArray(this.modules)
+      ? this.modules
+      : JSON.parse(sessionStorage.getItem('modulos') || '[]');
+    const activos = source.filter((modulo: any) =>
+      typeof modulo === 'string' ? true : modulo?.enabled !== false
+    );
+    const getId = (modulo: any, index: number) => Number(
+      modulo?.iderpmodulo ?? modulo?.idmodulo ?? modulo?.modulo ?? index + 1
+    );
+
+    this.enabled = Array(7).fill(false);
+    activos.forEach((modulo: any, index: number) => {
+      const id = getId(modulo, index);
+      if (id >= 1 && id <= this.enabled.length) this.enabled[id - 1] = true;
+    });
+    this.colorenabled = true;
+
+    const seleccionado = activos.find((modulo: any, index: number) => getId(modulo, index) === this.moduActual)
+      || activos[0];
+    const nuevoId = seleccionado ? getId(seleccionado, activos.indexOf(seleccionado)) : 0;
+    this.moduActual = nuevoId;
+    this.modulo = nuevoId;
+    this.modulos = activos.map((modulo: any) => typeof modulo === 'string' ? modulo : modulo.descripcion);
+    this.nomodulo = seleccionado
+      ? (typeof seleccionado === 'string' ? seleccionado : seleccionado.descripcion)
+      : '';
+    return;
 
     if (this.idusuario == 1) this.enabled = [true, true, false, false, true, true, true];
     else this.enabled = [true, false, false, false, false, false, true];
@@ -108,8 +135,11 @@ export class AutorizaService implements OnDestroy, CanActivate {
     this.modulo = opcion;
     this.moduActual = opcion;
     const values = JSON.parse(atob(sessionStorage.getItem('abc')!));
+    values.object = values.object || {};
     values.object.modulo = opcion;
     values.object.moduActual = opcion;
+    values.modulo = opcion;
+    values.moduActual = opcion;
 
     sessionStorage.setItem('abc', btoa(JSON.stringify(values)));
   }
@@ -124,7 +154,6 @@ export class AutorizaService implements OnDestroy, CanActivate {
     this.moduActual = 0;
     this.idusuario = 0;
     this.alias = '';
-    this.priusu = '';
     this.modules = null;
     this.router.navigate(['/inicio']);
   }

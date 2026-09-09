@@ -32,6 +32,7 @@ export class RubrosComponent implements OnInit {
       private fb: FormBuilder, private moduService: ModulosService, private printService: PrintService) { }
 
    ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/rubros');
       let modulo: Modulos = new Modulos();
       this.buscarForm = this.fb.group({ idmodulo_modulos: modulo });
 

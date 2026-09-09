@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import jsPDF from 'jspdf';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
@@ -53,7 +54,8 @@ export class RemisionComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private s_loader: LoadingService,
     private s_facxremi: FacxremiService,
-    private s_remisionPdf: RemisionReportsService
+    private s_remisionPdf: RemisionReportsService,
+    private authService: AutorizaService
   ) { }
 
   ngOnInit(): void {
@@ -92,7 +94,7 @@ export class RemisionComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'cv-facturas');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/cv-facturas', coloresJSON);
       this.colocaColor(datos);

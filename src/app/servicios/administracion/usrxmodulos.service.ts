@@ -20,7 +20,7 @@ export class UsrxmodulosService {
   }
 
   getAccessProfile(idusuario: number, platform: string) {
-    return this.http.get<any[]>(`${apiUrl}/access/profile?idusuario=${idusuario}&platform=${platform}`);
+    return this.http.get<any[]>(`${baseUrl}/access?idusuario=${idusuario}&plataform=${platform}`);
   }
 
   saveAccessSeccion(payload: { idusuario: number; iderpseccion: number; enabled: boolean }) {

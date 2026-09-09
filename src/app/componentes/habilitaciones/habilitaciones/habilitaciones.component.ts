@@ -86,7 +86,7 @@ export class HabilitacionesComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'habilitaciones');
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'habilitaciones');
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/habilitaciones', coloresJSON);
       this.colocaColor(datos);
