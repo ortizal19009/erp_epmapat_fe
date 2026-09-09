@@ -137,19 +137,19 @@
             <tr *ngFor="let it of _emisionindividual | filter:filterimp; let i = index">
               <td class="text-center font-weight-bold">{{ i + 1 }}</td>
               <td class="text-center">
-                <span class="badge badge-secondary">{{ it.idemision.emision }}</span>
+                <span class="badge badge-secondary">{{ it.emision }}</span>
               </td>
               <td class="text-center">
                 <span class="badge badge-light border text-dark">
-                  {{ it?.idlecturanueva?.idabonado_abonados?.idabonado || '-' }}
+                  {{ it?.cuenta || '-' }}
                 </span>
               </td>
-              <td>{{ it?.idlecturanueva?.idabonado_abonados?.idresponsable?.nombre || '-' }}</td>
-              <td>{{ it?.idlecturanueva?.idabonado_abonados?.idresponsable?.cedula || '-' }}</td>
-              <td class="text-right">{{ it?.idlecturaanterior?.idlectura || '-' }}</td>
-              <td class="text-right">{{ it?.idlecturanueva?.idlectura || '-' }}</td>
-              <td class="text-right">{{ it?.idlecturaanterior?.idfactura || '-' }}</td>
-              <td class="text-right">{{ it?.idlecturanueva?.idfactura || '-' }}</td>
+              <td>{{ it?.nombre || '-' }}</td>
+              <td>{{ it?.cedula || '-' }}</td>
+              <td class="text-right">{{ it?.idlecturaanterior || '-' }}</td>
+              <td class="text-right">{{ it?.idlecturanueva || '-' }}</td>
+              <td class="text-right">{{ it?.idfacturaanterior || '-' }}</td>
+              <td class="text-right">{{ it?.idfacturanueva || '-' }}</td>
               <td class="text-center">
                 <button class="btn btn-sm btn-outline-danger" title="Imprimir" (click)="imprimirItem(it)">
                   <i class="bi bi-printer"></i>

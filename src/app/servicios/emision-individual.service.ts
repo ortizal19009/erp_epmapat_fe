@@ -18,6 +18,12 @@ export class EmisionIndividualService {
       `${baseUrl}/idemision?idemision=${idemision}`
     );
   }
+  getListadoByIdEmision(idemision: number) {
+    return this.http.get<any[]>(`${baseUrl}/idemision/listado?idemision=${idemision}`);
+  }
+  getDetalle(idemisionindividual: number) {
+    return this.http.get<EmisionIndividual>(`${baseUrl}/${idemisionindividual}`);
+  }
   getLecturasNuevas(idemision: number) {
     return this.http.get<any>(`${baseUrl}/nuevas?idemision=${idemision}`);
   }

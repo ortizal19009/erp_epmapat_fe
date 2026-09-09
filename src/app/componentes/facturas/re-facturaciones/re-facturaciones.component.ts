@@ -313,7 +313,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
   getEmisionIndividualByIdEmision(idemision: number): void {
     this.cargando = true;
-    this.s_emisionindividual.getByIdEmision(idemision).subscribe({
+    this.s_emisionindividual.getListadoByIdEmision(idemision).subscribe({
       next: (datos: any[]) => {
         this._emisionindividual = (datos || []).filter((item) => !!item);
       },
@@ -481,6 +481,16 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   // imprimir
   // =======================
   async imprimirItem(emisionIndividual: any) {
+    try {
+      emisionIndividual = await firstValueFrom(
+        this.s_emisionindividual.getDetalle(emisionIndividual.idemisionindividual),
+      );
+    } catch (error) {
+      console.error('No se pudo cargar el detalle de la emisión individual', error);
+      this.authService.swal('error', 'No se pudo cargar el detalle para imprimir.');
+      return;
+    }
+
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
     let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
