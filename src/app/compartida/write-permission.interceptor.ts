@@ -76,7 +76,7 @@ export class WritePermissionInterceptor implements HttpInterceptor {
 
   private getActiveWindow(): string {
     // The current route is authoritative; sessionStorage can still contain the previous screen.
-    const route = this.router.url.split('?')[0].replace(/^#?\//, '').split('/')[0];
+    const route = this.router.url.split('?')[0].replace(/^#?\//, '');
     return this.resolveWindowAlias(route || sessionStorage.getItem('ventana') || '');
   }
 
@@ -93,6 +93,10 @@ export class WritePermissionInterceptor implements HttpInterceptor {
       'add-homologa': 'niifcuentas',
       'conciliaban': 'bancos',
       'info-liquida': 'beneficiarios',
+      'admin/access-control': 'admin-access-control',
+      'admin/catalogo-ventanas': 'admin-access-control',
+      'admin/correos': 'admin-correos',
+      'admin/mobile-apk': 'admin-mobile-apk',
     };
 
     return aliases[normalized] || this.stripAction(normalized);

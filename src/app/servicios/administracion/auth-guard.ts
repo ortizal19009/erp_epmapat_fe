@@ -33,13 +33,15 @@ export class AuthGuard implements CanActivate {
           this.router.navigate(['/home']);
           return of(false);
         }
-        return this.validarVentana(routePath);
+        return this.validarVentana(routePath, route.data?.['windowPermission']);
       })
     );
   }
 
-  private validarVentana(routePath: string) {
-    const ventana = this.resolveWindow(routePath);
+  private validarVentana(routePath: string, declaredWindow?: string) {
+    // Las rutas anidadas (por ejemplo admin/correos) no siempre coinciden con
+    // el identificador de la ventana (admin-correos). La metadata es la fuente oficial.
+    const ventana = String(declaredWindow || '').trim() || this.resolveWindow(routePath);
     if (!ventana) return of(true);
     const minimumLevel = this.isMutationRoute(routePath) ? 2 : 1;
     const allowed = this.perfilAcceso.hasWindowPermission(ventana, minimumLevel);
