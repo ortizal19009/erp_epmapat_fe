@@ -92,6 +92,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   _codigo: string;
   pdfView: boolean = true;
   facElectro: boolean = true;
+  generandoFacturaElectronica: boolean = false;
 
   swFE: boolean = false;
 
@@ -862,13 +863,30 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       },
     });
   }
-  expFacElectronica(idfactura: number) {
-    this.facService.getById(idfactura).subscribe({
-      next: (d_factura: any) => {
-        this._fecFacturaService.expDesdeAbonados(d_factura);
-        //this.swFactura = true
+  expFacElectronica(idfactura: number): void {
+    const facturaId = Number(idfactura);
+    if (!Number.isFinite(facturaId) || facturaId <= 0 || this.generandoFacturaElectronica) {
+      return;
+    }
+
+    this.generandoFacturaElectronica = true;
+    this.s_loading.showLoading();
+    // La creación se realiza exclusivamente en el ERP. No se debe llamar al
+    // servicio SRI externo desde esta pantalla, pues su cola procesa luego la factura creada.
+    this._fecFacturaService.asegurarFacturaElectronica(facturaId).subscribe({
+      next: (respuesta: any) => {
+        this.esFE = String(respuesta?.estado ?? respuesta?.fecFactura?.estado ?? this.esFE ?? '').toUpperCase();
+        this.swal('success', 'Factura electrónica generada correctamente. Quedará disponible para el proceso de envío.');
+        this.generandoFacturaElectronica = false;
+        this.s_loading.hideLoading();
       },
-      error: (e: any) => console.error(e),
+      error: (error: any) => {
+        const message = error?.error?.message || error?.error?.detalle || error?.error ||
+          'No fue posible generar la factura electrónica.';
+        this.swal('danger', typeof message === 'string' ? message : 'No fue posible generar la factura electrónica.');
+        this.generandoFacturaElectronica = false;
+        this.s_loading.hideLoading();
+      },
     });
   }
 

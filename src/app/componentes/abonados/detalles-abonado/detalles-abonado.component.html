@@ -848,9 +848,10 @@
         <button type="button" class="btn btn-outline-success btn-sm" (click)="cancelarFE()" data-dismiss="modal">
           <i class="fa fa-times-circle"></i> Cerrar</button>
         <button type="button" class="btn btn-success btn-sm"
-          [disabled]="!puedeGenerarFacturaElectronica()"
+          [disabled]="!puedeGenerarFacturaElectronica() || generandoFacturaElectronica"
           (click)="expFacElectronica(idfactura)" data-dismiss="modal">
-          <i class="bi bi-send"></i> Fac. Electronica</button>
+          <i class="bi" [ngClass]="generandoFacturaElectronica ? 'bi-arrow-repeat' : 'bi-send'"></i>
+          {{ generandoFacturaElectronica ? 'Generando...' : 'Fac. Electronica' }}</button>
 
       </div>
     </div>
