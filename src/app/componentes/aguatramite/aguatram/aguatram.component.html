@@ -62,11 +62,42 @@
             </div>
             <div class="row mt-3">
                <div class="col-sm text-center">
-                  <button class="btn btn-sm btn-success mx-1 mb-3" [disabled]="f_retiroMedidor.invalid || procesandoTramite"
+                  <button type="button" class="btn btn-sm btn-success mx-1 mb-3" [disabled]="f_retiroMedidor.invalid || procesandoTramite"
                      (click)="retiroMedidor()"><i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                  <button type="button" class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
                         class="fa fa-times-circle"></i>
                      Cancelar</button>
+               </div>
+            </div>
+         </form>
+      </div>
+      <div *ngIf="suspMedidor" class="ml-5 col-sm-11 detalle">
+         <form [formGroup]="f_suspensionMedidor">
+            <div class="row">
+               <div class="col-sm-12">
+                  <label class="col-sm-12">Motivo u observación de la suspensión
+                     <textarea rows="2" class="form-control form-control-sm" formControlName="observaciones"></textarea>
+                  </label>
+               </div>
+            </div>
+            <div class="form-group form-row col-sm-12">
+               <label class="font-weight-bold">Documento</label>
+               <select class="form-control form-control-sm col-sm-3" formControlName="iddocumento_documentos">
+                  <option *ngFor="let documentos of _documentos" [ngValue]="documentos.intdoc">
+                     {{ documentos.nomdoc }}
+                  </option>
+               </select>
+               <input class="form-control form-control-sm col-sm" formControlName="nrodocumento">
+            </div>
+            <div class="row mt-3">
+               <div class="col-sm text-center">
+                  <button type="button" class="btn btn-sm btn-success mx-1 mb-3"
+                     [disabled]="f_suspensionMedidor.invalid || procesandoTramite" (click)="suspenderMedidor()">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
                </div>
             </div>
          </form>
@@ -136,10 +167,10 @@
 
             <div class="row justify-content-center text-center mt-2">
                <div class="col-sm-6 detalle sombra border">
-                  <button class="btn btn-sm btn-outline-success mx-1 mb-2 mt-3"
+                  <button type="button" class="btn btn-sm btn-outline-success mx-1 mb-2 mt-3"
                      [disabled]="f_categoria.invalid || procesandoTramite" (click)="actualizarCategoria()"><i
                         class="fa fa-check-circle"></i>&nbsp;Aceptar</button>
-                  <button class="btn btn-sm btn-success mx-1 mb-2 mt-3" (click)="regresar()"><i
+                  <button type="button" class="btn btn-sm btn-success mx-1 mb-2 mt-3" (click)="regresar()"><i
                         class="fa fa-times-circle"></i>
                      Cancelar</button>
                </div>
@@ -212,11 +243,11 @@
 
             <div class="row justify-content-center text-center">
                <div class="col-sm-8 detalle">
-                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="confirmarCambioTitularidad()"
+                  <button type="button" class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="confirmarCambioTitularidad()"
                      [disabled]="f_camPropietario.invalid || procesandoTramite">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                   </button>
-                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                  <button type="button" class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
                         class="fa fa-times-circle"></i>
                      Cancelar</button>
                </div>
@@ -335,10 +366,10 @@
 
             <div class="row justify-content-center text-center">
                <div class="col-sm-8 detalle">
-                  <button class="btn btn-sm btn-outline-success mx-1 mb-3"
+                  <button type="button" class="btn btn-sm btn-outline-success mx-1 mb-3"
                      [disabled]="f_nMedidor.invalid || procesandoTramite" (click)="actualizarNuevoMedidor()"><i
                         class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                  <button type="button" class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
                         class="fa fa-times-circle"></i>
                      Cancelar</button>
                </div>

@@ -46,6 +46,7 @@ export class AguatramComponent implements OnInit {
    f_categoria!: FormGroup;
    f_nMedidor!: FormGroup;
    f_retiroMedidor!: FormGroup;
+   f_suspensionMedidor!: FormGroup;
    f_camPropietario!: FormGroup;
    f_camMedidor!: FormGroup;
    filterTerm!: string;
@@ -207,6 +208,11 @@ export class AguatramComponent implements OnInit {
          iddocumento_documentos: [null, Validators.required],
          nrodocumento: ['', Validators.required]
       });
+      this.f_suspensionMedidor = this.fb.group({
+         observaciones: ['', Validators.required],
+         iddocumento_documentos: [null, Validators.required],
+         nrodocumento: ['', Validators.required]
+      });
       this.f_camPropietario = this.fb.group({
          cliente: [null, Validators.required],
          observaciones: ['', Validators.required],
@@ -249,6 +255,7 @@ export class AguatramComponent implements OnInit {
             this.f_categoria.patchValue({ iddocumento_documentos: documentoPorDefecto });
             this.f_nMedidor.patchValue({ iddocumento_documentos: documentoPorDefecto });
             this.f_retiroMedidor.patchValue({ iddocumento_documentos: documentoPorDefecto });
+            this.f_suspensionMedidor.patchValue({ iddocumento_documentos: documentoPorDefecto });
             this.f_camPropietario.patchValue({ iddocumento_documentos: documentoPorDefecto });
          },
          error: (e: any) => console.error(e)
@@ -257,6 +264,7 @@ export class AguatramComponent implements OnInit {
 
    async retiroMedidor() {
       const abonado: Abonados = this.abonado;
+      if (!this.validarAbonadoSeleccionado()) return;
       if (abonado.estado === 1 || abonado.estado === 2) {
          const correos = await this.confirmarTramiteConCorreo(
             'Retiro de medidor',
@@ -265,14 +273,24 @@ export class AguatramComponent implements OnInit {
          );
          if (!correos) return;
 
-         abonado.estado = 3;
-         this.date = this.normalizarFechaLocal(this.f_retiroMedidor.value.fecmedidor);
-         this.observaciones = this.f_retiroMedidor.value.ubimedidor;
-         this.aguatramite.nrodocumento = this.f_retiroMedidor.value.nrodocumento;
-         this.aguatramite.iddocumento_documentos = +this.f_retiroMedidor.value.iddocumento_documentos!;
-         const tramite = await this.guardarAguaTramite(abonado, abonado.nromedidor);
-         await this.enviarCorreoComprobante(tramite, correos);
-         this.actualizarAbonado(abonado);
+         this.procesandoTramite = true;
+         this.s_loading.showLoading();
+         try {
+            abonado.estado = 3;
+            this.date = this.normalizarFechaLocal(this.f_retiroMedidor.value.fecmedidor);
+            this.observaciones = this.f_retiroMedidor.value.ubimedidor;
+            this.aguatramite.nrodocumento = this.f_retiroMedidor.value.nrodocumento;
+            this.aguatramite.iddocumento_documentos = +this.f_retiroMedidor.value.iddocumento_documentos!;
+            const tramite = await this.guardarAguaTramite(abonado, abonado.nromedidor);
+            await this.actualizarAbonado(abonado);
+            await this.enviarCorreoComprobante(tramite, correos);
+            this.regresar();
+         } catch (e) {
+            this.reportarErrorTramite(e);
+         } finally {
+            this.procesandoTramite = false;
+            this.s_loading.hideLoading();
+         }
       } else if (abonado.estado === 3) {
          alert('CUENTA TAPONADA');
       } else if (abonado.estado === 0) {
@@ -282,6 +300,12 @@ export class AguatramComponent implements OnInit {
 
    async suspenderMedidor() {
       const abonado: Abonados = this.abonado;
+      if (!this.validarAbonadoSeleccionado()) return;
+      if (this.f_suspensionMedidor.invalid) {
+         this.f_suspensionMedidor.markAllAsTouched();
+         this.swal('warning', 'Completa los datos de la suspensión');
+         return;
+      }
       if (abonado.estado === 3) {
          alert('ESTE MEDIDOR ESTA TAPONADO');
       } else {
@@ -292,24 +316,37 @@ export class AguatramComponent implements OnInit {
          );
          if (!correos) return;
 
-         abonado.estado = 2;
-         this.actualizarAbonado(abonado);
-         const tramite = await this.guardarAguaTramite(abonado, null);
-         await this.enviarCorreoComprobante(tramite, correos);
+         this.procesandoTramite = true;
+         this.s_loading.showLoading();
+         try {
+            abonado.estado = 2;
+            this.observaciones = this.f_suspensionMedidor.value.observaciones;
+            this.aguatramite.nrodocumento = this.f_suspensionMedidor.value.nrodocumento;
+            this.aguatramite.iddocumento_documentos = +this.f_suspensionMedidor.value.iddocumento_documentos!;
+            const tramite = await this.guardarAguaTramite(abonado, null);
+            await this.actualizarAbonado(abonado);
+            await this.enviarCorreoComprobante(tramite, correos);
+            this.regresar();
+         } catch (e) {
+            this.reportarErrorTramite(e);
+         } finally {
+            this.procesandoTramite = false;
+            this.s_loading.hideLoading();
+         }
       }
    }
 
-   actualizarAbonado(abonado: Abonados) {
+   private async actualizarAbonado(abonado: Abonados): Promise<void> {
       abonado.usumodi = this.authService.idusuario;
       abonado.fecmodi = this.obtenerFechaActualLocal();
       const observacion = this.observaciones || 'Trámite de agua';
-      this.s_abonados.updateAbonadoAuditoria(abonado, this.authService.idusuario, observacion, 'MODIFICACION').subscribe({
-         next: () => this.regresar(),
-         error: (e) => console.error(e),
-      });
+      await firstValueFrom(
+         this.s_abonados.updateAbonadoAuditoria(abonado, this.authService.idusuario, observacion, 'MODIFICACION')
+      );
    }
 
    async actualizarCategoria() {
+      if (!this.validarAbonadoSeleccionado()) return;
       if (this.f_categoria.invalid) {
          this.f_categoria.markAllAsTouched();
          this.swal('warning', 'Completa los datos del cambio de categoría');
@@ -322,15 +359,25 @@ export class AguatramComponent implements OnInit {
       );
       if (!correos) return;
 
-      this.abonado.idcategoria_categorias = this.f_categoria.value.idcategoria_categorias;
-      this.abonado.adultomayor = this.f_categoria.value.adultomayor;
-      this.abonado.municipio = this.f_categoria.value.municipio;
-      this.aguatramite.nrodocumento = this.f_categoria.value.nrodocumento;
-      this.aguatramite.iddocumento_documentos = +this.f_categoria.value.iddocumento_documentos!;
-      this.observaciones = this.f_categoria.value.observaciones;
-      this.actualizarAbonado(this.abonado);
-      const tramite = await this.guardarAguaTramite(this.abonado, null);
-      await this.enviarCorreoComprobante(tramite, correos);
+      this.procesandoTramite = true;
+      this.s_loading.showLoading();
+      try {
+         this.abonado.idcategoria_categorias = this.f_categoria.value.idcategoria_categorias;
+         this.abonado.adultomayor = this.f_categoria.value.adultomayor;
+         this.abonado.municipio = this.f_categoria.value.municipio;
+         this.aguatramite.nrodocumento = this.f_categoria.value.nrodocumento;
+         this.aguatramite.iddocumento_documentos = +this.f_categoria.value.iddocumento_documentos!;
+         this.observaciones = this.f_categoria.value.observaciones;
+         const tramite = await this.guardarAguaTramite(this.abonado, null);
+         await this.actualizarAbonado(this.abonado);
+         await this.enviarCorreoComprobante(tramite, correos);
+         this.regresar();
+      } catch (e) {
+         this.reportarErrorTramite(e);
+      } finally {
+         this.procesandoTramite = false;
+         this.s_loading.hideLoading();
+      }
    }
 
    regresar() {
@@ -345,6 +392,7 @@ export class AguatramComponent implements OnInit {
    }
 
    async actualizarNuevoMedidor() {
+      if (!this.validarAbonadoSeleccionado()) return;
       if (this.f_nMedidor.invalid) {
          this.f_nMedidor.markAllAsTouched();
          this.swal('warning', 'Completa los datos del nuevo medidor');
@@ -357,16 +405,25 @@ export class AguatramComponent implements OnInit {
       );
       if (!correos) return;
 
-      this.abonado.marca = this.f_nMedidor.value.medidormarca;
-      this.abonado.nromedidor = this.f_nMedidor.value.medidornumero;
-      this.abonado.lecturainicial = 0;
-      this.observaciones = this.f_nMedidor.value.observaciones;
-      this.aguatramite.nrodocumento = this.f_nMedidor.value.nrodocumento;
-      this.aguatramite.iddocumento_documentos = +this.f_nMedidor.value.iddocumento_documentos!;
-      this.actualizarAbonado(this.abonado);
-      const tramite = await this.guardarAguaTramite(this.abonado, this.f_nMedidor.value.codmedidor);
-      await this.enviarCorreoComprobante(tramite, correos);
-      this.regresar();
+      this.procesandoTramite = true;
+      this.s_loading.showLoading();
+      try {
+         this.abonado.marca = this.f_nMedidor.value.medidormarca;
+         this.abonado.nromedidor = this.f_nMedidor.value.medidornumero;
+         this.abonado.lecturainicial = 0;
+         this.observaciones = this.f_nMedidor.value.observaciones;
+         this.aguatramite.nrodocumento = this.f_nMedidor.value.nrodocumento;
+         this.aguatramite.iddocumento_documentos = +this.f_nMedidor.value.iddocumento_documentos!;
+         const tramite = await this.guardarAguaTramite(this.abonado, this.f_nMedidor.value.codmedidor);
+         await this.actualizarAbonado(this.abonado);
+         await this.enviarCorreoComprobante(tramite, correos);
+         this.regresar();
+      } catch (e) {
+         this.reportarErrorTramite(e);
+      } finally {
+         this.procesandoTramite = false;
+         this.s_loading.hideLoading();
+      }
    }
 
    get f() {
@@ -437,11 +494,14 @@ export class AguatramComponent implements OnInit {
          this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
          if (this.swActualizar) await this.actualizarFacturas();
 
-         this.actualizarAbonado(this.abonado);
          const tramite = await this.guardarAguaTramite(this.abonado, null);
+         await this.actualizarAbonado(this.abonado);
          await this.enviarCorreoComprobante(tramite, this.correosTramiteActual);
          this.modalConfirmacion?.hide();
          this.swal('success', 'Datos guardados y actualizados');
+         this.regresar();
+      } catch (e) {
+         this.reportarErrorTramite(e);
       } finally {
          this.procesandoTramite = false;
          this.correosTramiteActual = [];
@@ -458,11 +518,14 @@ export class AguatramComponent implements OnInit {
          this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
          if (this.swActualizar) await this.actualizarFacturas();
 
-         this.actualizarAbonado(this.abonado);
          const tramite = await this.guardarAguaTramite(this.abonado, null);
+         await this.actualizarAbonado(this.abonado);
          await this.enviarCorreoComprobante(tramite, this.correosTramiteActual);
          this.modalConfirmacion?.hide();
          this.swal('success', 'Responsable de pago actualizado');
+         this.regresar();
+      } catch (e) {
+         this.reportarErrorTramite(e);
       } finally {
          this.procesandoTramite = false;
          this.correosTramiteActual = [];
@@ -562,6 +625,7 @@ export class AguatramComponent implements OnInit {
    }
 
    async confirmarCambioTitularidad(): Promise<void> {
+      if (!this.validarAbonadoSeleccionado()) return;
       if (this.f_camPropietario.invalid) {
          this.f_camPropietario.markAllAsTouched();
          this.swal('warning', 'Completa la información requerida');
@@ -602,6 +666,20 @@ export class AguatramComponent implements OnInit {
       this.procesandoTramite = false;
       this.correosTramiteActual = [];
       this.modalConfirmacion?.hide();
+   }
+
+   private validarAbonadoSeleccionado(): boolean {
+      if (Number(this.abonado?.idabonado) > 0) {
+         return true;
+      }
+
+      this.swal('warning', 'Selecciona primero la cuenta a la que se aplicará el trámite');
+      return false;
+   }
+
+   private reportarErrorTramite(error: any): void {
+      console.error('No se pudo completar el trámite de agua', error);
+      this.swal('error', 'No se completó el trámite. No se ha regresado al listado para que puedas revisar los datos.');
    }
 
    private async confirmarTramiteConCorreo(
