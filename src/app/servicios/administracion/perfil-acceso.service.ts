@@ -99,6 +99,9 @@ export class PerfilAccesoService {
       const nombre = String(item?.nombre || '').trim().toLowerCase();
       if (nombre) this.windowPermissions.set(nombre, Number(item?.permissions ?? 0));
     });
+    // The write interceptor and read-only UI share this cache; replace it after every validation.
+    sessionStorage.setItem(`ventana-permisos-${userId}`, JSON.stringify(windows));
+    window.dispatchEvent(new Event('permissions-updated'));
     modules.filter((module: any) => module?.enabled !== false)
       .forEach((module: any) => this.collectEnabledCodes(module));
     this.loadedUserId = userId;

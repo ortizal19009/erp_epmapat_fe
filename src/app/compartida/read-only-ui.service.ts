@@ -24,6 +24,7 @@ export class ReadOnlyUiService {
     this.observer = new MutationObserver(() => this.apply());
     this.observer.observe(this.document.body, { childList: true, subtree: true });
     this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => this.refresh());
+    window.addEventListener('permissions-updated', () => this.refresh());
     this.refresh();
   }
 
@@ -98,6 +99,7 @@ export class ReadOnlyUiService {
       'gene-emision': 'emisiones', 'rutasxemision': 'emisiones', 'recal-factura': 'facturacion',
       'detalle-planilla': 'facturas', 'add-homologa': 'niifcuentas', 'conciliaban': 'bancos',
       'info-liquida': 'beneficiarios', 'info-ifinan': 'ifinan', 'info-ifina': 'ifinan',
+      'info-aguatramite': 'aguatramite',
     };
     const normalized = String(route || sessionStorage.getItem('ventana') || '').trim().toLowerCase().replace(/^\//, '');
     return aliases[normalized] || normalized.replace(/^(add|modi|modificar|info|detalle|detalles|imp|gene|control|buscar|anular|impor)[-_]?/, '');

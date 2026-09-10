@@ -82,6 +82,7 @@ export class WritePermissionInterceptor implements HttpInterceptor {
 
   private resolveWindowAlias(route: string): string {
     const normalized = this.normalize(route);
+    const baseRoute = normalized.split('/')[0];
     const aliases: Record<string, string> = {
       'forms-aguatramite': 'aguatramite',
       'modicaja': 'cajas',
@@ -97,9 +98,10 @@ export class WritePermissionInterceptor implements HttpInterceptor {
       'admin/catalogo-ventanas': 'admin-access-control',
       'admin/correos': 'admin-correos',
       'admin/mobile-apk': 'admin-mobile-apk',
+      'info-aguatramite': 'aguatramite',
     };
 
-    return aliases[normalized] || this.stripAction(normalized);
+    return aliases[normalized] || aliases[baseRoute] || this.stripAction(baseRoute);
   }
 
   private sameWindow(left: string, right: string): boolean {

@@ -14,6 +14,7 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import { PerfilAccesoService } from 'src/app/servicios/administracion/perfil-acceso.service';
 import Swal from 'sweetalert2';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -49,7 +50,8 @@ export class ClientesComponent implements OnInit, AfterViewInit {
     private router: Router,
     private coloresService: ColoresService,
     private aboService: AbonadosService,
-    public authService: AutorizaService
+    public authService: AutorizaService,
+    private perfilAcceso: PerfilAccesoService
   ) {}
 
   ngOnInit(): void {
@@ -98,6 +100,11 @@ export class ClientesComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     // Focus en el input al cargar (si tienes #nombreIdentifi en el template)
     this.nombreIdentifiEl?.nativeElement?.focus?.();
+  }
+
+  get canCreateClient(): boolean {
+    return this.authService.idusuario === 1
+      || this.perfilAcceso.hasWindowPermission(this.ventana, 2);
   }
 
   private async buscaColor() {

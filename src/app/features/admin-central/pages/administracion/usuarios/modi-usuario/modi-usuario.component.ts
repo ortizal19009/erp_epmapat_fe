@@ -151,7 +151,7 @@ export class ModiUsuarioComponent implements OnInit {
 
   guardar() {
     if (this.formUsuario.get('codusu')!.dirty) {
-      const b = myFun(this.formUsuario.get('codusu')!.value);
+      const b = myFun(String(this.formUsuario.get('codusu')!.value || '').trim());
       this.formUsuario.get('codusu')!.setValue(b);
     }
 

@@ -225,7 +225,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
                solicitaagua: datos.solicitaagua,
                solicitaalcantarillado: datos.solicitaalcantarillado,
                aprobadoagua: datos.aprobadoagua,
-               aprobadoalcantarillado: datos.aprobadoagua,
+               aprobadoalcantarillado: datos.aprobadoalcantarillado,
                fechainspeccion: this.formatearFechaInput(datos.fechainspeccion),
                medidorempresa: datos.medidorempresa,
                medidormarca: datos.medidormarca,
@@ -291,7 +291,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
       };
 
       try {
-         const datos: any = await firstValueFrom(this.traminuevoService.saveTramiteNuevo(payload));
+         const datos: any = await firstValueFrom(this.traminuevoService.updateTramiteNuevo(payload));
          const abonadoCreado = await this.guardarAbonadoAsync();
          await this.actualizarAguaTramiteAsync(3);
          let correoError: string | null = null;

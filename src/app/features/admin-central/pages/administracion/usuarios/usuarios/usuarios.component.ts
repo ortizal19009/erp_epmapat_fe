@@ -199,7 +199,7 @@ export class UsuariosComponent implements OnInit {
     const conf_password = e.target.value;
 
     if (conf_password === password && password && password.trim().length > 0) {
-      this.pass = myFun(password);
+      this.pass = myFun(password.trim());
     } else {
       this.pass = '';
     }
@@ -293,7 +293,7 @@ export class UsuariosComponent implements OnInit {
       this.pass = '';
       return;
     }
-    if (!this.pass) this.pass = myFun(p);
+    if (!this.pass) this.pass = myFun(String(p || '').trim());
 
     const raw = this.f_usuario.getRawValue();
 
