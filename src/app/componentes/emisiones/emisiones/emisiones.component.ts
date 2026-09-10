@@ -2585,22 +2585,22 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   async iEmisionIndividual(emisionIndividual: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
-    let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
+    let date_emision: Date = new Date(emisionIndividual.fechaemision);
     let fecemision = `${date_emision.getFullYear()}-${date_emision.getMonth() + 1
       }`;
     this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
 
     /* LECTURAS ANTERIORES */
     let lectAnteriores = await this.s_rxfService.getByIdfacturaAsync(
-      emisionIndividual.idlecturaanterior.idfactura,
+      emisionIndividual.idfacturaanterior,
     );
     let l_anteriores: any = [];
     let sum_anterior: number = 0;
     let m3_anterior: number =
-      emisionIndividual.idlecturaanterior.lecturaactual -
-      emisionIndividual.idlecturaanterior.lecturaanterior;
+      emisionIndividual.lecturaactualanterior -
+      emisionIndividual.lecturaanterioranterior;
     let anterior_factura = await this.facService.getByIdAsync(
-      emisionIndividual.idlecturaanterior.idfactura,
+      emisionIndividual.idfacturaanterior,
     );
     lectAnteriores.forEach((item: any) => {
       l_anteriores.push([
@@ -2625,15 +2625,15 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       body: [
         [
           {
-            content: `N° lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
+            content: `N° lectura: ${emisionIndividual.idlecturaanterior} `,
           },
           {
-            content: `Planilla: ${emisionIndividual.idlecturaanterior.idfactura}`,
+            content: `Planilla: ${emisionIndividual.idfacturaanterior}`,
           },
         ],
         [
-          `Lectura ant: ${emisionIndividual.idlecturaanterior.lecturaanterior} `,
-          `Lectura act: ${emisionIndividual.idlecturaanterior.lecturaactual} `,
+          `Lectura ant: ${emisionIndividual.lecturaanterioranterior} `,
+          `Lectura act: ${emisionIndividual.lecturaactualanterior} `,
           `M3: ${m3_anterior}`,
         ],
         [
@@ -2667,7 +2667,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     });
     /* LECTURAS ACTUALES */
     let lectActuales = await this.s_rxfService.getByIdfacturaAsync(
-      emisionIndividual.idlecturanueva.idfactura,
+      emisionIndividual.idfacturanueva,
     );
     let l_nuevos: any = [];
     let sum_nuevos: number = 0;
@@ -2681,10 +2681,10 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       sum_nuevos += Math.round((Number(item.cantidad) * Number(item.valorunitario) + Number.EPSILON) * 100) / 100;
     });
     let m3_nuevo: number =
-      emisionIndividual.idlecturanueva.lecturaactual -
-      emisionIndividual.idlecturanueva.lecturaanterior;
+      emisionIndividual.lecturaactualnueva -
+      emisionIndividual.lecturaanteriornueva;
     let nueva_factura = await this.facService.getByIdAsync(
-      emisionIndividual.idlecturanueva.idfactura,
+      emisionIndividual.idfacturanueva,
     );
     autoTable(doc, {
       headStyles: {
@@ -2700,12 +2700,12 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       head: [[{ content: 'Lectura nueva', colSpan: 5 }]],
       body: [
         [
-          `N° lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
-          `Planilla: ${emisionIndividual.idlecturanueva.idfactura}`,
+          `N° lectura: ${emisionIndividual.idlecturanueva} `,
+          `Planilla: ${emisionIndividual.idfacturanueva}`,
         ],
         [
-          `Lectura ant: ${emisionIndividual.idlecturanueva.lecturaanterior} `,
-          `Lectura act: ${emisionIndividual.idlecturanueva.lecturaactual} `,
+          `Lectura ant: ${emisionIndividual.lecturaanteriornueva} `,
+          `Lectura act: ${emisionIndividual.lecturaactualnueva} `,
           `M3: ${m3_nuevo}`,
         ],
         [
@@ -2737,9 +2737,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       body: l_nuevos,
       foot: [['TOTAL: ', sum_nuevos.toFixed(2)]],
     });
-    let dateEmision: Date = new Date(
-      emisionIndividual.idlecturanueva.fechaemision,
-    );
+    let dateEmision: Date = new Date(emisionIndividual.fechaemision);
     let currentDate: Date = new Date();
     autoTable(doc, {
       bodyStyles: {

@@ -626,13 +626,13 @@
                   <tbody>
                     <tr *ngFor="let emindividual of _emisionindividual | filter: filterimp ,let i = index">
                       <td>{{i+1}}</td>
-                      <td class="text-center">{{emindividual.idemision.emision}}</td>
-                      <td class="text-center">{{emindividual.idlecturanueva.idabonado_abonados.idabonado}}
+                      <td class="text-center">{{emindividual.emision}}</td>
+                      <td class="text-center">{{emindividual.cuenta}}
                       </td>
-                      <td class="text-right">{{emindividual.idlecturaanterior.idlectura}}</td>
-                      <td class="text-right">{{emindividual.idlecturanueva.idlectura}}</td>
-                      <td class="text-right">{{emindividual.idlecturaanterior.idfactura}}</td>
-                      <td class="text-right">{{emindividual.idlecturanueva.idfactura}}</td>
+                      <td class="text-right">{{emindividual.idlecturaanterior}}</td>
+                      <td class="text-right">{{emindividual.idlecturanueva}}</td>
+                      <td class="text-right">{{emindividual.idfacturaanterior}}</td>
+                      <td class="text-right">{{emindividual.idfacturanueva}}</td>
                       <td class="text-center">
                         <button class="btn btn-sm btn-danger" (click)="iEmisionIndividual(emindividual)"
                           data-dismiss='modal'>

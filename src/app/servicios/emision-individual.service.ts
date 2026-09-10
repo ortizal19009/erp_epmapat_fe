@@ -32,7 +32,7 @@ export class EmisionIndividualService {
     }>(`${baseUrl}/refacturacion`, datos);
   }
   getByIdEmision(idemision: number) {
-    return this.http.get<EmisionIndividual[]>(
+    return this.http.get<any[]>(
       `${baseUrl}/idemision?idemision=${idemision}`
     );
   }
