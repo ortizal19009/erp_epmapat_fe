@@ -14,10 +14,11 @@ export class ServiceErrorInterceptor implements HttpInterceptor {
         const status = error?.status;
         const critical = status === 0 || status === 502 || status === 503 || status === 504;
         const isLoginRequest = /\/usuarios\/login(?:[/?]|$)/i.test(req.url);
+        const isOptionalModuleCatalog = /\/erpmodulos\/platform\//i.test(req.url);
         const onErrorPage = this.router.url?.includes('service-unavailable');
 
-        // Keep the login form available after an intermittent network error.
-        if (critical && !onErrorPage && !isLoginRequest) {
+        // Login and the header's module catalog must not interrupt an otherwise valid session.
+        if (critical && !onErrorPage && !isLoginRequest && !isOptionalModuleCatalog) {
           this.router.navigate(['/service-unavailable'], {
             queryParams: { status: String(status), endpoint: req.url }
           });
