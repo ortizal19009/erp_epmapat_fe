@@ -78,6 +78,8 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   swbusca = 0; // 0: sin búsqueda, 1: no existe, 2: sin planillas, 3: con planillas
   swcobrado = false;
   private pdfPreviewObjectUrl: string | null = null;
+  imprimiendoComprobanteId: number | null = null;
+  imprimiendoLote = false;
   disabledcobro = true;
   procesandoCobro = false;
   totfac = 0;
@@ -1899,7 +1901,12 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.getRubroxfacReimpresion(idfactura, interes);
   }
   reImpComprobante(datos: any) {
-    this.impComprobante(datos);
+    const idfactura = Number(datos?.idfactura);
+    if (!Number.isFinite(idfactura) || idfactura <= 0) {
+      this.swal('warning', 'Ingresa un número de planilla válido para reimprimir.');
+      return;
+    }
+    this.impComprobante({ idfactura });
   }
 
   _subtotal(interes: any) {
@@ -2058,18 +2065,33 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   async impComprobante(datos: any) {
+    const idfactura = Number(datos?.idfactura);
+    if (!Number.isFinite(idfactura) || idfactura <= 0 || this.imprimiendoComprobanteId === idfactura) {
+      return;
+    }
+
     try {
-      const reporte = await this.s_jasperReport.getComprobantePago(datos.idfactura);
+      this.imprimiendoComprobanteId = idfactura;
+      this.loadingService.showLoading();
+      const reporte = await this.s_jasperReport.getComprobantePago(idfactura);
       const file = reporte instanceof Blob ? reporte : new Blob([reporte], { type: 'application/pdf' });
       this.abrirVistaPdf(file);
     } catch (e) {
       console.error(e);
-      this.swal('error', 'No se pudo generar el comprobante.');
+      const detalle = e instanceof Error ? e.message : 'No se pudo generar el comprobante.';
+      this.swal('error', detalle);
+    } finally {
+      this.imprimiendoComprobanteId = null;
+      this.loadingService.hideLoading();
     }
   }
 
   // versión vieja -> delega
   async imprimirTodasEnUno() {
+    if (this.imprimiendoLote) {
+      return;
+    }
+
     try {
       const items: MergeItem[] = (this._sincobro || [])
         .filter((s: any) => s.procesada && s.pagado)
@@ -2081,13 +2103,19 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
         return;
       }
 
+      this.imprimiendoLote = true;
+      this.loadingService.showLoading();
       const reporte = await this.s_jasperReport.mergeComprobantes({ items });
       const blob = reporte instanceof Blob ? reporte : new Blob([reporte], { type: 'application/pdf' });
       this.abrirVistaPdf(blob);
       this.swal('success', 'PDF unificado generado.');
     } catch (e) {
       console.error(e);
-      this.swal('error', 'No se pudo generar el PDF unificado.');
+      const detalle = e instanceof Error ? e.message : 'No se pudo generar el PDF unificado.';
+      this.swal('error', detalle);
+    } finally {
+      this.imprimiendoLote = false;
+      this.loadingService.hideLoading();
     }
   }
 

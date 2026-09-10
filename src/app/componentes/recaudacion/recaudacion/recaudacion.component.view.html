@@ -209,8 +209,9 @@
                   </small>
                 </div>
                 <button class="btn btn-primary btn-sm mt-2 mt-md-0" (click)="imprimirTodasEnUno()"
-                  [disabled]="deshabilitarImprimirTodo" title="Imprimir todas las facturas seleccionadas">
-                  <i class="fa fa-print"></i> Imprimir seleccionadas
+                  [disabled]="deshabilitarImprimirTodo || imprimiendoLote" title="Imprimir todas las facturas seleccionadas">
+                  <i class="fa" [ngClass]="imprimiendoLote ? 'fa-spinner fa-spin' : 'fa-print'"></i>
+                  {{ imprimiendoLote ? 'Generando comprobantes...' : 'Imprimir seleccionadas' }}
                 </button>
               </div>
 
@@ -282,14 +283,13 @@
                             <i class="fa fa-eye"></i>
                           </button>
                           <button *ngIf="swcobrado" class="btn btn-xs btn-icon" (click)="impComprobante(sincobro)"
-                            [disabled]="!sincobro.pagado"
+                            [disabled]="!sincobro.pagado || imprimiendoComprobanteId === sincobro.idfactura"
                             [ngClass]="{
                               'btn-danger': sincobro.procesando,
                               'btn-success': !sincobro.procesando && sincobro.pagado
                             }"
                             title="Imprimir">
-                            <i class="fa fa-print"></i>
-                            <i *ngIf="sincobro.procesando" class="fa fa-spinner fa-spin ml-1"></i>
+                            <i class="fa" [ngClass]="imprimiendoComprobanteId === sincobro.idfactura ? 'fa-spinner fa-spin' : 'fa-print'"></i>
                           </button>
                         </div>
                       </td>
