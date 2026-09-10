@@ -979,29 +979,23 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     }
 
     this.ntaCredito(seleccionada.idAbonado, checked);
-    const moduloId = this.resolveModuloId(seleccionada);
-    const aplicaMarcadoEncadenado =
-      ((moduloId === 3 && Number(seleccionada?.idAbonado) > 0) || moduloId === 4);
+    const aplicaMarcadoEncadenado = this.esFacturaConsumoAgua(seleccionada);
 
     if (aplicaMarcadoEncadenado) {
       const idAbonado = Number(seleccionada?.idAbonado);
-      const fechaSeleccionada = this.resolveFechaOrdenCobro(seleccionada);
-      const idFacturaSeleccionada = Number(seleccionada?.idfactura ?? 0);
+      const periodoSeleccionado = this.resolvePeriodoEmisionCobro(seleccionada);
 
       if (seleccionada?.pagado) {
-        // Al marcar: incluir solo facturas anteriores o de la misma fecha con menor id.
+        // No se puede cobrar un mes posterior dejando meses de consumo pendientes.
         this._sincobro.forEach((item: any) => {
-          if (Number(item?.idAbonado) !== idAbonado) {
+          if (!this.esFacturaConsumoAgua(item) || Number(item?.idAbonado) !== idAbonado) {
             return;
           }
 
-          const fechaItem = this.resolveFechaOrdenCobro(item);
-          const idFacturaItem = Number(item?.idfactura ?? 0);
-          const esAnterior =
-            fechaItem < fechaSeleccionada ||
-            (fechaItem === fechaSeleccionada && idFacturaItem <= idFacturaSeleccionada);
+          const periodoItem = this.resolvePeriodoEmisionCobro(item);
+          const esPeriodoAnteriorOActual = periodoItem > 0 && periodoItem <= periodoSeleccionado;
 
-          if (esAnterior) {
+          if (esPeriodoAnteriorOActual) {
             if (this.obtenerIdFormaCobroFactura(item) !== this.obtenerIdFormaCobroFactura(seleccionada)) {
               return;
             }
@@ -1009,19 +1003,16 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
           }
         });
       } else {
-        // Al desmarcar: quitar la actual y cualquier factura posterior del mismo abonado.
+        // Al desmarcar se quitan el mes actual y los meses posteriores de la cuenta.
         this._sincobro.forEach((item: any) => {
-          if (Number(item?.idAbonado) !== idAbonado) {
+          if (!this.esFacturaConsumoAgua(item) || Number(item?.idAbonado) !== idAbonado) {
             return;
           }
 
-          const fechaItem = this.resolveFechaOrdenCobro(item);
-          const idFacturaItem = Number(item?.idfactura ?? 0);
-          const esPosteriorOActual =
-            fechaItem > fechaSeleccionada ||
-            (fechaItem === fechaSeleccionada && idFacturaItem >= idFacturaSeleccionada);
+          const periodoItem = this.resolvePeriodoEmisionCobro(item);
+          const esPeriodoPosteriorOActual = periodoItem >= periodoSeleccionado;
 
-          if (esPosteriorOActual) {
+          if (esPeriodoPosteriorOActual) {
             item.pagado = 0;
           }
         });
@@ -1063,9 +1054,30 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
   private resolveFechaOrdenCobro(item: any): number {
     const fechaBase = item?.fechaemision ?? null;
-    const fecha = fechaBase ? new Date(fechaBase) : null;
+    const fecha = fechaBase
+      ? typeof fechaBase === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaBase)
+        ? new Date(`${fechaBase}T00:00:00`)
+        : new Date(fechaBase)
+      : null;
     const time = fecha?.getTime?.() ?? Number.NaN;
     return Number.isNaN(time) ? 0 : time;
+  }
+
+  private esFacturaConsumoAgua(item: any): boolean {
+    const moduloId = this.resolveModuloId(item);
+    const idAbonado = Number(item?.idAbonado ?? item?.idabonado ?? item?.cuenta ?? 0);
+    return idAbonado > 0 && (moduloId === 3 || moduloId === 4);
+  }
+
+  private resolvePeriodoEmisionCobro(item: any): number {
+    const fechaBase = item?.fechaemision ?? item?.feccrea;
+    if (!fechaBase) return 0;
+
+    const fecha = typeof fechaBase === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaBase)
+      ? new Date(`${fechaBase}T00:00:00`)
+      : new Date(fechaBase);
+    if (Number.isNaN(fecha.getTime())) return 0;
+    return fecha.getFullYear() * 100 + fecha.getMonth() + 1;
   }
 
   formatearPeriodoEmision(fecha: string | Date | null | undefined): string {
