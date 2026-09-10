@@ -1287,6 +1287,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     recaudacion.feccrea = fecha;
 
     this.procesandoCobro = true;
+    this.loadingService.showLoading();
     seleccionadas.forEach((item: any) => {
       item.procesando = true;
       item.procesada = false;
@@ -1328,6 +1329,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
           }
 
           this.procesandoCobro = false;
+          this.loadingService.hideLoading();
           this.swcobrado = true;
           this.limpiarFormularioCobro();
           this.closeModal('modalCobrar');
@@ -1338,6 +1340,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
             item.procesando = false;
           });
           this.procesandoCobro = false;
+          this.loadingService.hideLoading();
           console.error('Error al cobrar facturas:', err?.error ?? err);
           this.swal('error', 'Ocurrió un problema al procesar las facturas.');
         },
