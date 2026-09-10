@@ -54,7 +54,7 @@
                         <div class="text-center" *ngIf="msg">
                            <div *ngIf="kont < 4" class="alert alert-warning alert-dismissible fade show mt-2 px-0"
                               role="alert">
-                              <strong>Usuario y/o contrasena incorrectos.</strong><sup
+                               <strong>{{ errorLogin || 'Usuario y/o contrasena incorrectos.' }}</strong><sup
                                  class="roboto small green">{{kont}}</sup>
                               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                  <span aria-hidden="true">&times;</span>

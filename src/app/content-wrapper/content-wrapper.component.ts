@@ -18,6 +18,7 @@ export class ContentWrapperComponent implements OnInit {
   moduTmp: number;
   showPassword = false;
   iniciandoSesion = false;
+  errorLogin = '';
 
   constructor(
     public fb: FormBuilder,
@@ -52,6 +53,7 @@ export class ContentWrapperComponent implements OnInit {
   login() {
     if (this.iniciandoSesion || this.formLogin.invalid) return;
     this.msg = false;
+    this.errorLogin = '';
     this.iniciandoSesion = true;
     this.usuService.loginAuth({
       username: this.formLogin.value.username,
@@ -97,6 +99,7 @@ export class ContentWrapperComponent implements OnInit {
         } else {
           this.iniciandoSesion = false;
           this.msg = true;
+          this.errorLogin = 'No se recibio una respuesta valida del servidor.';
           this.kont++;
           if (this.kont > 3) this.bloqueado = true;
         }
@@ -104,14 +107,22 @@ export class ContentWrapperComponent implements OnInit {
       error: (err) => {
         this.iniciandoSesion = false;
         this.msg = true;
-        this.kont++;
         const message = err?.error?.message || err?.error || err?.message || 'No se pudo conectar al servidor.';
+        const credencialesInvalidas = err?.status === 401;
+        this.errorLogin = credencialesInvalidas
+          ? 'Usuario y/o contrasena incorrectos.'
+          : `No se pudo iniciar sesion: ${message}`;
+        if (credencialesInvalidas) {
+          this.kont++;
+          if (this.kont > 3) this.bloqueado = true;
+        }
         console.error('Error al iniciar sesión:', message, err);
       },
     });
   }
   reinicia() {
     this.msg = false;
+    this.errorLogin = '';
   }
 
   togglePasswordVisibility(): void {

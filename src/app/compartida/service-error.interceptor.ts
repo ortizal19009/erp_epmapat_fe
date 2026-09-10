@@ -13,9 +13,11 @@ export class ServiceErrorInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         const status = error?.status;
         const critical = status === 0 || status === 502 || status === 503 || status === 504;
+        const isLoginRequest = /\/usuarios\/login(?:[/?]|$)/i.test(req.url);
         const onErrorPage = this.router.url?.includes('service-unavailable');
 
-        if (critical && !onErrorPage) {
+        // Keep the login form available after an intermittent network error.
+        if (critical && !onErrorPage && !isLoginRequest) {
           this.router.navigate(['/service-unavailable'], {
             queryParams: { status: String(status), endpoint: req.url }
           });
