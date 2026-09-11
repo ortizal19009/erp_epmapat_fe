@@ -83,6 +83,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   disabledcobro = true;
   procesandoCobro = false;
   totfac = 0;
+  totalFacturaDetalle = 0;
   idfactura: number;
   consumo = 0;
   totInteres: number = 0;
@@ -956,8 +957,25 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       : 0;
 
     this._sincobro.forEach((item) => {
-      item.pagado = checked && this.obtenerIdFormaCobroFactura(item) === idFormaReferencia ? 1 : 0;
+      item.pagado = 0;
     });
+
+    if (checked) {
+      const candidatas = this._sincobro
+        .filter((item: any) => this.obtenerIdFormaCobroFactura(item) === idFormaReferencia)
+        .sort((a: any, b: any) => {
+          const cuentaA = Number(a?.idAbonado ?? a?.idabonado ?? a?.cuenta ?? 0);
+          const cuentaB = Number(b?.idAbonado ?? b?.idabonado ?? b?.cuenta ?? 0);
+          return cuentaA - cuentaB || this.resolvePeriodoEmisionCobro(a) - this.resolvePeriodoEmisionCobro(b);
+        });
+
+      candidatas.forEach((item: any) => {
+        if (!this.tieneConsumosAnterioresSinSeleccionar(item)) {
+          item.pagado = 1;
+        }
+      });
+    }
+
     this.facturaReferenciaCobro = checked
       ? this._sincobro.find((item: any) => item.pagado === 1 || item.pagado === true) ?? null
       : null;
@@ -978,6 +996,18 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (checked && this.tieneConsumosAnterioresConFormaIncompatible(seleccionada)) {
+      seleccionada.pagado = 0;
+      factura.pagado = 0;
+      e.target.checked = false;
+      this.swal(
+        'warning',
+        `La cuenta ${seleccionada.idAbonado} tiene facturas de consumo anteriores con otra forma de pago.`
+      );
+      this.totalAcobrar();
+      return;
+    }
+
     this.ntaCredito(seleccionada.idAbonado, checked);
     const aplicaMarcadoEncadenado = this.esFacturaConsumoAgua(seleccionada);
 
@@ -986,19 +1016,14 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       const periodoSeleccionado = this.resolvePeriodoEmisionCobro(seleccionada);
 
       if (seleccionada?.pagado) {
-        // No se puede cobrar un mes posterior dejando meses de consumo pendientes.
+        // Cobrar un mes actual incluye obligatoriamente todos los consumos previos.
         this._sincobro.forEach((item: any) => {
           if (!this.esFacturaConsumoAgua(item) || Number(item?.idAbonado) !== idAbonado) {
             return;
           }
 
           const periodoItem = this.resolvePeriodoEmisionCobro(item);
-          const esPeriodoAnteriorOActual = periodoItem > 0 && periodoItem <= periodoSeleccionado;
-
-          if (esPeriodoAnteriorOActual) {
-            if (this.obtenerIdFormaCobroFactura(item) !== this.obtenerIdFormaCobroFactura(seleccionada)) {
-              return;
-            }
+          if (periodoItem > 0 && periodoItem <= periodoSeleccionado) {
             item.pagado = 1;
           }
         });
@@ -1078,6 +1103,52 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       : new Date(fechaBase);
     if (Number.isNaN(fecha.getTime())) return 0;
     return fecha.getFullYear() * 100 + fecha.getMonth() + 1;
+  }
+
+  private tieneConsumosAnterioresSinSeleccionar(factura: any): boolean {
+    if (!this.esFacturaConsumoAgua(factura)) {
+      return false;
+    }
+
+    const cuenta = Number(factura?.idAbonado ?? factura?.idabonado ?? factura?.cuenta ?? 0);
+    const periodoFactura = this.resolvePeriodoEmisionCobro(factura);
+    if (!cuenta || !periodoFactura) {
+      return false;
+    }
+
+    return (this._sincobro || []).some((item: any) => {
+      const mismaCuenta = Number(item?.idAbonado ?? item?.idabonado ?? item?.cuenta ?? 0) === cuenta;
+      const periodoItem = this.resolvePeriodoEmisionCobro(item);
+      const estaSeleccionada = item?.pagado === 1 || item?.pagado === true;
+      return this.esFacturaConsumoAgua(item)
+        && mismaCuenta
+        && periodoItem > 0
+        && periodoItem < periodoFactura
+        && !estaSeleccionada;
+    });
+  }
+
+  private tieneConsumosAnterioresConFormaIncompatible(factura: any): boolean {
+    if (!this.esFacturaConsumoAgua(factura)) {
+      return false;
+    }
+
+    const cuenta = Number(factura?.idAbonado ?? factura?.idabonado ?? factura?.cuenta ?? 0);
+    const periodoFactura = this.resolvePeriodoEmisionCobro(factura);
+    const formaPago = this.obtenerIdFormaCobroFactura(factura);
+    if (!cuenta || !periodoFactura || !formaPago) {
+      return false;
+    }
+
+    return (this._sincobro || []).some((item: any) => {
+      const mismaCuenta = Number(item?.idAbonado ?? item?.idabonado ?? item?.cuenta ?? 0) === cuenta;
+      const periodoItem = this.resolvePeriodoEmisionCobro(item);
+      return this.esFacturaConsumoAgua(item)
+        && mismaCuenta
+        && periodoItem > 0
+        && periodoItem < periodoFactura
+        && this.obtenerIdFormaCobroFactura(item) !== formaPago;
+    });
   }
 
   formatearPeriodoEmision(fecha: string | Date | null | undefined): string {
@@ -1902,7 +1973,13 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.rubxfacService.getDetalleByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
         this._rubrosxfac = this.filtrarRubrosActivos(detalle);
-        this._subtotal(interes);
+        // El detalle de convenios ya incluye el rubro 5 (interes). No se debe
+        // volver a mostrar ni sumar el interes temporal de la recaudacion.
+        const interesAdicional = this.tieneRubroInteres(this._rubrosxfac)
+          ? 0
+          : this.obtenerNumeroDetalle(interes);
+        this.totInteres = interesAdicional;
+        this._subtotal(interesAdicional, this.totalFacturaDetalle);
       },
       error: (err) => console.error(err),
     });
@@ -1911,6 +1988,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.idfactura = idfactura;
     this.valoriva = this.obtenerNumeroDetalle(sincobro?.iva);
     this.totInteres = this.obtenerNumeroDetalle(sincobro?.interes);
+    this.totalFacturaDetalle = this.obtenerNumeroDetalle(sincobro?.total);
     let interes = this.totInteres;
     this.consumo = this.obtenerNumeroDetalle(sincobro?.consumo);
     this.getRubroxfacReimpresion(idfactura, interes);
@@ -1924,15 +2002,22 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.impComprobante({ idfactura });
   }
 
-  _subtotal(interes: any) {
+  _subtotal(interes: any, totalFactura = 0) {
+    const totalOficial = this.obtenerNumeroDetalle(totalFactura);
+    if (totalOficial > 0) {
+      this.totfac = this.redondearMonedaUp(totalOficial);
+      return;
+    }
+
     const totalRubros = (this._rubrosxfac || []).reduce(
       (total: number, rubro: any) => total + this.getTotalRubroDetalle(rubro),
       0
     );
-    this.totfac =
+    this.totfac = this.redondearMonedaUp(
       totalRubros +
-      this.obtenerNumeroDetalle(this.valoriva) +
-      this.obtenerNumeroDetalle(interes);
+        this.redondearMonedaUp(this.obtenerNumeroDetalle(this.valoriva)) +
+        this.redondearMonedaUp(this.obtenerNumeroDetalle(interes))
+    );
   }
 
   getCantidadRubroDetalle(rubro: any): number {
@@ -1988,6 +2073,19 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       rubro?.nombre ||
       'Rubro'
     );
+  }
+
+  private tieneRubroInteres(rubros: any[]): boolean {
+    return (rubros || []).some((rubro: any) => {
+      const idRubro = Number(rubro?.idrubro_rubros?.idrubro ?? rubro?.idrubro);
+      const descripcion = this.getDescripcionRubroDetalle(rubro)
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+      return idRubro === 5 || descripcion === 'interes' || descripcion === 'intereses';
+    });
   }
 
   private obtenerNumeroDetalle(value: any): number {

@@ -94,7 +94,8 @@ export class DetallePlanillaComponent implements OnInit, OnChanges {
         if (loadId !== this.currentLoadId) {
           return;
         }
-        this._rubros = [...item, ...rubrosAdicionales];
+        const rubrosServidor = Array.isArray(item) ? item : [];
+        this._rubros = [...rubrosServidor, ...this.filtrarRubrosAdicionales(rubrosServidor, rubrosAdicionales)];
       })
       .catch((e: any) => {
         console.error(e);
@@ -138,6 +139,27 @@ export class DetallePlanillaComponent implements OnInit, OnChanges {
       },
       error: (e: any) => console.error(e),
     });
+  }
+
+  private filtrarRubrosAdicionales(rubrosServidor: any[], adicionales: any[]): any[] {
+    return adicionales.filter((adicional) => {
+      const descripcion = this.normalizarDescripcionRubro(this.getDescripcionRubro(adicional));
+      return !rubrosServidor.some((rubro) =>
+        this.normalizarDescripcionRubro(this.getDescripcionRubro(rubro)) === descripcion
+        && this.getTotalRubro(rubro) > 0
+      );
+    });
+  }
+
+  private normalizarDescripcionRubro(descripcion: string): string {
+    const descripcionNormalizada = String(descripcion || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+    // El backend historicamente usa ambas etiquetas para el mismo rubro.
+    return descripcionNormalizada === 'intereses' ? 'interes' : descripcionNormalizada;
   }
 
   private recalcularTotales() {

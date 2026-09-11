@@ -431,6 +431,24 @@ te
   border-color: rgba(16, 42, 67, 0.08);
 }
 
+/* La direccion nunca debe invadir la fecha de emision. */
+.table-modern {
+  table-layout: fixed;
+  min-width: 1250px;
+}
+
+.table-modern .address-column,
+.table-modern .address-cell {
+  width: 260px;
+  max-width: 260px;
+}
+
+.table-modern .address-cell.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .table-hover tbody tr {
   transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
 }
