@@ -41,7 +41,15 @@ export class LoginComponent implements OnInit{
 
       this.usuarioService.loginAuth({ username, password, platform: 'WEB' }).subscribe({
          next: (resp: any) => {
-            const idusuario = +resp?.idusuario || 0;
+            const idusuario = Number(resp?.userId ?? resp?.idusuario ?? 0);
+            const token = String(resp?.token || '').trim();
+            if (!idusuario || !token) {
+               this.authService.logout();
+               alert('La respuesta de inicio de sesión no contiene una sesión WEB válida.');
+               return;
+            }
+
+            sessionStorage.clear();
             this.authService.idusuario = idusuario;
             this.authService.moduActual = 0;
             this.authService.modulo = 0;
@@ -55,6 +63,7 @@ export class LoginComponent implements OnInit{
                   modules: []
                };
                sessionStorage.setItem('abc', btoa(JSON.stringify(tokenPayload)));
+               sessionStorage.setItem('webJwt', token);
                localStorage.setItem('sessionlog', 'true');
             } catch {}
 
