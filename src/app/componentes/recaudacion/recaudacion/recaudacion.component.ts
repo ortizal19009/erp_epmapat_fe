@@ -140,6 +140,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     public fb: FormBuilder,
     public fb1: FormBuilder,
     private aboService: AbonadosService,
+    private modulosService: ModulosService,
     private clieService: ClientesService,
     private facService: FacturaService,
     private rubxfacService: RubroxfacService,
@@ -815,6 +816,16 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       return clientesPendientes.get(idCliente)!;
     };
 
+    const texto = (valor: any): string => typeof valor === 'string' ? valor.trim() : '';
+    const nombreModulo = (item: any): string => texto(item.modulo) || texto(item.modulo?.descripcion) || texto(item.idmodulo?.descripcion);
+    const faltanModulos = sincobrar.some(item => !nombreModulo(item) && this.resolveModuloId(item) > 0);
+    const catalogo = faltanModulos
+      ? await this.modulosService.getListaModulos().toPromise().catch(error => {
+          console.error('No se pudo consultar el catalogo de modulos', error);
+          return [];
+        }) : [];
+    const modulosPorId = new Map((catalogo || []).map(modulo => [Number(modulo.idmodulo), modulo.descripcion]));
+
     await Promise.all(
       sincobrar.map(async (item: any) => {
         const idAbonado = Number(item.idAbonado ?? item.idabonado ?? item.cuenta ?? 0);
@@ -822,8 +833,11 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
         item.idAbonado = idAbonado;
         item.idCliente = idCliente;
+        const descripcionModulo = nombreModulo(item);
+        item.idmodulo = this.resolveModuloId(item);
+        item.modulo = descripcionModulo || modulosPorId.get(item.idmodulo) || '';
         item.interes = this.normalizarValorMonetario(item.interes);
-        item.direccion = item.direccion ?? item.direccionubicacion ?? '';
+        item.direccion = texto(item.direccion) || texto(item.direccionubicacion);
         item.fechaemision = item.fechaemision ?? item.feccrea;
         if (idAbonado > 0 && item.idmodulo !== 27) {
           const abonado: Abonados | null = await obtenerAbonado(idAbonado);
@@ -831,10 +845,14 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
           item.responsablePago = abonado?.idresponsable?.nombre ?? item.responsablePago ?? item.nombre ?? '';
           item.iva = Number(item.iva ?? 0);
         } else {
-          const cliente: Clientes | null = !item.nombre && idCliente > 0 ? await obtenerCliente(idCliente) : null;
+          const cliente: Clientes | null = (!item.nombre || !item.direccion) && idCliente > 0 ? await obtenerCliente(idCliente) : null;
           item.direccion = item.direccion || cliente?.direccion || '';
           item.responsablePago = item.responsablePago ?? item.nombre ?? cliente?.nombre ?? '';
           item.iva = Number(item.iva ?? 0);
+        }
+        if (!texto(item.direccion) && idCliente > 0) {
+          const cliente = await obtenerCliente(idCliente);
+          item.direccion = texto(cliente?.direccion);
         }
         item.total = Number(item.total ?? 0);
         this.normalizarSeleccionInicial(item);
@@ -869,17 +887,15 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.sumtotal = 0;
 
     if (e.target.checked) {
-      this.arrFacturas.push(factura);
+      if (!this.arrFacturas.some((f: any) => f.idfactura === factura.idfactura)) this.arrFacturas.push(factura);
     } else {
       const query = this.arrFacturas.find((fact: { idfactura: number }) => fact.idfactura === factura.idfactura);
       const i = this.arrFacturas.indexOf(query);
       if (i >= 0) this.arrFacturas.splice(i, 1);
     }
 
-    this.arrFacturas.forEach((f: any) => {
-      this.sumtotal += Number(f.total || 0);
-      this.acobrar += Number(f.total || 0);
-    });
+    this.sumtotal = this.arrFacturas.reduce((sum: number, f: any) => sum + Math.round(Number(f.total || 0) * 100), 0) / 100;
+    this.acobrar = this.sumtotal;
   }
 
   async getAbonado(idabonado: number): Promise<any> {
@@ -1965,7 +1981,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   private filtrarRubrosActivos(rubros: any[]): any[] {
-    return (rubros || []).filter((item: any) => item?.estado !== 0);
+    return (rubros || []).filter((item: any) => item?.estado == null || Number(item.estado) !== 0);
   }
 
   getRubroxfacReimpresion(idfactura: number, interes: number) {
@@ -1975,9 +1991,10 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
         this._rubrosxfac = this.filtrarRubrosActivos(detalle);
         // El detalle de convenios ya incluye el rubro 5 (interes). No se debe
         // volver a mostrar ni sumar el interes temporal de la recaudacion.
-        const interesAdicional = this.tieneRubroInteres(this._rubrosxfac)
-          ? 0
-          : this.obtenerNumeroDetalle(interes);
+        const interesPersistido = this._rubrosxfac
+          .filter((r: any) => this.tieneRubroInteres([r]))
+          .reduce((sum: number, r: any) => sum + this.getTotalRubroDetalle(r), 0);
+        const interesAdicional = Math.max(0, Math.round((this.obtenerNumeroDetalle(interes) - interesPersistido) * 100) / 100);
         this.totInteres = interesAdicional;
         this._subtotal(interesAdicional, this.totalFacturaDetalle);
       },

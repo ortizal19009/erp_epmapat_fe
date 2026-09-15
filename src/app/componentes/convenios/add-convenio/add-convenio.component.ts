@@ -1,3 +1,4 @@
+import { distribuirRubros } from './convenio-montos';
 import { Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
@@ -221,6 +222,8 @@ export class AddConvenioComponent implements OnInit {
     });
   }
 
+  private distribucionRubros: number[][] = [];
+
   async sumTotaltarifa() {
     let suma = 0;
     let inte = 0;
@@ -228,24 +231,20 @@ export class AddConvenioComponent implements OnInit {
     for (let i = 0; i < (this._sincobro || []).length; i++) {
       const item = this._sincobro[i];
       const interes = await this.cInteres(item);
-      const idmodulo = Number(item?.idmodulo?.idmodulo ?? item?.idmodulo ?? 0);
-      const com = idmodulo === 3 && item?.idabonado != null ? 1 : 0;
-      item.total += interes;
+      // The query already includes every active rubro.
+      item.totalSinInteresTemporal ??= Number(item.total || 0);
+      item.total = Math.round((item.totalSinInteresTemporal + interes) * 100) / 100;
       inte += interes;
-      suma += item.total + com;
+      suma += item.total;
     }
 
-    this.total = suma;
+    this.total = Math.round(suma * 100) / 100;
     this.totInteres = inte;
     const cuotainicial = Math.round(suma * this.porcentaje * 100) / 100;
     this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
   }
 
   sumComercializacion(sincobro: any) {
-    const idmodulo = Number(sincobro?.idmodulo?.idmodulo ?? sincobro?.idmodulo ?? 0);
-    if (idmodulo === 3 && sincobro.idabonado != null) {
-      return sincobro.total + 1;
-    }
     return sincobro.total;
   }
 
@@ -264,12 +263,20 @@ export class AddConvenioComponent implements OnInit {
 
   changeCuotas() {
     this.formConvenio.get('cuotas')!.valueChanges.subscribe((cuotas) => {
+      this.facturas = [];
+      this.pagomensual = 0;
       const cuotainicial = this.formConvenio.value.cuotainicial;
       this.swcalcular = !!(cuotainicial > 0 && cuotas >= 2);
     });
   }
 
   calcular() {
+    const inicial = Number(this.formConvenio.value.cuotainicial);
+    const numeroCuotas = Number(this.formConvenio.value.cuotas);
+    if (!Number.isFinite(inicial) || inicial <= 0 || inicial >= this.total || !Number.isInteger(numeroCuotas) || numeroCuotas < 2) {
+      Swal.fire('Revise las cuotas', 'Revise la cuota inicial y el numero de cuotas antes de calcular.', 'warning');
+      return;
+    }
     this.swcalculando = true;
     this.s_loading.showLoading();
     this.txtcalcular = 'Calculando';
@@ -347,9 +354,10 @@ export class AddConvenioComponent implements OnInit {
     this.rubxfacService.getByIdfactura(this._sincobro[i].idfactura).subscribe({
       next: (datos: any) => {
         for (let j = 0; j < datos.length; j++) {
+          if (datos[j].estado != null && Number(datos[j].estado) === 0) continue;
           const r = {
             idrubro: datos[j].idrubro_rubros.idrubro,
-            valorunitario: +datos[j].valorunitario.toFixed(2),
+            valorunitario: Math.round(Number(datos[j].valorunitario || 0) * Number(datos[j].cantidad ?? 1) * 100) / 100,
           };
           const indice = this.rubros.findIndex(
             (rubro: { idrubro: number }) => rubro.idrubro === r.idrubro
@@ -389,6 +397,21 @@ export class AddConvenioComponent implements OnInit {
   }
 
   private confirmarGuardar() {
+    if (this.swcalculando || !this.facturas.length || !this.pagomensual) {
+      Swal.fire('Revise el convenio', 'Calcule las cuotas antes de guardar.', 'warning');
+      return;
+    }
+    try {
+      this.distribucionRubros = distribuirRubros(
+        this.facturas.map((f: any) => Number(f.totaltarifa)),
+        this.rubros.map((r: any) => Number(r.valorunitario)));
+      if (Math.round(this.total * 100) !== this.facturas.reduce((n: number, f: any) => n + Math.round(f.totaltarifa * 100), 0)) {
+        throw new Error('Las cuotas no coinciden con el total. Vuelva a calcular.');
+      }
+    } catch (error: any) {
+      Swal.fire('Revise el convenio', error.message, 'error');
+      return;
+    }
     this.s_loading.showLoading();
     const abonado = new Abonados();
     abonado.idabonado = this.formConvenio.value.idabonado;
@@ -411,7 +434,13 @@ export class AddConvenioComponent implements OnInit {
     this.convService.saveConvenio(convenio).subscribe({
       next: async (resp) => {
         this.newconvenio = resp;
-        await this.creaFacturas();
+        try {
+          await this.creaFacturas();
+        } catch (error) {
+          this.s_loading.hideLoading();
+          Swal.fire('Convenio incompleto', 'No se completaron las cuotas o sus rubros. Revise el convenio creado antes de volver a intentar.', 'error');
+          return;
+        }
         await this.enviarNotificacionConvenioSiAplica();
         this.s_loading.hideLoading();
         Swal.fire('¡Operación exitosa!', 'Convenio creado correctamente.', 'success');
@@ -456,6 +485,7 @@ export class AddConvenioComponent implements OnInit {
         await this.rubroxfac(i, nuevafac);
       } catch (error) {
         console.error(`Al guardar la factura ${i}`, error);
+        throw error;
       }
     }
   }
@@ -471,6 +501,7 @@ export class AddConvenioComponent implements OnInit {
       await this.cuotService.saveCuotaAsync(cuota);
     } catch (error) {
       console.error('Al guardar la cuota:', error);
+      throw error;
     }
   }
 
@@ -480,7 +511,7 @@ export class AddConvenioComponent implements OnInit {
       rxf.cantidad = 1;
       rxf.estado = 1;
       rxf.valorunitario =
-        +this.rubros[j].valorunitario.toFixed(2) * this.facturas[i].porcentaje;
+        this.distribucionRubros[i][j];
       rxf.idfactura_facturas = factura;
       const rubro = new Rubros();
       rubro.idrubro = this.rubros[j].idrubro;
@@ -489,6 +520,7 @@ export class AddConvenioComponent implements OnInit {
         await this.rxfService.saveRubroxfacAsync(rxf);
       } catch (error) {
         console.error(`Al guardar Rubroxfac ${j}`, error);
+        throw error;
       }
     }
   }
@@ -505,6 +537,7 @@ export class AddConvenioComponent implements OnInit {
         await this.actuAntiguas(k);
       } catch (error) {
         console.error(`Al guardar facxconvenio ${k}`, error);
+        throw error;
       }
     }
   }
@@ -520,6 +553,7 @@ export class AddConvenioComponent implements OnInit {
       await this.facService.updateFacturaAsync(factura);
     } catch (error) {
       console.error(`Al actualizar las antiguas ${k}`, error);
+      throw error;
     }
   }
 
