@@ -1,4 +1,5 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy, Output } from '@angular/core';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
@@ -10,11 +11,14 @@ import { ClientesService } from 'src/app/servicios/clientes.service';
   templateUrl: './buscar-cliente.component.html',
   styleUrls: ['./buscar-cliente.component.css'],
 })
-export class BuscarClienteComponent implements OnInit {
+export class BuscarClienteComponent implements OnInit, OnDestroy {
   @Output() setCliente: EventEmitter<any> = new EventEmitter();
 
   formBusClientes: FormGroup;
-  _clientes: any;
+  _clientes: Clientes[] = [];
+  buscando = false;
+  errorBusqueda = '';
+  private readonly destruir$ = new Subject<void>();
   // btn_search: boolean = true;
   filtro: string;
   ventana: string = 'buscar-cliente';
@@ -80,17 +84,27 @@ export class BuscarClienteComponent implements OnInit {
   }
 
   buscarClientes() {
-    if (
-      this.formBusClientes.value.nombre_identifica != null &&
-      this.formBusClientes.value.nombre_identifica != ''
-    ) {
-      this.clieService
-        .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
-        .subscribe({
-          next: (datos) => (this._clientes = datos),
-          error: (err) => console.error(err.error),
-        });
+    const termino = String(this.formBusClientes.value.nombre_identifica || '').trim();
+    if (this.buscando) return;
+    this._clientes = [];
+    this.errorBusqueda = '';
+    if (termino.length < 5 || termino.length > 100) {
+      this.errorBusqueda = 'Escribe entre 5 y 100 caracteres para buscar.';
+      return;
     }
+    this.buscando = true;
+    this.clieService.getByNombreIdentifi(termino).pipe(
+      takeUntil(this.destruir$),
+      finalize(() => this.buscando = false)
+    ).subscribe({
+      next: datos => this._clientes = datos || [],
+      error: () => this.errorBusqueda = 'No se pudo completar la busqueda. Intenta nuevamente cuando el servicio este disponible.',
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
   }
 
   selecCliente(cli: Clientes) {

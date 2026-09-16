@@ -63,6 +63,9 @@ export class WritePermissionInterceptor implements HttpInterceptor {
 
   private resolvePermission(rows: any[], ventana: string): number {
     const normalized = this.normalize(ventana);
+    // The module permission takes precedence over auto-created action/color windows.
+    const exact = (rows || []).find(row => this.normalize(row?.nombre) === normalized);
+    if (exact) return Number(exact.permissions ?? 0);
     const candidates = new Set([normalized, this.stripAction(normalized)]);
 
     for (const row of rows || []) {

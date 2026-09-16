@@ -17,7 +17,7 @@ export class ClientesService {
   //Busca Clientes por Nombre ó Identificación
   getByNombreIdentifi(nombreIdentifi: String) {
     return this.http.get<Clientes[]>(
-      `${baseUrl}?nombreIdentifi=${nombreIdentifi}`
+      baseUrl, { params: { nombreIdentifi: String(nombreIdentifi).trim() } }
     );
   }
 

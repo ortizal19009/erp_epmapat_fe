@@ -36,6 +36,7 @@ export class AddNtacreditoComponent implements OnInit {
   _documentos: any[] = [];
 
   formError: string = '';
+  guardando = false;
 
   constructor(
     private fb: FormBuilder,
@@ -119,7 +120,8 @@ export class AddNtacreditoComponent implements OnInit {
     this.router.navigate(['/ntacredito']);
   }
 
-  onSubmit() {
+  async onSubmit() {
+    if (this.guardando) return;
     this.formError = '';
 
     if (this.valorFactura <= 0) {
@@ -134,6 +136,23 @@ export class AddNtacreditoComponent implements OnInit {
     }
 
     const f = this.f_ntacredito.getRawValue();
+
+    this.guardando = true;
+    let confirmado = false;
+    try {
+      const resultado = await Swal.fire({
+        title: 'Confirmar nota de credito',
+        text: `Se registrara una nota de credito por $${Number(f.valor).toFixed(2)} para la factura ${this._factura?.nrofactura || f.idfactura}.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar y guardar',
+        cancelButtonText: 'Cancelar',
+      });
+      confirmado = resultado.isConfirmed;
+    } finally {
+      if (!confirmado) this.guardando = false;
+    }
+    if (!confirmado) return;
 
     const ntacredito: Ntacredito = new Ntacredito();
     ntacredito.valor = +f.valor;
@@ -156,12 +175,15 @@ export class AddNtacreditoComponent implements OnInit {
     this.s_ntacredito.saveNtacredito(ntacredito).subscribe({
       next: async (notaGuardada: any) => {
         this.loading.hideLoading();
-        await this.solicitarEnvioNotificacion(notaGuardada);
+        try {
+          await this.solicitarEnvioNotificacion(notaGuardada);
+        } finally { this.guardando = false; }
       },
       error: (e: any) => {
         this.loading.hideLoading();
         console.error(e);
-        this.formError = 'No se pudo guardar la nota de crédito. Revise e intente nuevamente.';
+        this.guardando = false;
+        this.formError = e?.error?.message || e?.message || 'No se pudo guardar la nota de crédito. Revise e intente nuevamente.';
       }
     });
   }
@@ -316,8 +338,8 @@ export class AddNtacreditoComponent implements OnInit {
       icon: 'question',
       showCancelButton: true,
       showDenyButton: true,
-      confirmButtonText: 'Guardar y enviar',
-      denyButtonText: 'Guardar sin enviar',
+      confirmButtonText: 'Enviar notificacion',
+      denyButtonText: 'No enviar',
       cancelButtonText: 'Cancelar envío',
       focusConfirm: false,
       preConfirm: () => {

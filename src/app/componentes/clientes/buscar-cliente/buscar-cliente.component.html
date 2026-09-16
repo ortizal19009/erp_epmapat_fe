@@ -9,11 +9,11 @@
                   <i class="fa fa-plus-square" aria-hidden="true"></i></button>
             </div>
             <input type="text" placeholder="Nombre o identificación (Mínimo 5)" class="form-control form-control-sm"
-               autofocus formControlName="nombre_identifica" required minlength="5"
+               autofocus formControlName="nombre_identifica" required minlength="5" maxlength="100"
                [ngClass]="{'is-invalid': formBusClientes.controls['nombre_identifica'].invalid && formBusClientes.controls['nombre_identifica'].touched,
                'is-valid': formBusClientes.controls['nombre_identifica'].valid, '': formBusClientes.controls['nombre_identifica'].untouched}" />
             <div class="input-group-append">
-               <button type="button" class="btn btn-sm btn-primary" (click)="buscarClientes()" [disabled]="formBusClientes.invalid">
+               <button type="button" class="btn btn-sm btn-primary" (click)="buscarClientes()" [disabled]="formBusClientes.invalid || buscando">
                   <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
             </div>
          </div>
@@ -27,6 +27,9 @@
 
 </div>
 
+<p *ngIf="buscando" role="status" class="text-info">Buscando clientes...</p>
+<p *ngIf="errorBusqueda" role="alert" class="text-danger">{{ errorBusqueda }}</p>
+<p *ngIf="_clientes.length === 50" class="text-muted">Se muestran los primeros 50 resultados. Completa el nombre o la identificacion para precisar la busqueda.</p>
 <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid">
    <!-- <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid"> -->
    <table class="table table-hover table-bordered table-sm mt-0 pt-0 clientedetalle" id="tablaClientes">
