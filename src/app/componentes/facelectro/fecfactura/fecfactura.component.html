@@ -737,6 +737,14 @@
         <div class="row mt-4">
           <div class="col-md-6">
             <h6 class="section-title">Pagos</h6>
+            <div *ngIf="pagosDetalleCargados && diferenciaPagos !== 0" class="alert alert-danger" role="alert">
+              Los pagos declarados no coinciden con el total de la factura.
+              Diferencia (factura menos pagos): {{ diferenciaPagos | number:'1.2-2' }}.
+              Debe corregirse antes de enviar al SRI.
+              <button *ngIf="factura?.estado === 'I' && !factura?.xmlautorizado && !factura?.intentosAutorizacion"
+                type="button" class="btn btn-sm btn-outline-danger d-block mt-2" [disabled]="sincronizandoPago"
+                (click)="sincronizarPagoFactura()">Sincronizar pago declarado</button>
+            </div>
             <div class="table-responsive">
               <table class="table table-sm table-bordered table-striped">
                 <thead class="thead-dark">
@@ -751,7 +759,7 @@
                     <td class="text-right">{{pago.total.toFixed(2)}}</td>
                   </tr>
                   <tr class="table-secondary font-weight-bold">
-                    <td>Total cobrado</td>
+                    <td>Total declarado en pagos</td>
                     <td class="text-right">{{totalpagado.toFixed(2)}}</td>
                   </tr>
                 </tbody>

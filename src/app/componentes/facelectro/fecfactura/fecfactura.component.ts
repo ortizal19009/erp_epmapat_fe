@@ -1155,55 +1155,66 @@ export class FecfacturaComponent implements OnInit {
     const limpio = String(valor || '').replace(/\D/g, '');
     return limpio ? Number(limpio) : null;
   }
-  setFactura(factura: any) {
+  sincronizandoPago = false;
+  async sincronizarPagoFactura(): Promise<void> {
+    const factura = this.factura;
+    const confirmacion = await Swal.fire({
+      title: 'Sincronizar pago declarado',
+      text: `El pago de la factura ${factura.idfactura} cambiara de ${this.totalpagado.toFixed(2)} a ${this.totalgeneraldetalle.toFixed(2)}. No se realizara un cobro ni se enviara al SRI.`,
+      icon: 'question', showCancelButton: true, confirmButtonText: 'Sincronizar', cancelButtonText: 'Cancelar',
+    });
+    if (!confirmacion.isConfirmed) return;
+    this.sincronizandoPago = true;
+    try {
+      await this.fecfacService.sincronizarPago(factura.idfactura);
+      if (this.factura.idfactura === factura.idfactura) await this.setFactura(factura);
+      this.swal('success', 'Pago declarado sincronizado.');
+    } catch (error: any) {
+      this.swal('error', error?.error?.message || 'No se pudo sincronizar el pago.');
+    } finally { this.sincronizandoPago = false; }
+  }
+
+  pagosDetalleCargados = false;
+  private cargaDetalleActual = 0;
+
+  get diferenciaPagos(): number {
+    return (Math.round(this.totalgeneraldetalle * 100) - Math.round(this.totalpagado * 100)) / 100;
+  }
+
+  async setFactura(factura: any) {
+    const carga = ++this.cargaDetalleActual;
     this.txtDetails = true;
-    this.totalpreciounitario = 0;
-    this.totalbaseimponible = 0;
-    this.totaliva = 0;
-    this.totalgeneraldetalle = 0;
-    this.totalpagado = 0;
+    this.pagosDetalleCargados = false;
+    this.totalpreciounitario = this.totalbaseimponible = this.totaliva = this.totalgeneraldetalle = this.totalpagado = 0;
     this.impuestos = [];
+    this._detalles = [];
+    this._pagos = [];
     this.validacionSriDetalle = [];
     this.validacionSriResumen = [];
     this.factura = factura;
-    this.fec_facdetalleService
-      .getFecDetalleByIdfactura(factura.idfactura)
-      .subscribe({
-        next: (detalles: any) => {
-          this._detalles = detalles;
-          detalles.forEach((item: any, index: number) => {
-            const cantidad = Number(item?.cantidad || 0);
-            const precioUnitario = Number(item?.preciounitario || 0);
-            this.totalpreciounitario += cantidad * precioUnitario;
-            this.fec_facdetimpService
-              .getFecFacDetalleService(item.idfacturadetalle)
-              .subscribe({
-                next: (impuestos: any) => {
-                  impuestos.forEach((item: any) => {
-                    this.impuestos.push(item);
-                    const baseImponible = Number(item?.baseimponible || 0);
-                    const valorIva = this.calcularValorIva(item);
-                    this.totalbaseimponible += baseImponible;
-                    this.totaliva += valorIva;
-                    this.totalgeneraldetalle += baseImponible + valorIva;
-                  });
-                  this.construirValidacionSriLocal();
-                },
-                error: (e) => console.error(e),
-              });
-          });
-        },
-        error: (e) => console.error(e),
-      });
-    this.fec_facPagosService.getByIdfactura(factura.idfactura).subscribe({
-      next: (pagos: any) => {
-        pagos.forEach((item: any, index: number) => {
-          this.totalpagado += item.total;
-        });
-        this._pagos = pagos;
-      },
-      error: (e) => console.error(e),
-    });
+    try {
+      const [detalles, pagos]: any[] = await Promise.all([
+        this.fec_facdetalleService.getFecDetalleByIdfactura(factura.idfactura).toPromise(),
+        this.fec_facPagosService.getByIdfactura(factura.idfactura).toPromise(),
+      ]);
+      const impuestos = await Promise.all((detalles || []).map((d: any) =>
+        this.fec_facdetimpService.getFecFacDetalleService(d.idfacturadetalle).toPromise()));
+      if (carga !== this.cargaDetalleActual) return;
+      this._detalles = detalles || [];
+      this._pagos = (pagos || []).map((p: any) => ({ ...p, total: Number(p.total || 0) }));
+      this.impuestos = impuestos.flat();
+      const centavos = (valor: number) => Math.round((valor + Number.EPSILON) * 100);
+      this.totalpreciounitario = this._detalles.reduce((s: number, d: any) => s + centavos(Number(d.cantidad || 0) * Number(d.preciounitario || 0)), 0) / 100;
+      this.totalbaseimponible = this._detalles.reduce((s: number, d: any) => s + centavos(Number(d.cantidad || 0) * Number(d.preciounitario || 0) - Number(d.descuento || 0)), 0) / 100;
+      this.totaliva = this.impuestos.reduce((s: number, i: any) => s + centavos(this.calcularValorIva(i)), 0) / 100;
+      this.totalgeneraldetalle = (centavos(this.totalbaseimponible) + centavos(this.totaliva)) / 100;
+      this.totalpagado = this._pagos.reduce((s: number, p: any) => s + centavos(p.total), 0) / 100;
+      this.construirValidacionSriLocal();
+      this.pagosDetalleCargados = true;
+    } catch (error) {
+      if (carga === this.cargaDetalleActual) this.swal('error', 'No se pudieron cargar todos los detalles y pagos de la factura.');
+      console.error(error);
+    }
   }
   deleteImpuesto(detalle: any) {
     this.fec_facdetimpService
@@ -1376,6 +1387,7 @@ export class FecfacturaComponent implements OnInit {
   }
 
   calcularValorIva(impuesto: any): number {
+    if (String(impuesto?.codigoimpuesto || '2') !== '2') return 0;
     const baseImponible = Number(impuesto?.baseimponible || 0);
     const tarifa = this.getTarifaPorCodigoPorcentaje(impuesto?.codigoporcentaje);
     return Math.round(baseImponible * (tarifa / 100) * 100) / 100;

@@ -347,6 +347,10 @@ export class FecfacturaService {
     return this.http.post(`${baseUrl}/mail-queue`, payload);
   }
 
+  sincronizarPago(idfactura: number): Promise<any> {
+    return firstValueFrom(this.http.post(`${baseUrl}/${idfactura}/sincronizar-pago`, {}));
+  }
+
   //Save
   save(f: Fecfactura) {
     return this.http.post(`${baseUrl}`, f);

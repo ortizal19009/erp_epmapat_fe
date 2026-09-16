@@ -1,4 +1,5 @@
 export class Fecfactura {
+  intentosAutorizacion?: number;
   idfactura: number;
   claveacceso: String;
   secuencial: String;
