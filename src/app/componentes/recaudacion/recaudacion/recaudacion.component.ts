@@ -1411,6 +1411,8 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
             if (actualizada) {
               item.nrofactura = actualizada.nrofactura ?? item.nrofactura;
               item.fechacobro = actualizada.feccrea ?? item.fechacobro;
+              item.interesConsolidado = actualizada.interesConsolidado;
+              item.interesMora = actualizada.interesMora;
               if (actualizada.interescobrado != null) {
                 item.interes = this.normalizarValorMonetario(actualizada.interescobrado);
               }
@@ -1984,17 +1986,18 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     return (rubros || []).filter((item: any) => item?.estado == null || Number(item.estado) !== 0);
   }
 
-  getRubroxfacReimpresion(idfactura: number, interes: number) {
+  getRubroxfacReimpresion(idfactura: number, interes: number, interesMora?: number) {
     this.totfac = 0;
     this.rubxfacService.getDetalleByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
         this._rubrosxfac = this.filtrarRubrosActivos(detalle);
-        // El detalle de convenios ya incluye el rubro 5 (interes). No se debe
-        // volver a mostrar ni sumar el interes temporal de la recaudacion.
+        // Rubro 5 already displays the consolidated interest; the additional row displays only late interest.
         const interesPersistido = this._rubrosxfac
           .filter((r: any) => this.tieneRubroInteres([r]))
           .reduce((sum: number, r: any) => sum + this.getTotalRubroDetalle(r), 0);
-        const interesAdicional = Math.max(0, Math.round((this.obtenerNumeroDetalle(interes) - interesPersistido) * 100) / 100);
+        const interesAdicional = interesMora != null
+          ? Math.max(0, this.obtenerNumeroDetalle(interesMora))
+          : Math.max(0, Math.round((this.obtenerNumeroDetalle(interes) - interesPersistido) * 100) / 100);
         this.totInteres = interesAdicional;
         this._subtotal(interesAdicional, this.totalFacturaDetalle);
       },
@@ -2008,7 +2011,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.totalFacturaDetalle = this.obtenerNumeroDetalle(sincobro?.total);
     let interes = this.totInteres;
     this.consumo = this.obtenerNumeroDetalle(sincobro?.consumo);
-    this.getRubroxfacReimpresion(idfactura, interes);
+    this.getRubroxfacReimpresion(idfactura, interes, sincobro?.interesMora);
   }
   reImpComprobante(datos: any) {
     const idfactura = Number(datos?.idfactura);

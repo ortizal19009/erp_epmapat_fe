@@ -12,6 +12,8 @@ export interface RecaudacionCobroItem {
   subtotal: number;
   total: number;
   interes: number;
+  interesConsolidado?: number;
+  interesMora?: number;
   interescobrado?: number;
   iva: number;
   numfacturas?: number;
