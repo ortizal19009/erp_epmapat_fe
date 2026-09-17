@@ -1411,6 +1411,9 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
             if (actualizada) {
               item.nrofactura = actualizada.nrofactura ?? item.nrofactura;
               item.fechacobro = actualizada.feccrea ?? item.fechacobro;
+              item.subtotal = actualizada.subtotal ?? item.subtotal;
+              item.total = actualizada.total ?? item.total;
+              item.iva = actualizada.iva ?? item.iva;
               item.interesConsolidado = actualizada.interesConsolidado;
               item.interesMora = actualizada.interesMora;
               if (actualizada.interescobrado != null) {

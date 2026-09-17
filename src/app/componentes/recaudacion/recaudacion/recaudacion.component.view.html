@@ -264,10 +264,6 @@
                         <strong class="amount-value small">
                           ${{ (+sincobro.total || 0).toFixed(2) }}
                         </strong>
-                        <small class="d-block text-muted" *ngIf="sincobro.idmodulo === 27 && sincobro.interesConsolidado != null">
-                          Interés del convenio: {{ sincobro.interesConsolidado | number:'1.2-2' }}<br>
-                          Mora de la cuota: {{ sincobro.interesMora | number:'1.2-2' }}
-                        </small>
                       </td>
                       <td class="text-center">
                         <div class="custom-control custom-checkbox custom-control-sm">
