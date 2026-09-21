@@ -1,0 +1,119 @@
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Monitoreo de Recorridos GPS</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- Barra de Filtros -->
+        <div class="card card-default mb-3">
+            <div class="card-body p-2">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label class="small mb-1">Lector:</label>
+                        <select class="form-control form-control-sm" [(ngModel)]="filterReaderId" (change)="applyFilters()">
+                            <option [ngValue]="null">-- Todos los lectores --</option>
+                            <option *ngFor="let r of readers" [ngValue]="r.idusuario">{{r.nomusu}} ({{r.alias}})</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="small mb-1">Fecha:</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="filterDate" (change)="applyFilters()">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-sm btn-outline-secondary btn-block" (click)="clearFilters()">
+                            <i class="fas fa-undo"></i> Limpiar
+                        </button>
+                    </div>
+                    <div class="col-md-3 text-right">
+                        <span class="text-muted small" *ngIf="sessions.length > 0">
+                            {{sessions.length}} jornadas encontradas
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar de Sesiones -->
+            <div class="col-md-3">
+                <div class="card card-primary card-outline">
+                    <div class="card-header p-2">
+                        <h3 class="card-title">Jornadas</h3>
+                    </div>
+                    <div class="card-body p-0" style="max-height: 540px; overflow-y: auto;">
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-header p-2 bg-light">
+                                <strong>RECORRIDOS RECIENTES</strong>
+                            </li>
+                            <li class="nav-item" *ngFor="let session of sessions">
+                                <a href="javascript:void(0)" class="nav-link border-bottom rounded-0" (click)="onSelectSession(session)"
+                                   [class.active]="selectedSession?.id === session.id">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>{{session.readerName}}</strong>
+                                        <span class="badge badge-info">{{session.workDate | date:'dd/MM'}}</span>
+                                    </div>
+                                    <div class="small mt-1">
+                                        <i class="fas fa-walking mr-1"></i> {{session.totalDistanceMeters / 1000 | number:'1.2-2'}} km
+                                        <i class="fas fa-map-marker-alt ml-2 mr-1"></i> {{session.totalPoints}} pts
+                                    </div>
+                                    <div class="text-muted extra-small">
+                                        <i class="far fa-clock"></i> {{session.startTime | date:'HH:mm'}} - {{session.endTime ? (session.endTime | date:'HH:mm') : 'En curso'}}
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="p-3 text-center text-muted small" *ngIf="sessions.length === 0">
+                                No se encontraron registros con los filtros actuales.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa -->
+            <div class="col-md-9">
+                <div class="card card-primary card-outline">
+                    <div class="card-body p-0">
+                        <div id="tracking-map" style="height: 600px; width: 100%;"></div>
+                    </div>
+                    <div class="card-footer" *ngIf="selectedSession">
+                        <div class="row align-items-center">
+                            <div class="col-sm-4">
+                                <strong>Hora:</strong> {{points[playbackIndex]?.capturedAt | date:'HH:mm:ss'}}
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-primary" (click)="togglePlayback()">
+                                        <i class="fas" [class.fa-play]="!isPlaying" [class.fa-pause]="isPlaying"></i>
+                                        {{isPlaying ? 'Pausar' : 'Reproducir'}}
+                                    </button>
+                                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-expanded="false">
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0)" (click)="playbackSpeed = 50">0.5x</a>
+                                        <a class="dropdown-item" href="javascript:void(0)" (click)="playbackSpeed = 100">1x</a>
+                                        <a class="dropdown-item" href="javascript:void(0)" (click)="playbackSpeed = 200">2x</a>
+                                        <a class="dropdown-item" href="javascript:void(0)" (click)="playbackSpeed = 400">4x</a>
+                                    </div>
+                                </div>
+                                <button class="btn btn-default ml-2" (click)="playbackIndex = 0; drawRoute()">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="range" class="custom-range" [(ngModel)]="playbackIndex"
+                                       [max]="points.length - 1" (input)="isPlaying = false">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

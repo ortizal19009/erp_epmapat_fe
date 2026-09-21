@@ -1,0 +1,23 @@
+#tracking-map {
+    border-radius: 0 0 8px 8px;
+    z-index: 1;
+}
+
+.extra-small {
+    font-size: 0.75rem;
+}
+
+.nav-link {
+    padding: 0.75rem 1rem;
+}
+
+.nav-link.active {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+    color: #007bff !important;
+    border-left: 3px solid #007bff;
+}
+
+.card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+}

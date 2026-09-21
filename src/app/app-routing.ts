@@ -925,6 +925,11 @@ const routes: Routes = [
     component: AddNtacreditoComponent,
     canActivate: [AuthGuard],
   },
+  {
+    path: 'trazabilidad',
+    loadChildren: () => import('./features/trazabilidad/trazabilidad.module').then(m => m.TrazabilidadModule),
+    canActivate: [AuthGuard]
+  },
   //================ CONTABILIDAD =============================
   { path: 'cuentas', component: CuentasComponent, canActivate: [AuthGuard] },
   { path: 'add-cuenta', component: AddCuentaComponent, canActivate: [AuthGuard] },
