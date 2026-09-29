@@ -37,7 +37,7 @@ import { Recargosxcuenta } from 'src/app/modelos/recargosxcuenta.model';
 import { RecargosxcuentaService } from 'src/app/servicios/recargosxcuenta.service';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, from, of, Subscription, mergeMap, map, catchError, timeout } from 'rxjs';
 declare const $: any;
 
 @Component({
@@ -53,6 +53,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   _facturas: any; //Planillas del Abonado
   _lecturas: any; //Historial de consumo
   lecturasHistorial: any[] = [];
+  totalesRubrosHistorial: Record<number, number | null | undefined> = {};
+  private totalesHistorialSubscription?: Subscription;
   elimdisabled = true;
   _rubrosxfac: any;
   totfac: number;
@@ -208,6 +210,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   }
   ngAfterViewInit(): void { }
   ngOnDestroy(): void {
+    this.totalesHistorialSubscription?.unsubscribe();
   }
   cancelarFE() {
     if (this.facElectro != true) {
@@ -612,6 +615,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   lecturasxAbonado(idabonado: number) {
+    this.totalesHistorialSubscription?.unsubscribe();
+    this.totalesRubrosHistorial = {};
     if (!idabonado) {
       this.lecturasHistorial = [];
       this._lecturas = [];
@@ -644,6 +649,27 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     const inicio = this.lecturasPage * this.lecturasSize;
     const fin = inicio + this.lecturasSize;
     this._lecturas = historial.slice(inicio, fin);
+    this.cargarTotalesHistorial();
+  }
+
+  private cargarTotalesHistorial(): void {
+    this.totalesHistorialSubscription?.unsubscribe();
+    this.totalesRubrosHistorial = {};
+    const facturas = [...new Set<number>((this._lecturas || [])
+      .map((lectura: any) => Number(lectura.idfactura))
+      .filter((id: number) => Number.isFinite(id) && id > 0))];
+    this.totalesHistorialSubscription = from(facturas).pipe(
+      mergeMap(idfactura => this.rubxfacService.getTotalFactura(idfactura).pipe(
+        timeout(15000),
+        map(valor => ({ idfactura, total: Number(valor ?? 0) as number | null })),
+        catchError(error => {
+          console.error('No se pudo consultar el total de rubros de la planilla', idfactura, error);
+          return of({ idfactura, total: null });
+        }),
+      ), 4),
+    ).subscribe(({ idfactura, total }) => {
+      this.totalesRubrosHistorial[idfactura] = total;
+    });
   }
 
   cambiarPaginaLecturas(delta: number): void {

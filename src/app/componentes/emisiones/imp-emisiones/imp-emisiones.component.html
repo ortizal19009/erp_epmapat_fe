@@ -30,6 +30,7 @@
                                 <option value=3>Emisión inicial</option>
                                 <option value=4>Emisión final</option>
                                 <option value=5>Valores Emitidos</option>
+                                <option value=14>Preemisión por ruta (emisión abierta)</option>
                                 <option value=6>Consumos por categoría</option>
                                 <option value=12>Refacturaciones</option>
                                 <option value=13>Refacturaciones Emisión</option>
@@ -73,12 +74,19 @@
                                 </datalist>
                                 <select type="date" class="form-control text-center d-none" formControlName="emision"
                                     aria-label="Small" aria-describedby="inputGroup-sizing-sm" tabindex="-1">
-                                    <option [ngValue]="emision.idemision" [disabled]="emision.estado === 0"
+                                    <option [ngValue]="emision.idemision" [disabled]="opcreporte === 14 ? emision.estado !== 0 : emision.estado === 0"
                                         *ngFor="let emision of l_emisionesFiltradas">
                                         {{emision.emision}}
                                     </option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div *ngIf="opcreporte === 14" class="col-sm-12 small mb-3">
+                            Resumen y detalle por ruta con m³ y valores previstos a pagar del período.
+                            Disponible solo para emisiones abiertas. Incluye multas y recargos aplicables;
+                            no incluye deudas anteriores. Los valores se recalculan al cierre.
+                            <div *ngIf="!puedeGenerarPreemision" class="text-warning mt-1">Seleccione una emisión abierta.</div>
                         </div>
 
                         <!--     <div [hidden]="opcreporte != 3" class="form-group col-md-10">
@@ -126,10 +134,10 @@
                 </form>
                 <div *ngIf="!swbotones" class="text-center">
                     <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' data-toggle="modal"
-                        data-target="#staticBackdrop" [disabled]="swbotones" (click)="imprimir()">
+                        data-target="#staticBackdrop" [disabled]="swbotones || swcalculando || (opcreporte === 14 && !puedeGenerarPreemision)" (click)="imprimir()">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                     <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="exportar()"
-                        [disabled]="!formImprimir.valid">
+                        [disabled]="!formImprimir.valid || swcalculando || (opcreporte === 14 && !puedeGenerarPreemision)">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
 
                     <button class="btn btn-outline-success btn-sm mx-1" routerLink="/emisiones"><i

@@ -51,6 +51,9 @@
             <i class="bi bi-file-earmark-spreadsheet"></i>&nbsp; Importar geolocalizaci&oacute;n</button>
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
             (click)="exportar()"><i class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
+            [disabled]="exportandoExcel || (!modoFiltro && !_abonados.length)" (click)="exportar(true)">
+            <i class="bi bi-file-earmark-spreadsheet"></i>&nbsp; Exportar filtrados a Excel</button>
         </div>
       </div>
       <input #importExcelInput type="file" accept=".xlsx" class="d-none" (change)="importarGeolocalizaciones($event)">
@@ -458,21 +461,26 @@
         </div>
         <div class='modal-body cuerpo'>
 
-          <div class="alert alert-info py-1 px-2 small mb-2" *ngIf="modoFiltro">
-            Se exportaran <strong>{{ pdfAlcance === 'todos' ? totalElements : _abonados.length }}</strong> abonado(s)
-            con la combinacion de filtros actual.
+          <div class="alert alert-info py-1 px-2 small mb-2">
+            <ng-container *ngIf="!modoFiltro || excelAlcance === 'pagina'">
+              Se exportarán <strong>{{ cantidadExcelPagina }}</strong> abonado(s).
+            </ng-container>
+            <ng-container *ngIf="modoFiltro && excelAlcance === 'todos'">
+              Se revisarán todos los resultados de estado, categoría y ruta ({{ totalElements }}).
+            </ng-container>
+            <div *ngIf="excelFiltrado && filterTerm">Solo se incluirán coincidencias con el texto: <strong>{{ filterTerm }}</strong>.</div>
           </div>
 
           <div class="form-group mb-2" *ngIf="modoFiltro">
             <label class="small text-muted mb-1">Alcance del reporte</label>
             <div class="d-flex flex-column" style="gap:4px">
               <label class="mb-0">
-                <input type="radio" [(ngModel)]="pdfAlcance" [value]="'pagina'"> &nbsp;
-                Solo pagina actual ({{ _abonados.length }} registros)
+                <input type="radio" name="excelAlcance" [(ngModel)]="excelAlcance" [value]="'pagina'"> &nbsp;
+                Solo página actual ({{ cantidadExcelPagina }} registros)
               </label>
               <label class="mb-0">
-                <input type="radio" [(ngModel)]="pdfAlcance" [value]="'todos'"> &nbsp;
-                Todos los resultados filtrados ({{ totalElements }})
+                <input type="radio" name="excelAlcance" [(ngModel)]="excelAlcance" [value]="'todos'"> &nbsp;
+                Todas las páginas, aplicando los filtros
               </label>
             </div>
           </div>
@@ -490,7 +498,7 @@
 
           <div class="row justify-content-center">
             <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
-              (click)="exporta()">
+              (click)="exporta()" [disabled]="exportandoExcel">
               <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
               <i class="bi bi-x-circle"></i> Cancelar</button>

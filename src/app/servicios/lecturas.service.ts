@@ -1,4 +1,5 @@
 import { HttpClient } from '@angular/common/http';
+import { PreemisionReporte } from '../interfaces/emisiones/preemision-reporte';
 import { Injectable } from '@angular/core';
 import { Lecturas } from '../modelos/lecturas.model';
 import { Observable, firstValueFrom } from 'rxjs';
@@ -12,6 +13,10 @@ const baseUrl = `${apiUrl}/lecturas`;
 })
 export class LecturasService {
   constructor(private http: HttpClient) { }
+
+  getPreemision(idemision: number) {
+    return this.http.get<PreemisionReporte>(`${baseUrl}/reportes/preemision`, { params: { idemision } });
+  }
 
   //Lectura por Planilla
   getOnefactura(idfactura: number) {

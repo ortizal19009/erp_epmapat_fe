@@ -1,3 +1,5 @@
+import { analisisLecturas } from 'src/app/compartida/analisis-lecturas';
+import { exportarExcelAnalisisLecturas } from 'src/app/compartida/analisis-lecturas-excel';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -403,48 +405,23 @@ export class LecturasComponent implements OnInit {
   }
 
   private getConsumo(lectura: any): number {
-    return Number(lectura?.lecturaactual || 0) - Number(lectura?.lecturaanterior || 0);
+    return analisisLecturas.getConsumo(lectura);
   }
 
   hasNegativeConsumption(lectura: any): boolean {
-    return this.getConsumo(lectura) < 0;
+    return analisisLecturas.hasNegativeConsumption(lectura);
   }
 
   hasHighConsumptionVsAverage(lectura: any): boolean {
-    const consumo = this.getConsumo(lectura);
-    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
-
-    if (consumo < 0 || promedio <= 0) return false;
-
-    return consumo > promedio * 2;
+    return analisisLecturas.hasHighConsumptionVsAverage(lectura);
   }
 
   isResidentialHighConsumption(lectura: any): boolean {
-    const consumo = this.getConsumo(lectura);
-    if (consumo <= 70) return false;
-
-    const descripcion = String(
-      lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || ''
-    ).toLowerCase();
-    const idcategoria = Number(
-      lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria || 0
-    );
-
-    return descripcion.includes('resid') || idcategoria === 1;
+    return analisisLecturas.isResidentialHighConsumption(lectura);
   }
 
   isSpecialAdultoMayorHighConsumption(lectura: any): boolean {
-    const consumo = this.getConsumo(lectura);
-    const adultomayor = !!lectura?.idabonado_abonados?.adultomayor;
-    const descripcion = String(
-      lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || ''
-    ).toLowerCase();
-    const idcategoria = Number(
-      lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria || 0
-    );
-    const esEspecial = descripcion.includes('especial') || idcategoria === 9;
-
-    return adultomayor && esEspecial && consumo > 34;
+    return analisisLecturas.isSpecialAdultoMayorHighConsumption(lectura);
   }
 
   getAlertClass(lectura: any): string {
@@ -559,16 +536,6 @@ export class LecturasComponent implements OnInit {
     this.tieneLecturasNegativas = alertas.negativas.length > 0;
     this.tieneAlertasRuta = alertas.total > 0;
 
-    if (alertas.total === 0) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'Ruta sin novedades de control',
-        text: 'No hay consumos negativos ni alertas especiales en esta ruta.',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-
     await this.mostrarAnalisisRuta(alertas);
   }
 
@@ -622,14 +589,31 @@ export class LecturasComponent implements OnInit {
       `Especial adulto mayor mayores a 34 m3: <b>${alertas.adultoMayorEspecial.length}</b>`,
     ].join('<br>');
 
-    const detalle = this.construirDetalleAnalisisRuta(alertas);
+    const detalle = this.construirDetalleAnalisisRuta(alertas) || 'Ruta sin novedades de control.';
     const result = await Swal.fire({
       icon: 'info',
       title: 'Analisis de ruta',
       html:
         `<div style="text-align:left;font-size:13px;">${resumen}</div>` +
         `<hr><div style="text-align:left;max-height:320px;overflow:auto;font-size:13px;">${detalle}</div>`,
-      confirmButtonText: 'Revisar',
+      confirmButtonText: 'Exportar Excel',
+      showCancelButton: true,
+      cancelButtonText: 'Cerrar',
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading(),
+      allowEscapeKey: () => !Swal.isLoading(),
+      preConfirm: () => exportarExcelAnalisisLecturas({
+        emision: String(this.rutaxemision?.emision || ''),
+        ruta: String(this.rutaxemision?.ruta || ''),
+        codigoRuta: String(this.rutaxemision?.codigo || ''),
+        totalLecturas: (this._lecturas || []).length,
+        grupos: [
+          { titulo: 'Lecturas con consumo negativo', lecturas: alertas.negativas },
+          { titulo: 'Lecturas sobre promedio (más del doble)', lecturas: alertas.sobrePromedio },
+          { titulo: 'Residenciales mayores a 70 m³', lecturas: alertas.residencialesAltas },
+          { titulo: 'Especial adulto mayor mayores a 34 m³', lecturas: alertas.adultoMayorEspecial },
+        ],
+      }),
       showDenyButton: true,
       denyButtonText: 'Imprimir reporte',
       width: '720px',

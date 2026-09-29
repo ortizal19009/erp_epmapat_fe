@@ -128,6 +128,10 @@ export class RubroxfacService {
     let res = await firstValueFrom(this.http.get<any>(`${baseUrl}/sumavalores?idfactura=${idfactura}`));
     return res;
   }
+
+  getTotalFactura(idfactura: number): Observable<number | null> {
+    return this.http.get<number | null>(`${baseUrl}/sumavalores`, { params: { idfactura } });
+  }
   getSumaRubros(d: Date, h: Date) {
     return this.http.get<Rubroxfac[]>(
       `${baseUrl}/reportes/fechaCobro?d=${d}&h=${h}`

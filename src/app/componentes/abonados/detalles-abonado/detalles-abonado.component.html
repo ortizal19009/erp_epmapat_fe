@@ -325,6 +325,7 @@
                           <th>Anterior</th>
                           <th>Actual</th>
                           <th>Planilla</th>
+                          <th title="Suma de los rubros activos de la factura">Total</th>
                           <th>Foto</th>
                         </tr>
                       </thead>
@@ -343,6 +344,14 @@
                           <td>{{ lectura.lecturaanterior | number:'1.0-0' }}</td>
                           <td>{{ lectura.lecturaactual | number:'1.0-0' }}</td>
                           <td>{{ lectura.idfactura }}</td>
+                          <td class="text-right font-weight-bold">
+                            <ng-container *ngIf="lectura.idfactura > 0; else sinPlanillaTotal">
+                              <span *ngIf="totalesRubrosHistorial[lectura.idfactura] === undefined" class="text-muted small">Cargando...</span>
+                              <span *ngIf="totalesRubrosHistorial[lectura.idfactura] === null" class="text-muted small" title="No se pudo consultar el total de rubros">No disponible</span>
+                              <span *ngIf="totalesRubrosHistorial[lectura.idfactura] != null">{{ totalesRubrosHistorial[lectura.idfactura] | number:'1.2-2' }}</span>
+                            </ng-container>
+                            <ng-template #sinPlanillaTotal><span class="text-muted">—</span></ng-template>
+                          </td>
                           <td>
                             <button type="button" class="btn btn-outline-info btn-xs"
                               (click)="verFotoLectura($event, lectura)"

@@ -14,6 +14,7 @@ import { LoadingService } from 'src/app/servicios/loading.service';
 import { PageResponse } from 'src/app/interfaces/page-response';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
+import { Ng2SearchPipe } from 'ng2-search-filter';
 
 @Component({
   selector: 'app-listar-abonados',
@@ -49,6 +50,9 @@ export class ListarAbonadosComponent implements OnInit {
   archExportar: string = '';
   otraPagina: boolean = false;
   pdfAlcance: 'pagina' | 'todos' = 'pagina';
+  excelAlcance: 'pagina' | 'todos' = 'pagina';
+  excelFiltrado = false;
+  exportandoExcel = false;
   _campos: any;
   rolepermission = 1;
   ventana = 'abonados';
@@ -304,7 +308,15 @@ export class ListarAbonadosComponent implements OnInit {
   // =====================
   // PDF / EXPORT
   // =====================
-  exportar() { this.archExportar = 'Abonados'; }
+  exportar(filtrado = false) {
+    this.excelFiltrado = filtrado;
+    this.excelAlcance = filtrado && this.modoFiltro ? 'todos' : 'pagina';
+    this.archExportar = filtrado ? 'Abonados_filtrados' : 'Abonados';
+  }
+
+  get cantidadExcelPagina(): number {
+    return this.excelFiltrado ? new Ng2SearchPipe().transform(this._abonados, this.filterTerm).length : this._abonados.length;
+  }
 
   abrirSelectorExcel() {
     this.mensajeImportacion = '';
@@ -645,10 +657,17 @@ export class ListarAbonadosComponent implements OnInit {
 
   private async descargarTodosParaPdf(): Promise<any[]> {
     if (!this.hayFiltrosActivos()) return this._abonados;
-    const resp = await firstValueFrom(
-      this.aboService.getAbonadosPage(0, this.totalElements, 'idabonado,asc', this.filtrosReporte())
-    );
-    return resp.content;
+    const filtros = this.filtrosReporte();
+    const datos: any[] = [];
+    let pagina = 0;
+    let totalPaginas = 1;
+    do {
+      const resp = await firstValueFrom(this.aboService.getAbonadosPage(pagina, 500, 'idabonado,asc', filtros));
+      datos.push(...resp.content);
+      totalPaginas = resp.totalPages;
+      pagina++;
+    } while (pagina < totalPaginas);
+    return datos;
   }
 
   private filtrosReporte() {
@@ -805,25 +824,37 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   async exporta() {
+    if (this.exportandoExcel) return;
+    this.exportandoExcel = true;
+    const texto = this.filterTerm;
+    const filtrado = this.excelFiltrado;
     this.loadingService.showLoading();
     try {
-      const datos = this.modoFiltro && this.pdfAlcance === 'todos'
+      const datos = this.modoFiltro && this.excelAlcance === 'todos'
         ? await this.descargarTodosParaPdf()
         : this._abonados;
-      this.generarExcel(datos);
+      const filas = filtrado ? new Ng2SearchPipe().transform(datos, texto) : datos;
+      if (!filas.length) {
+        this.loadingService.hideLoading();
+        await Swal.fire('Sin resultados', 'No hay abonados que coincidan con los filtros seleccionados.', 'info');
+        return;
+      }
+      await this.generarExcel(filas, filtrado ? texto : '');
     } catch (error) {
       console.error(error);
+      this.loadingService.hideLoading();
       Swal.fire('No se pudo exportar', 'Ocurrio un error al obtener los abonados para el reporte.', 'error');
     } finally {
+      this.exportandoExcel = false;
       this.loadingService.hideLoading();
     }
   }
 
-  private generarExcel(datos: any[]) {
+  private async generarExcel(datos: any[], textoFiltro = ''): Promise<void> {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Abonados');
     const estados: any = { 0: 'Eliminado', 1: 'Activo', 2: 'Suspendido', 3: 'Retirado' };
-    const filtros = this.descripcionFiltrosReporte();
+    const filtros = [this.descripcionFiltrosReporte(), textoFiltro ? `Texto de la lista: ${textoFiltro}` : ''].filter(Boolean).join(' | ');
 
     worksheet.mergeCells('A1:G1');
     const titleCell = worksheet.getCell('A1');
@@ -860,15 +891,14 @@ export class ListarAbonadosComponent implements OnInit {
     worksheet.views = [{ state: 'frozen', ySplit: filtros ? 4 : 3 }];
     worksheet.autoFilter = { from: 'A' + headerRow.number, to: 'G' + headerRow.number };
 
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${(this.archExportar || 'Abonados').trim() || 'Abonados'}.xlsx`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-    });
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${(this.archExportar || 'Abonados').trim() || 'Abonados'}.xlsx`;
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 
   private descripcionFiltrosReporte(): string {

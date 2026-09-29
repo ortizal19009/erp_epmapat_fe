@@ -164,6 +164,10 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
     this.testEmailMonitor?.unsubscribe();
   }
 
+  trackSummaryCard(_index: number, card: { label: string }): string {
+    return card.label;
+  }
+
   get summaryCards() {
     return [
       {

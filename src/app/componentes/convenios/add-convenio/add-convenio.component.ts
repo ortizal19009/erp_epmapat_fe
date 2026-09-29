@@ -1,4 +1,4 @@
-import { distribuirRubros } from './convenio-montos';
+import { aCentavos, distribuirRubros } from './convenio-montos';
 import { Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
@@ -223,6 +223,8 @@ export class AddConvenioComponent implements OnInit {
   }
 
   private distribucionRubros: number[][] = [];
+  private diferenciasFacturas: string[] = [];
+  private rubrosCompletos = false;
 
   async sumTotaltarifa() {
     let suma = 0;
@@ -230,17 +232,17 @@ export class AddConvenioComponent implements OnInit {
 
     for (let i = 0; i < (this._sincobro || []).length; i++) {
       const item = this._sincobro[i];
-      const interes = await this.cInteres(item);
+      const interes = aCentavos(Number(await this.cInteres(item)));
       // The query already includes every active rubro.
-      item.totalSinInteresTemporal ??= Number(item.total || 0);
-      item.total = Math.round((item.totalSinInteresTemporal + interes) * 100) / 100;
+      item.totalSinInteresTemporal ??= Number(item.total ?? item.totaltarifa ?? 0);
+      item.total = (aCentavos(item.totalSinInteresTemporal) + interes) / 100;
       inte += interes;
-      suma += item.total;
+      suma += aCentavos(item.total);
     }
 
-    this.total = Math.round(suma * 100) / 100;
-    this.totInteres = inte;
-    const cuotainicial = Math.round(suma * this.porcentaje * 100) / 100;
+    this.total = suma / 100;
+    this.totInteres = inte / 100;
+    const cuotainicial = Math.round(suma * this.porcentaje) / 100;
     this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
   }
 
@@ -282,18 +284,22 @@ export class AddConvenioComponent implements OnInit {
     this.txtcalcular = 'Calculando';
     this.facturas = [];
     this.rubros = [];
+    this.diferenciasFacturas = [];
+    this.rubrosCompletos = false;
 
     const cuotainicial = Number(this.formConvenio.value.cuotainicial || 0);
     const cuotas = Number(this.formConvenio.value.cuotas || 0);
+    const inicialCentavos = aCentavos(cuotainicial);
+    this.formConvenio.controls['cuotainicial'].setValue(inicialCentavos / 100, { emitEvent: false });
     this.nropagos = cuotas - 1;
     this.pagomensual = this.nropagos > 0
-      ? Math.round(((this.total - cuotainicial) / cuotas) * 100) / 100
+      ? Math.round((aCentavos(this.total) - inicialCentavos) / cuotas) / 100
       : 0;
 
     this.formConvenio.controls['pagomensual'].setValue(this.pagomensual);
     const totalpago = Math.round(this.pagomensual * this.nropagos * 100) / 100;
     this.formConvenio.controls['totalpago'].setValue(totalpago);
-    const cuotafinal = this.total - cuotainicial - this.pagomensual * this.nropagos;
+    const cuotafinal = (aCentavos(this.total) - inicialCentavos - aCentavos(this.pagomensual) * this.nropagos) / 100;
     this.formConvenio.controls['cuotafinal'].setValue(cuotafinal.toFixed(2));
 
     this.totaltarifaFacturas();
@@ -345,6 +351,7 @@ export class AddConvenioComponent implements OnInit {
 
   sumaRubros(i: number) {
     if (!this._sincobro || i >= this._sincobro.length) {
+      this.rubrosCompletos = true;
       this.swcalculando = false;
       this.txtcalcular = 'Calcular';
       this.s_loading.hideLoading();
@@ -353,12 +360,14 @@ export class AddConvenioComponent implements OnInit {
 
     this.rubxfacService.getByIdfactura(this._sincobro[i].idfactura).subscribe({
       next: (datos: any) => {
+        let totalRubros = 0;
         for (let j = 0; j < datos.length; j++) {
           if (datos[j].estado != null && Number(datos[j].estado) === 0) continue;
           const r = {
             idrubro: datos[j].idrubro_rubros.idrubro,
-            valorunitario: Math.round(Number(datos[j].valorunitario || 0) * Number(datos[j].cantidad ?? 1) * 100) / 100,
+            valorunitario: aCentavos(Number(datos[j].valorunitario || 0) * Number(datos[j].cantidad ?? 1)) / 100,
           };
+          totalRubros += aCentavos(r.valorunitario);
           const indice = this.rubros.findIndex(
             (rubro: { idrubro: number }) => rubro.idrubro === r.idrubro
           );
@@ -368,6 +377,11 @@ export class AddConvenioComponent implements OnInit {
             this.rubros[indice].valorunitario =
               Math.round((this.rubros[indice].valorunitario + r.valorunitario) * 100) / 100;
           }
+        }
+        const factura = this._sincobro[i];
+        const esperado = aCentavos(factura.totalSinInteresTemporal);
+        if (totalRubros !== esperado) {
+          this.diferenciasFacturas.push(`Factura ${factura.idfactura}: total sin interes $${(esperado / 100).toFixed(2)}, rubros $${(totalRubros / 100).toFixed(2)}, diferencia $${((totalRubros - esperado) / 100).toFixed(2)}.`);
         }
         this.sumaRubros(i + 1);
       },
@@ -397,7 +411,7 @@ export class AddConvenioComponent implements OnInit {
   }
 
   private confirmarGuardar() {
-    if (this.swcalculando || !this.facturas.length || !this.pagomensual) {
+    if (this.swcalculando || !this.rubrosCompletos || !this.facturas.length || !this.pagomensual) {
       Swal.fire('Revise el convenio', 'Calcule las cuotas antes de guardar.', 'warning');
       return;
     }
@@ -409,7 +423,7 @@ export class AddConvenioComponent implements OnInit {
         throw new Error('Las cuotas no coinciden con el total. Vuelva a calcular.');
       }
     } catch (error: any) {
-      Swal.fire('Revise el convenio', error.message, 'error');
+      Swal.fire('Revise el convenio', [error.message, ...this.diferenciasFacturas].join('\n'), 'error');
       return;
     }
     this.s_loading.showLoading();

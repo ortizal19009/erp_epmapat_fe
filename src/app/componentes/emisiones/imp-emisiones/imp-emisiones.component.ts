@@ -2,6 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { firstValueFrom } from 'rxjs';
+import { saveAs } from 'file-saver';
+import Swal from 'sweetalert2';
+import { PreemisionReporte } from 'src/app/interfaces/emisiones/preemision-reporte';
 import * as ExcelJS from 'exceljs';
 import { NombreEmisionPipe } from 'src/app/pipes/nombre-emision.pipe';
 import { EmisionIndividualService } from 'src/app/servicios/emision-individual.service';
@@ -146,6 +151,10 @@ export class ImpEmisionesComponent implements OnInit {
     if (detalle) detalle.classList.add('nuevoBG2');
   }
   async imprimir() {
+    if (String(this.formImprimir.value.reporte) === '14') {
+      await this.generarPreemision(false);
+      return;
+    }
     this.s_loading.showLoading();
     let body: any;
     let reporte: any;
@@ -248,6 +257,10 @@ export class ImpEmisionesComponent implements OnInit {
     }
   }
   exportar() {
+    if (String(this.formImprimir.value.reporte) === '14') {
+      void this.generarPreemision(true);
+      return;
+    }
     switch (this.formImprimir.value.reporte) {
       /*       case '0':
         this.buscarEmisiones();
@@ -491,6 +504,7 @@ export class ImpEmisionesComponent implements OnInit {
     const termino = (this.filtroEmision || '').trim().toLowerCase();
 
     this.l_emisionesFiltradas = this.l_emisiones.filter((emision: any) => {
+      if (this.opcreporte === 14 && Number(emision.estado) !== 0) return false;
       if (!termino) return true;
 
       return String(emision?.emision ?? '')
@@ -504,11 +518,14 @@ export class ImpEmisionesComponent implements OnInit {
     this.filtrarEmisiones();
 
     const seleccion = this.l_emisiones.find(
-      (emision: any) => String(emision?.emision ?? '') === valor
+      (emision: any) => String(emision?.emision ?? '') === valor &&
+        (this.opcreporte !== 14 || Number(emision.estado) === 0)
     );
 
     if (seleccion?.idemision != null) {
       this.formImprimir.patchValue({ emision: seleccion.idemision });
+    } else if (this.opcreporte === 14) {
+      this.formImprimir.patchValue({ emision: null });
     }
   }
   async exportarValoresEmitidos(idemision: any) {
@@ -1095,6 +1112,13 @@ export class ImpEmisionesComponent implements OnInit {
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
+    this.filtrarEmisiones();
+    if (this.opcreporte === 14) {
+      const seleccion = this.l_emisiones.find(e => Number(e.idemision) === Number(this.formImprimir.value.emision) && Number(e.estado) === 0);
+      this.filtroEmision = seleccion ? String(seleccion.emision) : '';
+      this.formImprimir.patchValue({ emision: seleccion?.idemision ?? null });
+      this.filtrarEmisiones();
+    }
     if (this.opcreporte === 8 || this.opcreporte === 10 || this.opcreporte === 12) {
       this.tipe = 'date';
       const fecha: Date = new Date();
@@ -1119,7 +1143,8 @@ export class ImpEmisionesComponent implements OnInit {
       this.opcreporte === 7 ||
       this.opcreporte === 9 ||
       this.opcreporte === 11 ||
-      this.opcreporte == 13
+      this.opcreporte == 13 ||
+      this.opcreporte === 14
     ) {
       return false;
     }
@@ -1167,6 +1192,119 @@ export class ImpEmisionesComponent implements OnInit {
   async getEmision(idemision: number) {
     const emision = await this.emiService.getByIdemision(idemision).toPromise();
     return emision;
+  }
+
+  get puedeGenerarPreemision(): boolean {
+    return this.l_emisiones.some(e => Number(e.idemision) === Number(this.formImprimir?.value.emision) && Number(e.estado) === 0);
+  }
+
+  async generarPreemision(excel: boolean): Promise<void> {
+    if (this.swcalculando) return;
+    const viewer = document.getElementById('pdfViewer') as HTMLIFrameElement | null;
+    if (!excel && viewer) viewer.removeAttribute('src');
+    if (!this.puedeGenerarPreemision) {
+      await Swal.fire('Seleccione una emisión abierta', 'La preemisión está disponible antes del cierre de la emisión.', 'info');
+      return;
+    }
+    this.swcalculando = true;
+    this.s_loading.showLoading();
+    try {
+      const reporte = await firstValueFrom(this.s_lecturas.getPreemision(Number(this.formImprimir.value.emision)));
+      if (!reporte.cuentas) {
+        this.s_loading.hideLoading();
+        await Swal.fire('Sin lecturas', 'La emisión seleccionada todavía no tiene lecturas para calcular.', 'info');
+        return;
+      }
+      if (excel) {
+        await this.exportarPreemision(reporte);
+      } else {
+        this.imprimirPreemision(reporte);
+      }
+    } catch (error: any) {
+      console.error('No se pudo generar la preemisión', error);
+      this.s_loading.hideLoading();
+      await Swal.fire('No se pudo generar la preemisión',
+        error?.status === 409 ? 'La emisión ya no está abierta. Actualice la selección.' :
+        (error?.error?.message || 'No se pudo completar el cálculo. Intente nuevamente.'), 'error');
+    } finally {
+      this.swcalculando = false;
+      this.s_loading.hideLoading();
+    }
+  }
+
+  private imprimirPreemision(reporte: PreemisionReporte): void {
+    const doc = new jsPDF('l', 'pt', 'a4');
+    const titulo = `Preemisión: ${new NombreEmisionPipe().transform(reporte.emision)}`;
+    const aviso = 'Valores provisionales del período: incluyen multas y recargos aplicables; no incluyen deudas anteriores.';
+    this.s_pdf.header(titulo, doc);
+    autoTable(doc, {
+      startY: 95,
+      body: [[aviso], ['Se recalculan al cierre con las lecturas y condiciones vigentes.'],
+        [`Consumos negativos calculados con 0 m³: ${reporte.consumosNegativos}`]],
+      theme: 'plain', styles: { fontSize: 9 },
+    });
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [['Código', 'Ruta', 'Cuentas', 'm³ a facturar', 'Valor previsto USD']],
+      body: reporte.rutas.map(r => [r.codigo, r.ruta, r.cuentas, r.m3, Number(r.valor).toFixed(2)]),
+      foot: [['', 'TOTAL', reporte.cuentas, reporte.m3, Number(reporte.valor).toFixed(2)]],
+      theme: 'grid', styles: { fontSize: 9 },
+    });
+    for (const ruta of reporte.rutas) {
+      doc.addPage();
+      this.s_pdf.header(`${titulo} - ${ruta.codigo} ${ruta.ruta}`, doc);
+      autoTable(doc, {
+        startY: 95,
+        head: [['Cuenta', 'Abonado', 'Categoría', 'Anterior', 'Actual', 'm³', 'Valor USD', 'Observación']],
+        body: ruta.detalle.map(c => [c.cuenta, c.abonado, c.categoria, c.anterior, c.actual, c.m3, Number(c.valor).toFixed(2), c.observacion]),
+        foot: [['', 'TOTAL RUTA', '', '', '', ruta.m3, Number(ruta.valor).toFixed(2), '']],
+        theme: 'grid', styles: { fontSize: 8 }, margin: { bottom: 35 },
+      });
+    }
+    for (let page = 1; page <= doc.getNumberOfPages(); page++) {
+      doc.setPage(page);
+      this.s_pdf.setfooter(doc);
+    }
+    const viewer = document.getElementById('pdfViewer') as HTMLIFrameElement | null;
+    if (viewer) viewer.src = URL.createObjectURL(doc.output('blob'));
+  }
+
+  private async exportarPreemision(reporte: PreemisionReporte): Promise<void> {
+    const workbook = new ExcelJS.Workbook();
+    const resumen = workbook.addWorksheet('Resumen por ruta');
+    resumen.columns = [{ width: 20 }, { width: 48 }, { width: 16 }, { width: 20 }, { width: 23 }];
+    resumen.addRow(['Preemisión', reporte.emision]);
+    resumen.addRow(['Valores provisionales del período. Incluyen multas y recargos aplicables; no incluyen deudas anteriores.']);
+    resumen.mergeCells('A2:E2');
+    resumen.getRow(2).height = 32;
+    resumen.addRow(['Código', 'Ruta', 'Cuentas', 'm³ a facturar', 'Valor previsto USD']);
+    reporte.rutas.forEach(r => resumen.addRow([String(r.codigo || ''), r.ruta, r.cuentas, r.m3, Number(r.valor)]));
+    resumen.addRow(['', 'TOTAL', reporte.cuentas, reporte.m3, Number(reporte.valor)]).font = { bold: true };
+    resumen.getColumn(5).numFmt = '#,##0.00';
+    const detalle = workbook.addWorksheet('Detalle por cuenta');
+    detalle.columns = [
+      { header: 'Código', width: 16 }, { header: 'Ruta', width: 32 },
+      { header: 'Cuenta', width: 16 }, { header: 'Abonado', width: 45 },
+      { header: 'Categoría', width: 25 }, { header: 'Anterior', width: 16 },
+      { header: 'Actual', width: 16 }, { header: 'm³ a facturar', width: 18 },
+      { header: 'Valor previsto USD', width: 23 }, { header: 'Observación', width: 55 },
+    ];
+    reporte.rutas.forEach(r => r.detalle.forEach(c => detalle.addRow([
+      String(r.codigo || ''), r.ruta, String(c.cuenta), c.abonado, c.categoria,
+      c.anterior, c.actual, c.m3, Number(c.valor), c.observacion,
+    ])));
+    detalle.getColumn(9).numFmt = '#,##0.00';
+    for (const [sheet, header] of [[resumen, 3], [detalle, 1]] as [ExcelJS.Worksheet, number][]) {
+      sheet.views = [{ state: 'frozen', ySplit: header }];
+      sheet.autoFilter = { from: { row: header, column: 1 }, to: { row: sheet === resumen ? sheet.rowCount - 1 : sheet.rowCount, column: sheet.columnCount } };
+      sheet.getRow(header).eachCell(cell => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF174B63' } };
+      });
+      sheet.eachRow(row => { row.alignment = { vertical: 'top', wrapText: true }; });
+    }
+    const nombre = String(this.formImprimir.value.nombrearchivo || `preemision-${reporte.emision}`).replace(/[<>:"/\\|?*\x00-\x1F]/g, '-');
+    saveAs(new Blob([await workbook.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${nombre}.xlsx`);
   }
 
   private filtrarRegistrosActivos<T>(registros: T): T {

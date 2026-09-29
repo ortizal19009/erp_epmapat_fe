@@ -214,12 +214,6 @@ export class RetencionesSriService {
       sleepMillis?: number;
     }
   ): Observable<RetencionProcesadaResponse> {
-    const formData = new FormData();
-    const xmlBlob = typeof xml === 'string'
-      ? new Blob([xml], { type: 'application/xml' })
-      : xml;
-    formData.append('xml', xmlBlob, 'retencion.xml');
-
     const params = new URLSearchParams();
     if (options?.modo?.trim()) {
       params.set('modo', options.modo.trim());
@@ -239,7 +233,10 @@ export class RetencionesSriService {
 
     const query = params.toString();
     const url = `${this.sriApiV1Url}/retenciones${query ? `?${query}` : ''}`;
-    return this.http.post<RetencionProcesadaResponse>(url, formData);
+    // El controlador recibe @RequestBody String y consume application/xml.
+    return this.http.post<RetencionProcesadaResponse>(url, xml, {
+      headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+    });
   }
 
   reenviarCorreoPorId(

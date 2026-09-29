@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of, switchMap } from 'rxjs';
+import { finalize, of, switchMap } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Categoria } from 'src/app/modelos/categoria.model';
@@ -25,7 +25,7 @@ import * as L from 'leaflet';
   templateUrl: './modificar-abonados.component.html',
   styleUrls: ['./modi-abonado.component.css'],
 })
-export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
+export class ModificarAbonadosComponent implements OnInit, AfterViewInit, OnDestroy {
   abonado: Abonados = new Abonados();
   abonadoForm: FormGroup;
   f_responsablePago: FormGroup;
@@ -48,6 +48,9 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   selectedFotoMedidor: File | null = null;
   geoError: string | null = null;
   formSubmitted = false;
+  guardando = false;
+  fotoCasaError = false;
+  fotoMedidorError = false;
   map!: L.Map | undefined;
   marker!: L.Marker | undefined;
   defaultCoords: L.LatLngExpression = [0.8038125013453109, -77.72763063596486];
@@ -91,8 +94,8 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
       medidorprincipal: ['', Validators.required],
       usucrea: this.authService.idusuario,
       geolocalizacion: ['', this.geolocalizacionValidator],
-      fotocasa: [''],
-      fotomedidor: [''],
+      fotocasaPath: [''],
+      fotomedidorPath: [''],
       adultomayor: '',
       municipio: '',
       swalcantarillado: '',
@@ -205,10 +208,14 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   }
 
   retornar() {
+    if (this.guardando) return;
+    const idabonado = Number(this.abonado?.idabonado ?? this.v_idabonado);
+    if (idabonado > 0) sessionStorage.setItem('idabonadoToFactura', String(idabonado));
     this.router.navigate(['detalles-abonado']);
   }
 
   onSubmit() {
+    if (this.guardando) return;
     this.formSubmitted = true;
     if (this.abonadoForm.invalid) {
       this.abonadoForm.markAllAsTouched();
@@ -246,6 +253,10 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
     }).then((result) => {
       if (!result.isConfirmed) return;
 
+      if (this.guardando) return;
+      this.guardando = true;
+      let datosGuardados = false;
+      const fotos = { fotocasa: this.selectedFotoCasa, fotomedidor: this.selectedFotoMedidor };
       const observacion = result.value || 'Sin observación';
       this.abonadosS.updateAbonadoAuditoria(
         payload,
@@ -254,37 +265,41 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         'MODIFICACION'
       ).pipe(
         switchMap((abonadoActualizado) => {
-          if (!this.selectedFotoCasa && !this.selectedFotoMedidor) {
+          datosGuardados = true;
+          if (!fotos.fotocasa && !fotos.fotomedidor) {
             return of(abonadoActualizado);
           }
 
           return this.abonadosS.uploadFotosAbonado(
             payload.idabonado,
-            {
-              fotocasa: this.selectedFotoCasa,
-              fotomedidor: this.selectedFotoMedidor,
-            },
+            fotos,
             this.authService.idusuario,
             'Actualización de fotos de abonado',
             'MODIFICACION'
           );
-        })
+        }),
+        finalize(() => this.guardando = false)
       ).subscribe({
         next: (abonadoActualizado) => {
           this.abonado = abonadoActualizado;
           this.selectedFotoCasa = null;
           this.selectedFotoMedidor = null;
           this.abonadoForm.patchValue({
-            fotocasa: abonadoActualizado.fotocasaPath ?? abonadoActualizado.fotocasa ?? '',
-            fotomedidor: abonadoActualizado.fotomedidorPath ?? abonadoActualizado.fotomedidor ?? '',
+            fotocasaPath: abonadoActualizado.fotocasaPath ?? abonadoActualizado.fotocasa ?? '',
+            fotomedidorPath: abonadoActualizado.fotomedidorPath ?? abonadoActualizado.fotomedidor ?? '',
           });
           this.refreshFotoPreviews(abonadoActualizado);
           Swal.fire({ toast: true, icon: 'success', title: 'Abonado modificado', position: 'top', showConfirmButton: false, timer: 2000 });
+          this.guardando = false;
           this.retornar();
         },
         error: (err) => {
           console.error(err);
-          Swal.fire({ icon: 'error', title: 'Error al guardar', text: err?.error?.message ?? 'Error inesperado' });
+          const detalle = err?.error?.message || err?.error?.detail ||
+            (err?.status === 413 ? 'Las imagenes superan el tamano permitido por el servidor.' :
+              err?.status === 0 ? 'No se pudo conectar con el servidor.' : 'No se pudo completar la operacion.');
+          Swal.fire({ icon: 'error', title: datosGuardados ? 'No se pudieron guardar las fotos' : 'Error al guardar',
+            text: datosGuardados ? `Los datos del abonado se guardaron, pero la carga de fotos no se completo. ${detalle} Las imagenes seleccionadas se conservan para reintentar.` : detalle });
         },
       });
     });
@@ -320,8 +335,8 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         idestadom_estadom: datos.idestadom_estadom,
         medidorprincipal: datos.medidorprincipal,
         geolocalizacion: datos.geolocalizacion || '',
-        fotocasa: datos.fotocasaPath || datos.fotocasa || '',
-        fotomedidor: datos.fotomedidorPath || datos.fotomedidor || '',
+        fotocasaPath: datos.fotocasaPath || datos.fotocasa || '',
+        fotomedidorPath: datos.fotomedidorPath || datos.fotomedidor || '',
         municipio: datos.municipio,
         adultomayor: datos.adultomayor,
         swbasura: datos.swbasura,
@@ -499,28 +514,61 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   }
 
   onFotoCasaUploaded(ruta: string): void {
-    this.abonadoForm.patchValue({ fotocasa: ruta });
+    this.abonadoForm.patchValue({ fotocasaPath: ruta });
     this.fotoCasaPreview = this.abonadosS.getFotoCasaUrl(this.v_idabonado);
   }
 
   onFotoMedidorUploaded(ruta: string): void {
-    this.abonadoForm.patchValue({ fotomedidor: ruta });
+    this.abonadoForm.patchValue({ fotomedidorPath: ruta });
     this.fotoMedidorPreview = this.abonadosS.getFotoMedidorUrl(this.v_idabonado);
   }
 
   onFotoCasaSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
-    this.selectedFotoCasa = file;
-    this.fotoCasaPreview = file ? URL.createObjectURL(file) : this.getFotoCasaPersistedUrl();
+    this.seleccionarFoto(event, 'casa');
   }
 
   onFotoMedidorSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
-    this.selectedFotoMedidor = file;
-    this.fotoMedidorPreview = file ? URL.createObjectURL(file) : this.getFotoMedidorPersistedUrl();
+    this.seleccionarFoto(event, 'medidor');
+  }
+
+  private seleccionarFoto(event: Event, tipo: 'casa' | 'medidor'): void {
+    if (this.guardando) return;
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || !file.size || file.size > 20 * 1024 * 1024) {
+      input.value = '';
+      Swal.fire('Imagen no valida', 'Seleccione una imagen JPG, PNG o WEBP de hasta 20 MB.', 'warning');
+      return;
+    }
+    if (tipo === 'casa') {
+      this.liberarPreview(this.fotoCasaPreview);
+      this.selectedFotoCasa = file;
+      this.fotoCasaError = false;
+      this.fotoCasaPreview = URL.createObjectURL(file);
+    } else {
+      this.liberarPreview(this.fotoMedidorPreview);
+      this.selectedFotoMedidor = file;
+      this.fotoMedidorError = false;
+      this.fotoMedidorPreview = URL.createObjectURL(file);
+    }
+  }
+
+  private liberarPreview(url: string | null): void {
+    if (url?.startsWith('blob:')) URL.revokeObjectURL(url);
+  }
+
+  ngOnDestroy(): void {
+    this.liberarPreview(this.fotoCasaPreview);
+    this.liberarPreview(this.fotoMedidorPreview);
+    this.map?.remove();
   }
 
   private refreshFotoPreviews(abonado: Abonados | null | undefined): void {
+    this.liberarPreview(this.fotoCasaPreview);
+    this.liberarPreview(this.fotoMedidorPreview);
+    this.fotoCasaError = false;
+    this.fotoMedidorError = false;
     this.fotoCasaPreview = this.getFotoCasaPersistedUrl(abonado);
     this.fotoMedidorPreview = this.getFotoMedidorPersistedUrl(abonado);
   }

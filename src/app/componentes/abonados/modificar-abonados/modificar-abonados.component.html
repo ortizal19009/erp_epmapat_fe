@@ -72,7 +72,7 @@
                   <div class="side-photo-card">
                     <div class="side-photo-card__title">Foto casa</div>
                     <ng-container *ngIf="fotoCasaPreview; else noCasa">
-                      <img [src]="fotoCasaPreview | safe" alt="Foto de la casa" class="side-photo-card__image">
+                      <img [src]="fotoCasaPreview | safe" (error)="fotoCasaError = true" [hidden]="fotoCasaError" alt="Foto de la casa" class="side-photo-card__image">
                     </ng-container>
                     <ng-template #noCasa>
                       <div class="side-photo-card__empty">Sin imagen</div>
@@ -81,7 +81,7 @@
                   <div class="side-photo-card">
                     <div class="side-photo-card__title">Foto medidor</div>
                     <ng-container *ngIf="fotoMedidorPreview; else noMedidor">
-                      <img [src]="fotoMedidorPreview | safe" alt="Foto del medidor" class="side-photo-card__image">
+                      <img [src]="fotoMedidorPreview | safe" (error)="fotoMedidorError = true" [hidden]="fotoMedidorError" alt="Foto del medidor" class="side-photo-card__image">
                     </ng-container>
                     <ng-template #noMedidor>
                       <div class="side-photo-card__empty">Sin imagen</div>
@@ -361,10 +361,6 @@
                             <input type="text" class="form-control form-control-sm field-input field-input--readonly"
                               [ngClass]="{'is-invalid': esInvalido('idcliente_clientes')}"
                               formControlName="idcliente_clientes" readonly>
-                            <button type="button" class="btn btn-outline-primary btn-sm ml-2"
-                              data-toggle="modal" data-target="#clienteModal">
-                              Cambiar
-                            </button>
                           </div>
                           <small class="text-danger" *ngIf="esInvalido('idcliente_clientes')">Selecciona el cliente del abonado.</small>
                         </div>
@@ -376,10 +372,6 @@
                             <input type="text" class="form-control form-control-sm field-input field-input--readonly"
                               [ngClass]="{'is-invalid': esInvalido('idresponsable')}"
                               formControlName="idresponsable" readonly>
-                            <button type="button" class="btn btn-outline-primary btn-sm ml-2"
-                              data-toggle="modal" data-target="#responsablePagoModal">
-                              Cambiar
-                            </button>
                           </div>
                           <small class="text-danger" *ngIf="esInvalido('idresponsable')">Selecciona el responsable de pagos.</small>
                         </div>
@@ -404,13 +396,15 @@
                               <small>Imagen general del inmueble.</small>
                             </div>
                             <label class="upload-dropzone">
-                              <input type="file" accept="image/*" (change)="onFotoCasaSelected($event)">
+                              <input type="file" accept="image/jpeg,image/png,image/webp" [disabled]="guardando" (change)="onFotoCasaSelected($event)">
                               <span class="upload-dropzone__icon"><i class="bi bi-cloud-arrow-up"></i></span>
                               <span class="upload-dropzone__text">Seleccionar imagen</span>
-                              <span class="upload-dropzone__hint">PNG, JPG o WEBP</span>
+                              <span class="upload-dropzone__hint">PNG, JPG o WEBP, hasta 20 MB</span>
                             </label>
+                            <small class="text-info d-block" *ngIf="selectedFotoCasa">{{ selectedFotoCasa.name }}: pendiente de guardar.</small>
+                            <small class="text-danger d-block" *ngIf="fotoCasaError">No se pudo cargar la foto de la casa. Intente recargar la ficha.</small>
                             <div class="photo-preview-shell mt-3" *ngIf="fotoCasaPreview">
-                              <img [src]="fotoCasaPreview | safe" alt="Foto de la casa" class="photo-preview-shell__img">
+                              <img [src]="fotoCasaPreview | safe" (error)="fotoCasaError = true" [hidden]="fotoCasaError" alt="Foto de la casa" class="photo-preview-shell__img">
                             </div>
                           </div>
                         </div>
@@ -422,13 +416,15 @@
                               <small>Imagen clara del dispositivo instalado.</small>
                             </div>
                             <label class="upload-dropzone">
-                              <input type="file" accept="image/*" (change)="onFotoMedidorSelected($event)">
+                              <input type="file" accept="image/jpeg,image/png,image/webp" [disabled]="guardando" (change)="onFotoMedidorSelected($event)">
                               <span class="upload-dropzone__icon"><i class="bi bi-camera"></i></span>
                               <span class="upload-dropzone__text">Seleccionar imagen</span>
-                              <span class="upload-dropzone__hint">PNG, JPG o WEBP</span>
+                              <span class="upload-dropzone__hint">PNG, JPG o WEBP, hasta 20 MB</span>
                             </label>
+                            <small class="text-info d-block" *ngIf="selectedFotoMedidor">{{ selectedFotoMedidor.name }}: pendiente de guardar.</small>
+                            <small class="text-danger d-block" *ngIf="fotoMedidorError">No se pudo cargar la foto del medidor. Intente recargar la ficha.</small>
                             <div class="photo-preview-shell mt-3" *ngIf="fotoMedidorPreview">
-                              <img [src]="fotoMedidorPreview | safe" alt="Foto del medidor" class="photo-preview-shell__img">
+                              <img [src]="fotoMedidorPreview | safe" (error)="fotoMedidorError = true" [hidden]="fotoMedidorError" alt="Foto del medidor" class="photo-preview-shell__img">
                             </div>
                           </div>
                         </div>
@@ -442,11 +438,11 @@
                       <span>Verifica estado, ubicación y evidencia para evitar inconsistencias futuras.</span>
                     </div>
                     <div class="action-bar__buttons">
-                      <button type="button" class="btn btn-outline-secondary px-4 mr-2" (click)="retornar()">
+                      <button type="button" class="btn btn-outline-secondary px-4 mr-2" (click)="retornar()" [disabled]="guardando">
                         <i class="fa fa-times-circle"></i> Cancelar
                       </button>
-                      <button type="button" class="btn btn-success px-4 action-bar__primary" (click)="cargarDatos()">
-                        <i class="fa fa-check-circle"></i> Guardar cambios
+                      <button type="button" class="btn btn-success px-4 action-bar__primary" (click)="cargarDatos()" [disabled]="guardando">
+                        <i class="fa fa-check-circle"></i> {{ guardando ? 'Guardando datos y fotos...' : 'Guardar cambios' }}
                       </button>
                     </div>
                   </div>

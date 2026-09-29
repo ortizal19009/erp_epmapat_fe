@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, NgZone } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
 import { AutorizaService } from './autoriza.service';
@@ -16,13 +16,18 @@ export class ReadOnlyUiService {
     private router: Router,
     private authService: AutorizaService,
     private ventanasService: VentanasService,
+    private zone: NgZone,
   ) { }
 
   start(): void {
     if (this.observer) return;
 
-    this.observer = new MutationObserver(() => this.apply());
-    this.observer.observe(this.document.body, { childList: true, subtree: true });
+    // Los cambios del DOM no deben iniciar otra detección de cambios de Angular.
+    // Un ngFor que reconstruye elementos podría alimentar al observador indefinidamente.
+    this.zone.runOutsideAngular(() => {
+      this.observer = new MutationObserver(() => this.apply());
+      this.observer.observe(this.document.body, { childList: true, subtree: true });
+    });
     this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => this.refresh());
     window.addEventListener('permissions-updated', () => this.refresh());
     this.refresh();

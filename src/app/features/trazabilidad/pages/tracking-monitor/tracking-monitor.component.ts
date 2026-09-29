@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
-import { TrazabilidadService } from '../../services/trazabilidad.service';
-import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { TrazabilidadService, TrackingReader } from '../../services/trazabilidad.service';
 import * as L from 'leaflet';
 
 @Component({
@@ -14,7 +13,8 @@ export class TrackingMonitorComponent implements OnInit, AfterViewInit, OnDestro
   private readerMarker: any;
 
   sessions: any[] = [];
-  readers: any[] = [];
+  readers: TrackingReader[] = [];
+  readersError = false;
   selectedSession: any = null;
   points: any[] = [];
 
@@ -28,8 +28,7 @@ export class TrackingMonitorComponent implements OnInit, AfterViewInit, OnDestro
   playbackInterval: any;
 
   constructor(
-    private trackingService: TrazabilidadService,
-    private usuarioService: UsuarioService
+    private trackingService: TrazabilidadService
   ) {}
 
   ngOnInit(): void {
@@ -53,13 +52,13 @@ export class TrackingMonitorComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   loadReaders(): void {
-    this.usuarioService.getUsuarios().subscribe(data => {
-      this.readers = data.filter(u => {
-        const isEnabled = u.estado === true;
-        const access = (u.plataform_access || '').toUpperCase();
-        const hasMobileAccess = ['MOBILE', 'BOTH', 'T', 'TRUE', '1'].includes(access);
-        return isEnabled && hasMobileAccess;
-      });
+    this.readersError = false;
+    this.trackingService.getReaders().subscribe({
+      next: readers => this.readers = readers,
+      error: () => {
+        this.readers = [];
+        this.readersError = true;
+      }
     });
   }
 

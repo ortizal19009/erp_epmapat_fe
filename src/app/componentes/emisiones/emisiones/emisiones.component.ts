@@ -1,4 +1,6 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { analisisLecturas } from 'src/app/compartida/analisis-lecturas';
+import { exportarExcelAnalisisLecturas } from 'src/app/compartida/analisis-lecturas-excel';
+import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -55,6 +57,96 @@ import { MobileWebsocketService } from 'src/app/servicios/mobile-websocket.servi
   styleUrls: ['./emisiones.component.css'],
 })
 export class EmisionesComponent implements OnInit, OnDestroy {
+  cargandoAnalisisEmision = false;
+
+  async verAnalisisEmision(): Promise<void> {
+    if (!this.idemision || this.cargandoAnalisisEmision) return;
+    const idemision = this.idemision;
+    const emision = new NombreEmisionPipe().transform(this.selEmision);
+    this.cargandoAnalisisEmision = true;
+    void Swal.fire({
+      title: 'Cargando análisis de emisión',
+      text: 'Consultando todas las lecturas de la emisión...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    try {
+      const lecturas = await firstValueFrom(this.s_lecturas.getByIdEmision(idemision));
+      if (!Array.isArray(lecturas)) throw new Error('Respuesta de lecturas inválida');
+      const grupos = [
+        { titulo: 'Lecturas con consumo negativo', lecturas: lecturas.filter(l => analisisLecturas.hasNegativeConsumption(l)) },
+        { titulo: 'Lecturas sobre promedio (más del doble)', lecturas: lecturas.filter(l => analisisLecturas.hasHighConsumptionVsAverage(l)) },
+        { titulo: 'Residenciales mayores a 70 m³', lecturas: lecturas.filter(l => analisisLecturas.isResidentialHighConsumption(l)) },
+        { titulo: 'Especial adulto mayor mayores a 34 m³', lecturas: lecturas.filter(l => analisisLecturas.isSpecialAdultoMayorHighConsumption(l)) },
+      ];
+      const totalAlertas = grupos.reduce((total, grupo) => total + grupo.lecturas.length, 0);
+      const escape = (value: unknown): string => String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      }[char] as string));
+      const resumen = `<b>Emisión:</b> ${escape(emision)}<br><b>Lecturas analizadas:</b> ${lecturas.length}<br>` +
+        grupos.map(g => `${g.titulo}: <b>${g.lecturas.length}</b>`).join('<br>');
+      const detalle = grupos.filter(g => g.lecturas.length).map(g => {
+        const items = g.lecturas.slice(0, 8).map(l => {
+          const abonado = l.idabonado_abonados;
+          const ruta = l.idrutaxemision_rutasxemision?.idruta_rutas;
+          return `Ruta: ${escape(ruta?.descripcion || ruta?.codigo || 'Sin ruta')} | Cuenta: ${escape(abonado?.idabonado)} - ${escape(abonado?.idcliente_clientes?.nombre)}<br>` +
+            `Consumo: ${analisisLecturas.getConsumo(l)} m³ | Promedio: ${Number(abonado?.promedio || 0)} m³`;
+        }).join('<br><br>');
+        const extra = g.lecturas.length > 8 ? `<br><br>Y ${g.lecturas.length - 8} lectura(s) adicional(es). Consulte el reporte completo.` : '';
+        return `<b>${g.titulo} (${g.lecturas.length})</b><br>${items}${extra}`;
+      }).join('<br><br>');
+      const resultado = await Swal.fire({
+        icon: totalAlertas ? 'info' : (lecturas.length ? 'success' : 'info'),
+        title: 'Análisis de emisión',
+        html: `<div style="text-align:left;font-size:13px">${resumen}<hr>` +
+          `<div style="max-height:320px;overflow:auto">${detalle || (lecturas.length ? 'Emisión sin novedades de control.' : 'Esta emisión no tiene lecturas.')}</div></div>`,
+        confirmButtonText: 'Exportar Excel',
+        showCancelButton: true,
+        cancelButtonText: 'Cerrar',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(),
+        allowEscapeKey: () => !Swal.isLoading(),
+        preConfirm: () => exportarExcelAnalisisLecturas({ emision, totalLecturas: lecturas.length, grupos }),
+        showDenyButton: lecturas.length > 0,
+        denyButtonText: 'Imprimir reporte',
+        width: '820px',
+      });
+      if (resultado.isDenied) this.imprimirAnalisisEmision(emision, lecturas.length, grupos);
+    } catch (error) {
+      console.error('No se pudo cargar el análisis de emisión', error);
+      await Swal.fire({ icon: 'error', title: 'No se pudo cargar el análisis de emisión', text: 'Intente nuevamente.', confirmButtonText: 'Aceptar' });
+    } finally {
+      this.cargandoAnalisisEmision = false;
+    }
+  }
+
+  private imprimirAnalisisEmision(emision: string, total: number, grupos: { titulo: string; lecturas: Lecturas[] }[]): void {
+    const doc = new jsPDF('l', 'pt', 'a4');
+    this.s_pdf.header('Análisis de emisión', doc);
+    autoTable(doc, {
+      startY: 80,
+      body: [['Emisión', emision], ['Lecturas analizadas', String(total)], ...grupos.map(g => [g.titulo, String(g.lecturas.length)])],
+      theme: 'grid', styles: { fontSize: 9 },
+    });
+    for (const grupo of grupos.filter(g => g.lecturas.length)) {
+      autoTable(doc, {
+        startY: (doc as any).lastAutoTable.finalY + 16,
+        head: [[{ content: grupo.titulo, colSpan: 7 }], ['Ruta', 'Cuenta', 'Abonado', 'Anterior', 'Actual', 'Consumo m³', 'Promedio m³']],
+        body: grupo.lecturas.map(l => [
+          String(l.idrutaxemision_rutasxemision?.idruta_rutas?.descripcion || 'Sin ruta'),
+          String(l.idabonado_abonados?.idabonado ?? ''),
+          String(l.idabonado_abonados?.idcliente_clientes?.nombre ?? ''),
+          String(l.lecturaanterior ?? 0), String(l.lecturaactual ?? 0),
+          String(analisisLecturas.getConsumo(l)), String(l.idabonado_abonados?.promedio || 0),
+        ]),
+        theme: 'grid', styles: { fontSize: 8 },
+      });
+    }
+    this.s_pdf.setfooter(doc);
+    doc.save(`analisis-emision-${emision}.pdf`);
+  }
+
   formBuscar: FormGroup;
   formAddEmision: FormGroup;
   f_emisionIndividual: FormGroup;
