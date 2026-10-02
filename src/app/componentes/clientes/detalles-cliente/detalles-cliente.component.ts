@@ -7,7 +7,7 @@ import { FacelectroService } from 'src/app/servicios/facelectro.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { TramitesService } from 'src/app/servicios/ctramites.service';
-import { ColoresService } from 'src/app/compartida/colores.service';
+import { PerfilAccesoService } from 'src/app/servicios/administracion/perfil-acceso.service';
 
 @Component({
   selector: 'app-detalles-cliente',
@@ -31,8 +31,7 @@ export class DetallesClienteComponent implements OnInit {
   idfactura: number;
   limit: number = 20;
   idcliente: number;
-  rolepermission = 1; // 1=lector, 2=editor, 3=admin (ajusta a tu convención)
-  ventana = 'detalles-clientes';
+  ventana = 'clientes';
 
   constructor(
     private cliService: ClientesService,
@@ -42,19 +41,19 @@ export class DetallesClienteComponent implements OnInit {
     private traService: TramitesService,
     private router: Router,
     public authService: AutorizaService,
-    private coloresService: ColoresService
+    private perfilAcceso: PerfilAccesoService
   ) {}
 
   ngOnInit(): void {
-    // if (!this.authService.log) this.router.navigate(['/inicio']);
-    // Permisos (también sin await directo)
-    if (this.coloresService.rolepermission == null) {
-    }
-    this.coloresService
-      .getRolePermission(this.authService.idusuario, this.ventana)
-      .then((rp) => (this.rolepermission = rp))
-      .catch(console.error);
     this.obtenerDatosCliente();
+  }
+
+  get puedeModificar(): boolean {
+    return this.perfilAcceso.hasWindowPermission(this.ventana, 2);
+  }
+
+  get puedeEliminar(): boolean {
+    return this.perfilAcceso.hasWindowPermission(this.ventana, 3);
   }
 
   obtenerDatosCliente() {
@@ -167,6 +166,7 @@ export class DetallesClienteComponent implements OnInit {
   }
 
   modificarCliente(idcliente: number) {
+    if (!this.puedeModificar) return;
     sessionStorage.setItem('padreModiCliente', '/detalles-cliente');
     sessionStorage.setItem(
       'idclienteToModi',

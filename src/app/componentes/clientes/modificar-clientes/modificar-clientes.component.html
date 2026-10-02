@@ -12,7 +12,7 @@
   <div class="container-fluid">
     <div class="row justify-content-center">
       <div class="card card-body col-sm-10 detalle sombra">
-        <form [formGroup]="formCliente">
+        <form *ngIf="formCliente" [formGroup]="formCliente" (ngSubmit)="onSubmit()">
           <div class="row">
 
             <div class="form-group col-md-4 my-0 py-0">
@@ -42,8 +42,7 @@
                     identificación</span>
                 </div>
                 <select type="number" class="form-control form-control-sm" id="idtpidentifica_tpidentifica"
-                  formControlName="idtpidentifica_tpidentifica" [compareWith]="compararTpIdentifica"
-                  (change)="changeTpidentifica()">
+                  formControlName="idtpidentifica_tpidentifica" [compareWith]="compararTpIdentifica">
                   <option [ngValue]="tp" *ngFor="let tp of _tpidentifica">
                     {{ tp.codigo + ' ' +tp.nombre }}
                   </option>
@@ -51,14 +50,29 @@
               </div>
             </div>
 
-            <div class="form-group col-md-4 my-0 py-0">
-              <div class="input-group input-group-sm mb-3">
+            <div class="form-group col-md-4 mt-0 mb-3 py-0">
+              <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Identificación</span>
+                  <span class="input-group-text font-weight-bold" id="identificacion-label">Identificación</span>
                 </div>
-                <input type="text" class="form-control text-center" formControlName="cedula" aria-label="Small"
-                  aria-describedby="inputGroup-sizing-sm" maxlength="13" [ngClass]="{'is-invalid': f['cedula'].invalid && f['cedula'].touched,
+                <input type="text" class="form-control text-center" formControlName="cedula" aria-labelledby="identificacion-label"
+                  aria-describedby="identificacion-feedback" maxlength="13" [ngClass]="{'is-invalid': f['cedula'].invalid && f['cedula'].touched,
                            'is-valid': f['cedula'].valid, '': f['cedula'].untouched}">
+              </div>
+              <div id="identificacion-feedback" class="small mt-1" aria-live="polite">
+                  <span *ngIf="f['cedula'].pending" class="text-muted">Verificando identificación...</span>
+                  <ng-container *ngIf="f['cedula'].touched || f['cedula'].dirty">
+                    <span class="text-danger" *ngIf="f['cedula'].hasError('required')">Ingrese la identificación.</span>
+                    <span class="text-danger" *ngIf="f['cedula'].hasError('tipoIdentificacion')">Seleccione el tipo de identificación.</span>
+                    <span class="text-danger" *ngIf="f['cedula'].hasError('ruc')">El RUC debe contener 13 dígitos.</span>
+                    <span class="text-danger" *ngIf="f['cedula'].hasError('cedula')">Ingrese una cédula válida de 10 dígitos.</span>
+                    <span class="text-danger" *ngIf="f['cedula'].hasError('pasaporte')">El pasaporte debe contener entre 5 y 13 caracteres.</span>
+                    <span class="text-danger" *ngIf="f['cedula'].hasError('existe')">Esta identificación ya pertenece a otro cliente.</span>
+                    <span class="text-danger" *ngIf="f['cedula'].hasError('consultaIdentificacion')">
+                      No se pudo verificar la identificación.
+                      <button type="button" class="btn btn-link btn-sm p-0" (click)="reintentarIdentificacion()">Reintentar</button>
+                    </span>
+                  </ng-container>
               </div>
             </div>
 
@@ -174,8 +188,8 @@
           </div>
 
           <div class="my-0 text-center">
-            <button type="button" class="btn btn-success btn-sm mx-1"
-              [disabled]="formCliente.pristine || !formCliente.valid" (click)="onSubmit()">
+            <button type="submit" class="btn btn-success btn-sm mx-1"
+              [disabled]="formCliente.pristine || !formCliente.valid">
               <i class="fa fa-check-circle"></i> Aceptar
             </button>
             <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="retornar()">
@@ -184,7 +198,7 @@
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
               (click)="onBuscarCliente()" data-target="#modalUsuarioPass">
-              Ususario/Contraseña
+              Usuario / Contraseña
             </button>
           </div>
 
@@ -199,154 +213,97 @@
 
 
 
-<!-- Modal -->
-<div class="modal fade" id="modalUsuarioPass" data-backdrop="static" data-keyboard="false" tabindex="-1"
-  aria-labelledby="modalUsuarioPassLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content border-0 rounded-3 shadow-lg">
-      <div class="modal-header bg-gradient-primary text-white">
-        <div>
-          <h5 class="modal-title mb-0">
-            <i class="bi bi-person-gear mr-2"></i> Actualizar usuario y contraseña
-          </h5>
-          <small class="d-block text-white-50">
-            Defina las credenciales de acceso al portal de clientes
-          </small>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row">
-            <!-- Columna izquierda: datos del cliente -->
-            <div class="col-md-5 mb-3">
-              <div class="card border-0 bg-light rounded-3 h-100">
-                <div class="card-header bg-light border-0 pb-1">
-                  <h6 class="mb-0 font-weight-bold">
-                    <i class="bi bi-person-lines-fill mr-1"></i> Datos del cliente
-                  </h6>
-                </div>
-                <div class="card-body pt-2 pb-3" *ngIf="clienteSeleccionado; else sinClienteInfo">
-                  <p class="small mb-2">
-                    <strong>Nombre:</strong><br>
-                    <span>{{ clienteSeleccionado.nombre }}</span>
-                  </p>
-                  <p class="small mb-2">
-                    <strong>Identificación:</strong><br>
-                    <span>{{ clienteSeleccionado.cedula }}</span>
-                  </p>
-                  <p class="small mb-0">
-                    <strong>Dirección:</strong><br>
-                    <span>{{ clienteSeleccionado.direccion || 'No registrada' }}</span>
-                  </p>
-                </div>
-                <ng-template #sinClienteInfo>
-                  <div class="card-body d-flex align-items-center justify-content-center">
-                    <span class="text-muted small">
-                      <i class="bi bi-info-circle mr-1"></i>
-                      Busque un cliente para mostrar su información.
-                    </span>
-                  </div>
-                </ng-template>
-              </div>
-            </div>
-
-            <!-- Columna derecha: credenciales -->
-            <div class="col-md-7">
-              <form [formGroup]="formCredenciales" (ngSubmit)="onActualizarCredenciales()">
-                <h6 class="fw-bold text-secondary mb-3">
-                  <i class="bi bi-key-fill mr-1"></i> Credenciales de acceso
-                </h6>
-
-                <div class="mb-3">
-                  <label class="form-label small font-weight-bold">Usuario de acceso</label>
-                  <div class="input-group input-group-sm">
-                    <span class="input-group-text">
-                      <i class="bi bi-person-circle"></i>
-                    </span>
-                    <input type="text" class="form-control" formControlName="username"
-                      placeholder="Nombre de usuario" />
-                  </div>
-                  <div class="form-text text-muted small">
-                    Este será el usuario que el cliente usará para iniciar sesión.
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group col-md-6 mb-3">
-                    <label class="form-label small font-weight-bold">Nueva contraseña</label>
-                    <div class="input-group input-group-sm">
-                      <span class="input-group-text">
-                        <i class="bi bi-lock-fill"></i>
-                      </span>
-                      <input type="password" class="form-control" formControlName="password" placeholder="********" />
-                    </div>
-                  </div>
-
-                  <div class="form-group col-md-6 mb-3">
-                    <label class="form-label small font-weight-bold">Confirmar contraseña</label>
-                    <div class="input-group input-group-sm">
-                      <span class="input-group-text">
-                        <i class="bi bi-lock"></i>
-                      </span>
-                      <input type="password" class="form-control" formControlName="confirmPassword"
-                        placeholder="********" />
-                    </div>
-                    <div *ngIf="
-    formCredenciales.errors?.['passwordMismatch'] &&
-    (formCredenciales.get('password')?.touched ||
-    formCredenciales.get('confirmPassword')?.touched)
-  " class="text-danger small mt-1">
-                      Las contraseñas no coinciden.
-                    </div>
-
-                  </div>
-                </div>
-
-                <!-- Estado activo / inactivo -->
-                <div class="mt-2 mb-3">
-                  <label class="form-label small font-weight-bold d-block">Estado del usuario</label>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="switchActivo" formControlName="activo">
-                    <label class="form-check-label small" for="switchActivo">
-                      {{ formCredenciales.get('activo')?.value ? 'Usuario activo' : 'Usuario inactivo' }}
-                    </label>
-                  </div>
-                  <div class="form-text text-muted small">
-                    Si el usuario está inactivo, no podrá iniciar sesión en el portal.
-                  </div>
-                </div>
-
-                <div class="d-flex justify-content-end mt-4">
-                  <button type="button" class="btn btn-outline-secondary btn-sm mr-2" data-dismiss="modal">
-                    <i class="bi bi-x-circle mr-1"></i> Cerrar
-                  </button>
-
-                  <button type="submit" class="btn btn-success btn-sm"
-                    [disabled]="loadingGuardar || formCredenciales.invalid || !clienteSeleccionado">
-                    <i class="bi bi-save mr-1"></i>
-                    {{ loadingGuardar ? 'Guardando...' : 'Guardar cambios' }}
-                  </button>
-                </div>
-              </form>
-
-              <div *ngIf="successMsg" class="alert alert-success mt-3 py-2 small">
-                <i class="bi bi-check-circle-fill mr-1"></i>{{ successMsg }}
-              </div>
-
-              <div *ngIf="errorMsg" class="alert alert-danger mt-3 py-2 small">
-                <i class="bi bi-exclamation-triangle-fill mr-1"></i>{{ errorMsg }}
-              </div>
-
-              <div *ngIf="!clienteSeleccionado && !loadingBuscar && !errorMsg" class="mt-3 text-muted small">
-                <i class="bi bi-info-circle mr-1"></i>
-                Busque un cliente para poder actualizar su usuario y contraseña.
-              </div>
-            </div>
+<!-- Credenciales del portal -->
+<div class="modal fade credentials-modal" id="modalUsuarioPass" data-backdrop="static" data-keyboard="false"
+  tabindex="-1" aria-labelledby="modalUsuarioPassLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header credentials-header">
+        <div class="credentials-heading">
+          <span class="credentials-icon"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+          <div>
+            <span class="credentials-eyebrow">PORTAL DE CLIENTES</span>
+            <h5 id="modalUsuarioPassLabel">Usuario y contrase&ntilde;a</h5>
+            <p>Administra las credenciales y el estado de acceso.</p>
           </div>
         </div>
+        <button type="button" class="credentials-close" data-dismiss="modal" aria-label="Cerrar"
+          [disabled]="loadingGuardar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
       </div>
+      <form [formGroup]="formCredenciales" (ngSubmit)="onActualizarCredenciales()">
+        <div class="modal-body">
+          <div class="credentials-client" *ngIf="clienteSeleccionado">
+            <span class="credentials-avatar"><i class="bi bi-person" aria-hidden="true"></i></span>
+            <div>
+              <span class="credentials-caption">CLIENTE</span>
+              <strong>{{ clienteSeleccionado.nombre }}</strong>
+              <span class="text-muted small">{{ clienteSeleccionado.cedula }}</span>
+            </div>
+          </div>
+          <fieldset [disabled]="loadingGuardar || !clienteSeleccionado">
+            <div class="credentials-field">
+              <label for="portalUsername">Usuario de acceso</label>
+              <input id="portalUsername" type="text" class="form-control" formControlName="username"
+                autocomplete="username" placeholder="Ingresa el nombre de usuario"
+                [class.is-invalid]="formCredenciales.get('username')?.invalid && formCredenciales.get('username')?.touched"
+                aria-describedby="portalUsernameHelp">
+              <small id="portalUsernameHelp" class="text-muted">El cliente usar&aacute; este usuario para ingresar al portal.</small>
+              <div class="text-danger small" *ngIf="formCredenciales.get('username')?.invalid && formCredenciales.get('username')?.touched">
+                Ingresa el usuario de acceso.
+              </div>
+            </div>
+            <div class="credentials-password-heading">
+              <label for="portalPassword">Nueva contrase&ntilde;a</label>
+              <button type="button" class="credentials-visibility" (click)="mostrarPasswords = !mostrarPasswords"
+                [attr.aria-pressed]="mostrarPasswords">
+                <i class="bi" [ngClass]="mostrarPasswords ? 'bi-eye-slash' : 'bi-eye'" aria-hidden="true"></i>
+                {{ mostrarPasswords ? 'Ocultar' : 'Mostrar' }} contrase&ntilde;as
+              </button>
+            </div>
+            <div class="credentials-password-grid">
+              <div class="credentials-field">
+                <input id="portalPassword" [type]="mostrarPasswords ? 'text' : 'password'" class="form-control"
+                  formControlName="password" autocomplete="new-password" placeholder="Nueva contrase&ntilde;a"
+                  aria-describedby="portalPasswordHelp"
+                  [class.is-invalid]="formCredenciales.get('password')?.invalid && formCredenciales.get('password')?.touched">
+                <small id="portalPasswordHelp" [class.text-danger]="formCredenciales.get('password')?.invalid && formCredenciales.get('password')?.touched"
+                  [class.text-muted]="!formCredenciales.get('password')?.touched || formCredenciales.get('password')?.valid">
+                  Usa al menos 6 caracteres.
+                </small>
+              </div>
+              <div class="credentials-field">
+                <label class="sr-only" for="portalConfirmPassword">Confirmar contrase&ntilde;a</label>
+                <input id="portalConfirmPassword" [type]="mostrarPasswords ? 'text' : 'password'" class="form-control"
+                  formControlName="confirmPassword" autocomplete="new-password" placeholder="Repite la contrase&ntilde;a"
+                  aria-describedby="portalConfirmHelp"
+                  [class.is-invalid]="formCredenciales.get('confirmPassword')?.touched && (formCredenciales.get('confirmPassword')?.invalid || formCredenciales.hasError('passwordMismatch'))">
+                <small id="portalConfirmHelp" class="text-danger" *ngIf="formCredenciales.get('confirmPassword')?.touched">
+                  <span *ngIf="formCredenciales.get('confirmPassword')?.hasError('required')">Confirma la contrase&ntilde;a.</span>
+                  <span *ngIf="formCredenciales.hasError('passwordMismatch')">Las contrase&ntilde;as no coinciden.</span>
+                </small>
+              </div>
+            </div>
+            <label class="credentials-status" for="switchActivo" [class.credentials-status-active]="formCredenciales.get('activo')?.value">
+              <span>
+                <strong>{{ formCredenciales.get('activo')?.value ? 'Usuario activo' : 'Usuario inactivo' }}</strong>
+                <small>{{ formCredenciales.get('activo')?.value ? 'Acceso al portal habilitado.' : 'Acceso al portal deshabilitado.' }}</small>
+              </span>
+              <input type="checkbox" id="switchActivo" formControlName="activo" role="switch">
+            </label>
+          </fieldset>
+          <div *ngIf="successMsg" class="alert alert-success mt-3 mb-0" role="status">{{ successMsg }}</div>
+          <div *ngIf="errorMsg" class="alert alert-danger mt-3 mb-0" role="alert">{{ errorMsg }}</div>
+          <p *ngIf="!clienteSeleccionado" class="text-muted mt-3 mb-0">Espera a que se carguen los datos del cliente.</p>
+        </div>
+        <div class="modal-footer credentials-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal" [disabled]="loadingGuardar">Cerrar</button>
+          <button type="submit" class="btn btn-success" [disabled]="loadingGuardar || formCredenciales.invalid || !clienteSeleccionado">
+            <span *ngIf="loadingGuardar" class="spinner-border spinner-border-sm mr-2" aria-hidden="true"></span>
+            <i *ngIf="!loadingGuardar" class="bi bi-check2-circle mr-2" aria-hidden="true"></i>
+            {{ loadingGuardar ? 'Guardando...' : 'Guardar credenciales' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

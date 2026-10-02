@@ -51,12 +51,12 @@
                   </li>
                </ul>
                <div class="row justify-content-center">
-                  <button class="btn btn-warning btn-xs mx-1" *ngIf="rolepermission === 2 || rolepermission === 3"
+                  <button class="btn btn-warning btn-xs mx-1" *ngIf="puedeModificar"
                      type="button" (click)="modificarCliente(cliente.idcliente)">
                      <i class="fa fa-edit" style="font-size:24pxi"></i>
                      Modificar
                   </button>
-                  <button class="btn btn-danger btn-xs mx-1" *ngIf="rolepermission === 3" data-toggle="modal"
+                  <button class="btn btn-danger btn-xs mx-1" *ngIf="puedeEliminar" data-toggle="modal"
                      data-target="#modalEliminar">
                      <i class="fa fa-times-circle" style="font-size:24pxi"></i>
                      Eliminar

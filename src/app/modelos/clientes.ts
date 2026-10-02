@@ -3,6 +3,8 @@ import { PersoneriaJuridica } from "./personeria-juridica";
 import { Tpidentifica } from "./tpidentifica.model";
 
 export class Clientes {
+    username?: string;
+    activo?: boolean;
     idcliente: number;
     cedula: String;
     nombre: String;

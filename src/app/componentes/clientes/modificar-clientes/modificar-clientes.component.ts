@@ -1,4 +1,4 @@
-import { Component, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, SimpleChanges } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { forkJoin, map, of } from 'rxjs';
+import { catchError, forkJoin, map, of, Subject, switchMap, takeUntil, timer } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -25,7 +25,8 @@ import Swal from 'sweetalert2';
   templateUrl: './modificar-clientes.component.html',
   styleUrls: ['./modificar-clientes.component.css'],
 })
-export class ModificarClientesComponent implements OnInit {
+export class ModificarClientesComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   private parent: string | null;
   formCliente: FormGroup;
   cliente: Clientes;
@@ -46,6 +47,7 @@ export class ModificarClientesComponent implements OnInit {
 
   loadingBuscar = false;
   loadingGuardar = false;
+  mostrarPasswords = false;
 
   clienteSeleccionado: any | null = null;
 
@@ -76,6 +78,7 @@ export class ModificarClientesComponent implements OnInit {
         username: ['', [Validators.required, Validators.minLength(4)]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required]],
+        activo: [true],
       },
       { validators: this.passwordsCoincidenValidator }
     );
@@ -101,12 +104,12 @@ export class ModificarClientesComponent implements OnInit {
       {
         idcliente: '',
         idnacionalidad_nacionalidad: [null, Validators.required],
-        idtpidentifica_tpidentifica: [null, Validators.required],
-        cedula: [
-          '',
-          Validators.required,
-          [this.valIdentifica.bind(this), this.busIdentifica.bind(this)],
-        ],
+        idtpidentifica_tpidentifica: this.fb.control(null, { validators: Validators.required, updateOn: 'change' }),
+        cedula: this.fb.control('', {
+          validators: [Validators.required, this.valIdentifica.bind(this)],
+          asyncValidators: [this.busIdentifica.bind(this)],
+          updateOn: 'change',
+        }),
         nombre: ['', [Validators.required, Validators.minLength(3)]],
         direccion: ['', Validators.required],
         telefono: ['', Validators.required],
@@ -129,11 +132,14 @@ export class ModificarClientesComponent implements OnInit {
         username: ['', [Validators.required]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required]],
-        activo: [true, Validators.required], // nuevo campo
+        activo: [true],
       },
       { validators: this.passwordMatchValidator }
     );
 
+    this.formCliente.get('idtpidentifica_tpidentifica')!.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.changeTpidentifica());
     this.cargarCatalogosYCliente();
   }
   passwordMatchValidator(group: AbstractControl) {
@@ -281,12 +287,19 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   changeTpidentifica() {
-    const cedulaControl = this.formCliente.get('cedula');
-    if (cedulaControl) {
-      cedulaControl.setValue('');
-    }
-    this.codidentifica =
-      this.formCliente.value.idtpidentifica_tpidentifica?.codigo ?? '';
+    this.codidentifica = this.formCliente.get('idtpidentifica_tpidentifica')?.value?.codigo ?? '';
+    const identificacion = this.formCliente.get('cedula');
+    identificacion?.updateValueAndValidity();
+    if (identificacion?.value) identificacion.markAsTouched();
+  }
+
+  reintentarIdentificacion(): void {
+    this.formCliente.get('cedula')?.updateValueAndValidity();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private construirPayloadCliente() {
@@ -357,7 +370,7 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.formCliente.invalid) {
+    if (!this.formCliente.valid) {
       this.formCliente.markAllAsTouched();
       return;
     }
@@ -424,72 +437,6 @@ export class ModificarClientesComponent implements OnInit {
         },
       });
     });
-    return;
-
-    Swal.fire({
-      title: '¿Guardar cambios?',
-      html: `Cliente: <strong>${this.formCliente.value.nombre}</strong><br>
-             Identificación: <strong>${this.formCliente.value.cedula}</strong>`,
-      icon: 'question',
-      input: 'textarea',
-      inputLabel: 'Observación del cambio',
-      inputPlaceholder: 'Describa brevemente qué se modificó...',
-      inputAttributes: { 'aria-label': 'Observación' },
-      showCancelButton: true,
-      confirmButtonColor: '#28a745',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: '<i class="bi bi-check-circle"></i> Guardar',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (!result.isConfirmed) return;
-
-      const formVal = this.formCliente.value;
-
-      const clienteBody = {
-        ...formVal,
-        idnacionalidad_nacionalidad: {
-          idnacionalidad: formVal.idnacionalidad_nacionalidad?.idnacionalidad
-            ?? formVal.idnacionalidad_nacionalidad
-        },
-        idtpidentifica_tpidentifica: {
-          idtpidentifica: formVal.idtpidentifica_tpidentifica?.idtpidentifica
-            ?? formVal.idtpidentifica_tpidentifica
-        },
-        idpjuridica_personeriajuridica: {
-          idpjuridica: formVal.idpjuridica_personeriajuridica?.idpjuridica
-            ?? formVal.idpjuridica_personeriajuridica
-        },
-        usumodi: this.authService.idusuario,
-        fecmodi: new Date().toISOString().split('T')[0],
-      };
-
-      this.cliService.updateClienteAuditoria(
-        clienteBody,
-        this.authService.idusuario,
-        result.value || 'Sin observación',
-        'MODIFICACION'
-      ).subscribe({
-        next: () => {
-          Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: 'Cliente modificado correctamente',
-            position: 'top',
-            showConfirmButton: false,
-            timer: 2000,
-          });
-          this.retornar();
-        },
-        error: (err) => {
-          console.error(err.error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al guardar',
-            text: err?.error?.message ?? 'Ocurrió un error inesperado.',
-          });
-        },
-      });
-    });
   }
 
   compararNacionalidad(o1: Nacionalidad, o2: Nacionalidad): boolean {
@@ -531,38 +478,30 @@ export class ModificarClientesComponent implements OnInit {
     return String(id1) === String(id2);
   }
 
-  valIdentifica(control: AbstractControl) {
-    switch (this.codidentifica) {
-      case '04': // RUC
-        if (control.value.length == 13) {
-          const numeros = /^\d+$/.test(control.value);
-          if (numeros) return of(null); // Validación exitosa
-          else return of({ invalid: true });
-        } else return of({ invalid: true }); // Validación fallida
-      case '05': // Cedula
-        if (control.value.length == 10) {
-          let rtn = this.valCedula(control.value);
-          if (rtn) return of(null);
-          else return of({ invalid: true });
-        } else return of({ invalid: true });
-      case '06': //Pasaporte
-        if (control.value.length >= 5) {
-          return of(null);
-        } else return of({ invalid: true });
+  valIdentifica(control: AbstractControl): ValidationErrors | null {
+    const valor = String(control.value ?? '');
+    if (!valor) return null; // Validators.required handles empty input.
+    const codigo = control.parent?.get('idtpidentifica_tpidentifica')?.value?.codigo;
+    switch (codigo) {
+      case '04':
+        return /^\d{13}$/.test(valor) ? null : { ruc: true };
+      case '05':
+        return /^\d{10}$/.test(valor) && this.valCedula(valor) ? null : { cedula: true };
+      case '06':
+        return valor.trim().length >= 5 && valor.length <= 13 ? null : { pasaporte: true };
       default:
-        return of({ invalid: true });
+        return { tipoIdentificacion: true };
     }
-    return of({ invalid: true }); // Si no se encuentra una validación específica, considera que es fallida
   }
 
   busIdentifica(control: AbstractControl) {
-    return this.cliService
-      .valIdentificacion(control.value)
-      .pipe(
-        map((result) =>
-          control.value != this.antcedula && result ? { existe: true } : null
-        )
-      );
+    const identificacion = String(control.value ?? '');
+    if (identificacion === this.antcedula) return of(null);
+    return timer(300).pipe(
+      switchMap(() => this.cliService.valIdentificacion(identificacion)),
+      map(result => result ? { existe: true } : null),
+      catchError(() => of({ consultaIdentificacion: true }))
+    );
   }
 
   valCedula(cedula: String) {
@@ -611,33 +550,21 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   onBuscarCliente(): void {
+    if (this.loadingGuardar) return;
     this.errorMsg = '';
     this.successMsg = '';
-    this.clienteSeleccionado = null;
-
-    const cuenta = this.formBuscar.value.cuenta?.trim();
-    const identificacion = this.formBuscar.value.identificacion?.trim();
-
-    /*     if (!cuenta && !identificacion) {
-          this.errorMsg = 'Ingrese número de cuenta o identificación para buscar.';
-          return;
-        }
-     */
-    this.loadingBuscar = true;
-    let cli: any = this.cliente;
-    this.loadingBuscar = false;
-
-    if (!cli) {
-      this.errorMsg =
-        'No se encontró ningún cliente con los datos proporcionados.';
-      return;
-    }
-
-    this.clienteSeleccionado = cli;
+    this.mostrarPasswords = false;
+    this.clienteSeleccionado = this.cliente ?? null;
+    this.formCredenciales.reset({
+      username: this.cliente?.username ?? '',
+      password: '',
+      confirmPassword: '',
+      activo: true,
+    });
   }
 
   onActualizarCredenciales(): void {
-    if (!this.clienteSeleccionado) return;
+    if (!this.clienteSeleccionado || this.loadingGuardar) return;
 
     this.errorMsg = '';
     this.successMsg = '';
@@ -647,7 +574,7 @@ export class ModificarClientesComponent implements OnInit {
       return;
     }
 
-    const { username, password } = this.formCredenciales.value;
+    const { username, password, activo } = this.formCredenciales.getRawValue();
 
     this.loadingGuardar = true;
 
@@ -655,13 +582,19 @@ export class ModificarClientesComponent implements OnInit {
       .actualizarCredenciales(
         this.clienteSeleccionado.idcliente,
         username,
-        password
+        password,
+        activo
       )
       .subscribe({
         next: () => {
           this.loadingGuardar = false;
           this.successMsg = 'Usuario y contraseña actualizados correctamente.';
-          this.retornar();
+          this.cliente.username = username;
+          this.clienteSeleccionado.activo = activo;
+          this.formCredenciales.patchValue({ password: '', confirmPassword: '' });
+          this.formCredenciales.markAsPristine();
+          this.formCredenciales.markAsUntouched();
+          this.mostrarPasswords = false;
         },
         error: (err) => {
           console.error(err);
@@ -673,7 +606,7 @@ export class ModificarClientesComponent implements OnInit {
 
   limpiarTodo(): void {
     this.formBuscar.reset();
-    this.formCredenciales.reset();
+    this.formCredenciales.reset({ username: '', password: '', confirmPassword: '', activo: true });
     this.clienteSeleccionado = null;
     this.errorMsg = '';
     this.successMsg = '';

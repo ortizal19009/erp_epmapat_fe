@@ -104,9 +104,10 @@ export class ClientesService {
   actualizarCredenciales(
     idcliente: number,
     username: string,
-    password: string
+    password: string,
+    activo?: boolean
   ) {
-    const body = { username, password };
+    const body = { username, password, activo };
     return this.http.put<void>(`${baseUrl}/${idcliente}/credenciales`, body);
   }
   obtenerDuplicados(page: number, size: number, q?: string) {
