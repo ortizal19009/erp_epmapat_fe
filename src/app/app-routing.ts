@@ -928,7 +928,8 @@ const routes: Routes = [
   {
     path: 'trazabilidad',
     loadChildren: () => import('./features/trazabilidad/trazabilidad.module').then(m => m.TrazabilidadModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
+    data: { windowPermission: 'trazabilidad' }
   },
   //================ CONTABILIDAD =============================
   { path: 'cuentas', component: CuentasComponent, canActivate: [AuthGuard] },

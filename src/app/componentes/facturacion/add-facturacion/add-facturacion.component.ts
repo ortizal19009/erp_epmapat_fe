@@ -303,7 +303,7 @@ export class AddFacturacionComponent implements OnInit {
   private guardarLiquidafac$(facturacion: Facturacion, factura: Facturas, cuota: number): Observable<Object> {
     const liquidafac = {} as Liquidafac;
     liquidafac.cuota = cuota;
-    liquidafac.valor = this.totfac;
+    liquidafac.valor = factura.totaltarifa;
     liquidafac.estado = 0;
     liquidafac.idfacturacion_facturacion = facturacion;
     liquidafac.idfactura_facturas = factura;
@@ -371,6 +371,14 @@ export class AddFacturacionComponent implements OnInit {
       return;
     }
 
+    const idProducto = Number(producto.idcatalogoitems);
+    const existente = this.arrRubros.find((item) => item[4] === idProducto);
+    if (existente) {
+      existente[1] = Number(existente[1]) + 1;
+      this.subtotal();
+      return;
+    }
+
     this.arrRubros.push([
       String(rubro.descripcion || producto?.descripcion || 'Rubro sin descripción'),
       1,
@@ -383,26 +391,7 @@ export class AddFacturacionComponent implements OnInit {
   }
 
   todos() {
-    let i = 0;
-    this._productos.forEach(() => {
-      const producto = this._productos[i];
-      const rubro = producto?.idrubro_rubros;
-      if (!rubro) {
-        i++;
-        return;
-      }
-
-      this.arrRubros.push([
-        String(rubro.descripcion || producto?.descripcion || 'Rubro sin descripción'),
-        1,
-        Number(rubro.valor || 0),
-        Number(rubro.swiva || 0),
-        Number(producto?.idcatalogoitems || 0),
-        Number(rubro.idrubro || 0),
-      ]);
-      i++;
-    });
-    this.subtotal();
+    this._productos.forEach((producto: Catalogoitems) => this.aniadir(producto));
   }
 
   modiValor(indice: number) {

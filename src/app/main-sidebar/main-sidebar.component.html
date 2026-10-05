@@ -58,7 +58,7 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [class.disabled]="!canAnyWindowPermission(['clientes', 'abonados', 'emisiones', 'suspensiones', 'habilitaciones', 'rutas', 'pliego', 'pliego24'], 1)">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!canAnyWindowPermission(['clientes', 'abonados', 'emisiones', 'suspensiones', 'habilitaciones', 'rutas', 'pliego', 'pliego24', 'trazabilidad'], 1)">
             <i class="bi-droplet-half nav-icon" style="font-size: 15px;"></i>
             <p> Consumo Agua
               <i class="fas fa-angle-right right"></i>
@@ -130,7 +130,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/trazabilidad" class="nav-link" [class.disabled]="!canWindowPermission('usuarios', 1)">
+              <a routerLink="/trazabilidad" class="nav-link" [class.disabled]="!canWindowPermission('trazabilidad', 1)">
                 <i class="fa fa-map-marker-alt nav-icon"></i>
                 <p class="text-warning"> Trazabilidad GPS</p>
               </a>

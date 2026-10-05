@@ -32,6 +32,7 @@ export class TrackingMonitorComponent implements OnInit, AfterViewInit, OnDestro
   ) {}
 
   ngOnInit(): void {
+    sessionStorage.setItem('ventana', '/trazabilidad');
     this.loadReaders();
     this.loadSessions();
   }

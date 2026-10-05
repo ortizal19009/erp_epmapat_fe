@@ -132,6 +132,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
   }
 
   public selecModulo(opcion: number) {
+    const cambioModulo = this.moduActual !== opcion;
     this.modulo = opcion;
     this.moduActual = opcion;
     const values = JSON.parse(atob(sessionStorage.getItem('abc')!));
@@ -142,6 +143,9 @@ export class AutorizaService implements OnDestroy, CanActivate {
     values.moduActual = opcion;
 
     sessionStorage.setItem('abc', btoa(JSON.stringify(values)));
+    if (cambioModulo) {
+      this.router.navigate(['/inicio']);
+    }
   }
 
   logout(): void {

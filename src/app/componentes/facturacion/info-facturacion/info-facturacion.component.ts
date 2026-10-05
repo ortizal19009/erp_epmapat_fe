@@ -64,7 +64,7 @@ export class InfoFacturacionComponent implements OnInit {
 
     this._liquidafac.forEach((liqfac: any) => {
       const factura = liqfac?.idfactura_facturas;
-      suma += Number(liqfac?.valor ?? factura?.totaltarifa ?? 0);
+      suma += this.getValorPlanilla(liqfac);
       if (Number(factura?.pagado) === 1) {
         cobradas++;
       } else {
@@ -123,7 +123,9 @@ export class InfoFacturacionComponent implements OnInit {
   }
 
   getValorPlanilla(liqfac: any): number {
-    return Number(liqfac?.valor ?? liqfac?.idfactura_facturas?.totaltarifa ?? 0);
+    // La factura contiene el importe individual; liquidafac.valor puede
+    // contener el total de la deuda en registros anteriores.
+    return Number(liqfac?.idfactura_facturas?.totaltarifa ?? liqfac?.valor ?? 0);
   }
 
   private resolveNombreCliente(datos: any): string {

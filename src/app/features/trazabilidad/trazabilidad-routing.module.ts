@@ -7,7 +7,8 @@ const routes: Routes = [
   {
     path: '',
     component: TrackingMonitorComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
+    data: { windowPermission: 'trazabilidad' }
   }
 ];
 
