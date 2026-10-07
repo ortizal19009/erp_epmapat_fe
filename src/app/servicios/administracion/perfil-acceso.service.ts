@@ -8,6 +8,7 @@ import { UsuarioService } from './usuario.service';
 
 @Injectable({ providedIn: 'root' })
 export class PerfilAccesoService {
+  verificationErrorStatus: number | null = null;
   private loadedUserId = 0;
   private loadingUserId = 0;
   private loadingRequest?: Observable<boolean>;
@@ -34,6 +35,7 @@ export class PerfilAccesoService {
     if (this.loadingRequest && this.loadingUserId === userId) return this.loadingRequest;
 
     this.clearProfile();
+    this.verificationErrorStatus = null;
     this.loadingUserId = userId;
     this.loadingRequest = forkJoin({
       session: this.usuarioService.validateWebSession(),
@@ -46,7 +48,8 @@ export class PerfilAccesoService {
       }),
       map(() => true),
       // A failed verification must never grant access based on a previous browser cache.
-      catchError(() => {
+      catchError((error) => {
+        this.verificationErrorStatus = Number(error?.status ?? 503);
         this.clearProfile();
         this.authService.modules = [];
         this.authService.enabModulos();
@@ -113,7 +116,7 @@ export class PerfilAccesoService {
       if (!raw) return;
       const session = JSON.parse(atob(raw));
       session.modules = modules;
-      sessionStorage.setItem('abc', btoa(JSON.stringify(session)));
+      this.authService.saveSession(session);
     } catch {
       // The profile remains available in the in-memory session even if legacy storage is malformed.
     }

@@ -62,9 +62,7 @@ export class LoginComponent implements OnInit{
                   nomusu: resp?.username || username,
                   modules: []
                };
-               sessionStorage.setItem('abc', btoa(JSON.stringify(tokenPayload)));
-               sessionStorage.setItem('webJwt', token);
-               localStorage.setItem('sessionlog', 'true');
+               this.authService.saveSession(tokenPayload, token);
             } catch {}
 
             // Do not expose the ERP modules until both module and window permissions are verified.

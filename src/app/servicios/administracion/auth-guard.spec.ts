@@ -6,6 +6,29 @@ import { ActivatedRouteSnapshot } from '@angular/router';
 import { of } from 'rxjs';
 
 describe('AuthGuard', () => {
+  [0, 401, 502, 503, 504].forEach((status) => {
+    it(`handles failed session verification with status ${status}`, () => {
+      const router = jasmine.createSpyObj('Router', ['navigate']);
+      const auth = { sessionlog: true, idusuario: 2, logout: jasmine.createSpy('logout') };
+      const profile = {
+        loadForCurrentUser: () => of(false), verificationErrorStatus: status,
+      };
+      const guard = new AuthGuard(auth as unknown as AutorizaService, router,
+        profile as unknown as PerfilAccesoService);
+      const result = guard.canActivate({ routeConfig: { path: 'facturacion' } } as ActivatedRouteSnapshot);
+      if (typeof result === 'boolean') { fail('Expected verification'); return; }
+      result.subscribe((allowed) => {
+        expect(allowed).toBeFalse();
+        if (status === 401) expect(auth.logout).toHaveBeenCalled();
+        else {
+          expect(auth.logout).not.toHaveBeenCalled();
+          expect(router.navigate).toHaveBeenCalledWith(['/service-unavailable'], {
+            queryParams: { status: String(status) },
+          });
+        }
+      });
+    });
+  });
   [0, 1, 2, 3].forEach((level) => {
     ['trazabilidad', ''].forEach((path) => {
       it(`controls trazabilidad access at level ${level} for route '${path}'`, () => {

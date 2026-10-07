@@ -34,11 +34,11 @@
                                 <option value=6>Consumos por categoría</option>
                                 <option value=12>Refacturaciones</option>
                                 <option value=13>Refacturaciones Emisión</option>
-                                <option value=7 [disabled]="usuario !=1">Refacturación por emisión</option>
-                                <option value=8 [disabled]="usuario !=1"> Refacturación por fecha</option>
+                                <option value=7>Refacturación por emisión</option>
+                                <option value=8> Refacturación por fecha</option>
                                 <option value=9>Ref emision rubros</option>
                                 <option value=10>Ref fecha rubros</option>
-                                <option value=11 [disabled]="usuario !=1">Resumen Emisión</option>
+                                <option value=11>Resumen Emisión</option>
 
                             </select>
                         </div>
@@ -133,10 +133,10 @@
                     </div>
                 </form>
                 <div *ngIf="!swbotones" class="text-center">
-                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' data-toggle="modal"
+                    <button *ngIf="swimprimir" data-allow-readonly type='button' class='btn btn-success btn-sm mx-1' data-toggle="modal"
                         data-target="#staticBackdrop" [disabled]="swbotones || swcalculando || (opcreporte === 14 && !puedeGenerarPreemision)" (click)="imprimir()">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                    <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="exportar()"
+                    <button *ngIf="!swimprimir" data-allow-readonly type='button' class='btn btn-warning btn-sm mx-1' (click)="exportar()"
                         [disabled]="!formImprimir.valid || swcalculando || (opcreporte === 14 && !puedeGenerarPreemision)">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
 

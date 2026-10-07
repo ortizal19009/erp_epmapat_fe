@@ -149,6 +149,16 @@
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
               "node_modules/admin-lte/dist/js/adminlte.min.js"
             ]
+          },
+          "configurations": {
+            "rrhh": {
+              "tsConfig": "tsconfig.rrhh-spec.json",
+              "scripts": []
+            },
+            "emisiones": {
+              "tsConfig": "tsconfig.emisiones-spec.json",
+              "scripts": []
+            }
           }
         }
       }

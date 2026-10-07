@@ -19,6 +19,10 @@
   width: 190px;
 }
 
+.calendar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .5rem; }
+.calendar-day { border: 1px solid #adb5bd; border-radius: .3rem; padding: .5rem; background: #fff; color: #212529; }
+.calendar-event { display: block; width: 100%; margin-top: .35rem; text-align: left; white-space: normal; }
+
 .gap-sm > * + * {
   margin-left: .5rem;
 }

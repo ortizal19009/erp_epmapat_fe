@@ -80,9 +80,7 @@ export class ContentWrapperComponent implements OnInit {
             alias: resp.username,
             modules: [],
           };
-          sessionStorage.setItem('abc', btoa(JSON.stringify(abc)));
-          sessionStorage.setItem('webJwt', resp.token);
-          localStorage.setItem('sessionlog', 'true');
+          this.authService.saveSession(abc, resp.token);
 
           // El guard de /home recibe el perfil ya validado y no carga módulos bloqueados.
           this.perfilAcceso.loadForCurrentUser(true).subscribe({

@@ -94,10 +94,22 @@ export class ImpEmisionesComponent implements OnInit {
           emision: datos.idemision,
         });
       },
-      error: (err) => console.error(err.error),
+      error: (err) => { void this.mostrarErrorReporte(err); },
     });
     //this.getReporte();
     this.listAllEmisiones();
+  }
+
+  private async mostrarErrorReporte(error: any): Promise<void> {
+    this.s_loading.hideLoading();
+    let detail = error?.error;
+    if (detail instanceof Blob) {
+      try { detail = JSON.parse(await detail.text()); } catch { detail = null; }
+    }
+    const message = error?.status === 401 ? 'La sesi\u00f3n expir\u00f3. Inicie sesi\u00f3n nuevamente.'
+      : error?.status === 403 ? 'No tiene permiso para consultar este reporte de emisiones.'
+      : detail?.message || error?.message || 'No se pudo cargar la informaci\u00f3n del reporte.';
+    await Swal.fire({ icon: 'error', title: 'Reporte no disponible', text: message });
   }
 
   async getReporte(idemision: number) {
@@ -139,7 +151,7 @@ export class ImpEmisionesComponent implements OnInit {
           emision: datos.idemision,
         });
       },
-      error: (err) => console.error(err.error),
+      error: (err) => { void this.mostrarErrorReporte(err); },
     });
   }
   colocaColor(colores: any) {
@@ -151,134 +163,143 @@ export class ImpEmisionesComponent implements OnInit {
     if (detalle) detalle.classList.add('nuevoBG2');
   }
   async imprimir() {
-    if (String(this.formImprimir.value.reporte) === '14') {
-      await this.generarPreemision(false);
-      return;
-    }
-    this.s_loading.showLoading();
-    let body: any;
-    let reporte: any;
-    switch (this.formImprimir.value.reporte) {
-      case '0':
-        this.buscarEmisiones();
-        break;
-      case '1':
-        this.getByIdEmisiones(this.formImprimir.value.emision);
-        break;
-      case '2':
-        this.getEmisionIndividualByIdEmision(this.formImprimir.value.emision);
-        break;
-      case '3':
-        this.impEmisionInicial(this.formImprimir.value.emision);
-        break;
-      case '4':
-        this.impEmisionFinal(this.formImprimir.value.emision);
-        break;
-      case '5':
-        this.impValoresEmisiones(this.formImprimir.value.emision);
-        break;
-      case '6':
-        this.impConsumoXCategoria(this.formImprimir.value.emision);
-        break;
-      case '7':
-        this.impRefacturacionxEmision(this.formImprimir.value.emision);
-        break;
-      case '8':
-        this.impRefacturacionxFecha(
-          this.formImprimir.value.d_emi,
-          this.formImprimir.value.h_emi
-        );
-        break;
-      case '9':
-        this.impRefEmisionRubros(this.formImprimir.value.emision);
-        break;
-      case '10':
-        this.impRefFechaRubros(
-          this.formImprimir.value.d_emi,
-          this.formImprimir.value.h_emi
-        );
-        break;
-      case '11':
-        this.getReporte(this.formImprimir.value.emision);
-        break;
-      case '12':
-        body = {
-          "reportName": "Refacturaciones",
-          "parameters": {
-            "desde": this.formImprimir.value.d_emi,
-            "hasta": this.formImprimir.value.h_emi,
-            "idusuario": 1
-          },
-          "extencion": ".pdf"
-        }
-
-        reporte = await this.s_jasperReport.getReporte(body);
-        setTimeout(() => {
-          const file = new Blob([reporte], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-
-          // Asignar el blob al iframe
-          const pdfViewer = document.getElementById(
-            'pdfViewer'
-          ) as HTMLIFrameElement;
-
-          if (pdfViewer) {
-            pdfViewer.src = fileURL;
+    try {
+      document.getElementById('pdfViewer')?.removeAttribute('src');
+      if (String(this.formImprimir.value.reporte) === '14') {
+        await this.generarPreemision(false);
+        return;
+      }
+      this.s_loading.showLoading();
+      let body: any;
+      let reporte: any;
+      switch (String(this.formImprimir.value.reporte)) {
+        case '0':
+          await this.buscarEmisiones();
+          break;
+        case '1':
+          await this.getByIdEmisiones(this.formImprimir.value.emision);
+          break;
+        case '2':
+          await this.getEmisionIndividualByIdEmision(this.formImprimir.value.emision);
+          break;
+        case '3':
+          await this.impEmisionInicial(this.formImprimir.value.emision);
+          break;
+        case '4':
+          await this.impEmisionFinal(this.formImprimir.value.emision);
+          break;
+        case '5':
+          await this.impValoresEmisiones(this.formImprimir.value.emision);
+          break;
+        case '6':
+          await this.impConsumoXCategoria(this.formImprimir.value.emision);
+          break;
+        case '7':
+          await this.impRefacturacionxEmision(this.formImprimir.value.emision);
+          break;
+        case '8':
+          await this.impRefacturacionxFecha(
+            this.formImprimir.value.d_emi,
+            this.formImprimir.value.h_emi
+          );
+          break;
+        case '9':
+          await this.impRefEmisionRubros(this.formImprimir.value.emision);
+          break;
+        case '10':
+          await this.impRefFechaRubros(
+            this.formImprimir.value.d_emi,
+            this.formImprimir.value.h_emi
+          );
+          break;
+        case '11':
+          await this.getReporte(this.formImprimir.value.emision);
+          break;
+        case '12':
+          body = {
+            "reportName": "Refacturaciones",
+            "parameters": {
+              "desde": this.formImprimir.value.d_emi,
+              "hasta": this.formImprimir.value.h_emi,
+              "idusuario": this.authService.idusuario
+            },
+            "extencion": ".pdf"
           }
-        }, 1000);
-        this.s_loading.hideLoading();
-        break;
-      case '13':
-        body = {
-          "reportName": "RefacturacionesRubros",
-          "parameters": {
-            "idemision": this.formImprimir.value.emision,
-            "idusuario": 1
-          },
-          "extencion": ".pdf"
-        }
 
-        reporte = await this.s_jasperReport.getReporte(body);
-        setTimeout(() => {
-          const file = new Blob([reporte], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
+          reporte = await this.s_jasperReport.getReporte(body);
+          setTimeout(() => {
+            const file = new Blob([reporte], { type: 'application/pdf' });
+            const fileURL = URL.createObjectURL(file);
 
-          // Asignar el blob al iframe
-          const pdfViewer = document.getElementById(
-            'pdfViewer'
-          ) as HTMLIFrameElement;
+            // Asignar el blob al iframe
+            const pdfViewer = document.getElementById(
+              'pdfViewer'
+            ) as HTMLIFrameElement;
 
-          if (pdfViewer) {
-            pdfViewer.src = fileURL;
+            if (pdfViewer) {
+              pdfViewer.src = fileURL;
+            }
+          }, 1000);
+          this.s_loading.hideLoading();
+          break;
+        case '13':
+          body = {
+            "reportName": "RefacturacionesRubros",
+            "parameters": {
+              "idemision": this.formImprimir.value.emision,
+              "idusuario": this.authService.idusuario
+            },
+            "extencion": ".pdf"
           }
-        }, 1000);
-        this.s_loading.hideLoading();
-        break;
+
+          reporte = await this.s_jasperReport.getReporte(body);
+          setTimeout(() => {
+            const file = new Blob([reporte], { type: 'application/pdf' });
+            const fileURL = URL.createObjectURL(file);
+
+            // Asignar el blob al iframe
+            const pdfViewer = document.getElementById(
+              'pdfViewer'
+            ) as HTMLIFrameElement;
+
+            if (pdfViewer) {
+              pdfViewer.src = fileURL;
+            }
+          }, 1000);
+          this.s_loading.hideLoading();
+          break;
+      }
+    } catch (error) {
+      await this.mostrarErrorReporte(error);
     }
   }
-  exportar() {
-    if (String(this.formImprimir.value.reporte) === '14') {
-      void this.generarPreemision(true);
-      return;
-    }
-    switch (this.formImprimir.value.reporte) {
-      /*       case '0':
-        this.buscarEmisiones();
-        break;
-      case '1':
-        this.getByIdEmisiones(this.formImprimir.value.emision);
-        break;
-      case '2':
-        this.getEmisionIndividualByIdEmision(this.formImprimir.value.emision);
-        break;
-      case '3':
-        this.impEmisionInicial(this.formImprimir.value.emision);
-        break;
-      case '4':
-        this.impEmisionFinal(this.formImprimir.value.emision);
-        break; */
-      case '5':
-        this.exportarValoresEmitidos(this.formImprimir.value.emision);
+  async exportar() {
+    try {
+      if (String(this.formImprimir.value.reporte) === '14') {
+        void this.generarPreemision(true);
+        return;
+      }
+      switch (String(this.formImprimir.value.reporte)) {
+        /*       case '0':
+          this.buscarEmisiones();
+          break;
+        case '1':
+          this.getByIdEmisiones(this.formImprimir.value.emision);
+          break;
+        case '2':
+          this.getEmisionIndividualByIdEmision(this.formImprimir.value.emision);
+          break;
+        case '3':
+          this.impEmisionInicial(this.formImprimir.value.emision);
+          break;
+        case '4':
+          this.impEmisionFinal(this.formImprimir.value.emision);
+          break; */
+        case '5':
+          await this.exportarValoresEmitidos(this.formImprimir.value.emision);
+      }
+    } catch (error) {
+      await this.mostrarErrorReporte(error);
     }
   }
   regresar() {
@@ -487,7 +508,7 @@ export class ImpEmisionesComponent implements OnInit {
         );
         this.s_loading.hideLoading();
       },
-      error: (e) => console.error(e),
+      error: (e) => { void this.mostrarErrorReporte(e); },
     });
   }
   listAllEmisiones() {
@@ -496,7 +517,7 @@ export class ImpEmisionesComponent implements OnInit {
         this.l_emisiones = Array.isArray(emisiones) ? emisiones : [];
         this.filtrarEmisiones();
       },
-      error: (e) => console.error(e),
+      error: (e) => { void this.mostrarErrorReporte(e); },
     });
   }
 
@@ -1165,7 +1186,7 @@ export class ImpEmisionesComponent implements OnInit {
           this._emisiones = datos;
           this.impListaEmisiones();
         },
-        error: (err) => console.error(err.error),
+        error: (err) => { void this.mostrarErrorReporte(err); },
       });
   }
   impListaEmisiones() {

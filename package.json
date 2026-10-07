@@ -6,7 +6,8 @@
     "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:rrhh": "ng test --configuration=rrhh --watch=false --browsers=ChromeHeadless --include=src/app/componentes/rrhh/th-leave/th-leave.component.spec.ts"
   },
   "private": true,
   "dependencies": {

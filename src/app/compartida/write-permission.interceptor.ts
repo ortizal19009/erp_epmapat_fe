@@ -16,6 +16,7 @@ export class WritePermissionInterceptor implements HttpInterceptor {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const readReport = this.isEmissionReportRequest(req);
     if (!this.isWriteRequest(req) || this.isTechnicalRequest(req.url) || this.isAdministrator()) {
       return next.handle(req);
     }
@@ -30,16 +31,25 @@ export class WritePermissionInterceptor implements HttpInterceptor {
       catchError(() => this.block('No se pudo validar el permiso para modificar información.')),
       switchMap((permissions) => {
         const level = this.resolvePermission(permissions, ventana);
-        if (level >= 2) {
+        if (level >= (readReport ? 1 : 2)) {
           return next.handle(req);
         }
-        return this.block('Su nivel de permiso solo permite consultar información.');
+        return this.block(readReport ? 'No tiene permiso para consultar los reportes de emisiones.'
+          : 'Su nivel de permiso solo permite consultar información.');
       })
     );
   }
 
   private isWriteRequest(req: HttpRequest<any>): boolean {
     return ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase());
+  }
+
+  private isEmissionReportRequest(req: HttpRequest<any>): boolean {
+    // These templates only read emission data. Keep all other POSTs under write permission.
+    const endpoint = `${environment.API_URL.replace(/\/$/, '')}/jasperReports/reportes`;
+    return req.method.toUpperCase() === 'POST' && req.url.split('?')[0] === endpoint
+      && this.getActiveWindow() === 'emisiones'
+      && ['ResumenEmision', 'Refacturaciones', 'RefacturacionesRubros'].includes(req.body?.reportName);
   }
 
   private isTechnicalRequest(url: string): boolean {

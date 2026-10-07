@@ -1,11 +1,137 @@
 <div class="container-fluid mt-2 rrhh-page">
   <div class="d-flex justify-content-between align-items-center mb-2 px-2 py-2 cabecera sombra border rounded">
-    <h5 class="mb-0">TH Leave</h5>
-    <span class="text-muted small">Aprobador actual: <strong>{{ aprobadorId }}</strong></span>
+    <h5 class="mb-0">Vacaciones, permisos y licencias</h5>
+    <span class="text-muted small">Usuario de sesión: <strong>{{ aprobadorId }}</strong></span>
   </div>
 
+  <div class="alert alert-info py-1 mb-2" *ngIf="permissionsReady && !canWrite">Su acceso permite consultar saldos y solicitudes.</div>
+  <div class="text-muted mb-2" role="status" *ngIf="loading">Cargando saldos y solicitudes...</div>
   <div class="alert alert-success py-1 mb-2" *ngIf="msg">{{ msg }}</div>
   <div class="alert alert-danger py-1 mb-2" *ngIf="error">{{ error }}</div>
+
+  <button class="btn btn-sm btn-outline-primary mb-3" (click)="toggleBandeja()" [disabled]="!permissionsReady || saving">
+    {{ inboxVisible ? 'Cerrar bandeja general' : 'Abrir bandeja general de solicitudes' }}
+  </button>
+  <div class="card card-outline card-primary mb-3" *ngIf="inboxVisible">
+    <div class="card-header py-2 cabecera"><strong>Bandeja general de solicitudes</strong></div>
+    <div class="card-body detalle">
+      <p class="small text-muted">Solicitudes de todos los empleados, ordenadas por número de solicitud de menor a mayor. Las fechas filtran solicitudes que se cruzan con el período.</p>
+      <div class="row">
+        <div class="col-md-3 mb-2">
+          <label for="inbox-personal">Empleado</label>
+          <select id="inbox-personal" class="form-control form-control-sm" [(ngModel)]="inboxFilter.idpersonal"
+            (ngModelChange)="invalidarBandeja()" [disabled]="saving || inboxLoading">
+            <option [ngValue]="0">Todos los empleados</option>
+            <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-2">
+          <label for="inbox-estado">Estado</label>
+          <select id="inbox-estado" class="form-control form-control-sm" [(ngModel)]="inboxFilter.estado"
+            (ngModelChange)="invalidarBandeja()" [disabled]="saving || inboxLoading">
+            <option value="TODAS">Todos</option><option value="SOLICITADA">Solicitada</option>
+            <option value="APROBADA">Aprobada</option><option value="RECHAZADA">Rechazada</option>
+            <option value="CANCELADA">Cancelada</option><option value="REVERTIDA">Revertida</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-2">
+          <label for="inbox-tipo">Tipo</label>
+          <select id="inbox-tipo" class="form-control form-control-sm" [(ngModel)]="inboxFilter.tipo"
+            (ngModelChange)="invalidarBandeja()" [disabled]="saving || inboxLoading">
+            <option value="TODAS">Todos</option><option value="VACACION">Vacación</option>
+            <option value="PERMISO">Permiso</option><option value="LICENCIA">Licencia</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-2"><label for="inbox-desde">Desde</label>
+          <input id="inbox-desde" type="date" class="form-control form-control-sm" [(ngModel)]="inboxFilter.desde"
+            (ngModelChange)="invalidarBandeja()" [disabled]="saving || inboxLoading"></div>
+        <div class="col-md-2 mb-2"><label for="inbox-hasta">Hasta</label>
+          <input id="inbox-hasta" type="date" class="form-control form-control-sm" [(ngModel)]="inboxFilter.hasta"
+            (ngModelChange)="invalidarBandeja()" [min]="inboxFilter.desde" [disabled]="saving || inboxLoading"></div>
+        <div class="col-md-1 mb-2"><label for="inbox-size">Filas</label>
+          <select id="inbox-size" class="form-control form-control-sm" [(ngModel)]="inboxSize"
+            (ngModelChange)="invalidarBandeja()" [disabled]="saving || inboxLoading">
+            <option [ngValue]="10">10</option><option [ngValue]="20">20</option><option [ngValue]="50">50</option>
+          </select></div>
+      </div>
+      <button class="btn btn-sm btn-primary mb-2" (click)="cargarBandeja(0)" [disabled]="saving || inboxLoading">Buscar solicitudes</button>
+      <button class="btn btn-sm btn-outline-secondary mb-2 ml-2" (click)="exportarBandeja()"
+        [disabled]="saving || inboxLoading || inboxExporting || !inbox?.contenido?.length">
+        {{ inboxExporting ? 'Exportando...' : 'Exportar página CSV' }}</button>
+      <p class="small text-muted" *ngIf="inbox">La exportación consulta nuevamente esta página con los filtros actuales; los datos pueden cambiar desde la búsqueda.</p>
+      <p class="small" role="status" *ngIf="inboxLoading">Cargando bandeja...</p>
+      <div class="table-responsive" *ngIf="inbox">
+        <table class="table table-sm table-bordered">
+          <thead><tr><th>ID</th><th>Empleado</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Días</th><th>Acciones</th></tr></thead>
+          <tbody><tr *ngFor="let row of inbox.contenido">
+            <td>{{ row.idrequest }}</td><td>{{ row.apellidos }}, {{ row.nombres }} <span class="small">(#{{ row.idpersonal }})</span></td>
+            <td>{{ row.tipolicencia }}</td><td><span [ngClass]="estadoClass(row.estado)">{{ row.estado }}</span></td>
+            <td>{{ formatFecha(row.fechainicio || '') }}</td><td>{{ formatFecha(row.fechafin || '') }}</td><td>{{ row.dias_solicitados }}</td>
+            <td>
+              <button *ngIf="canWrite && row.estado === 'SOLICITADA'" class="btn btn-sm btn-success mr-1"
+                (click)="resolverBandeja(row, true)" [disabled]="saving || loading || inboxLoading">Aprobar</button>
+              <button *ngIf="canWrite && row.estado === 'SOLICITADA'" class="btn btn-sm btn-danger mr-1"
+                (click)="resolverBandeja(row, false)" [disabled]="saving || loading || inboxLoading">Rechazar</button>
+              <button class="btn btn-sm btn-outline-info mr-1" (click)="verDetalle(row)" [disabled]="saving">Detalle</button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="verEmpleadoBandeja(row)"
+                [disabled]="saving || loading || !row.idpersonal">Ver saldos y solicitudes</button>
+            </td>
+          </tr><tr *ngIf="!inbox.contenido.length"><td colspan="8" class="text-center text-muted">Sin solicitudes para los filtros seleccionados</td></tr></tbody>
+        </table>
+        <div class="d-flex flex-wrap align-items-center justify-content-end">
+          <span class="small mr-2">{{ inbox.total_elementos }} solicitud(es) · Página {{ inbox.total_paginas ? inbox.pagina + 1 : 0 }} / {{ inbox.total_paginas }}</span>
+          <button class="btn btn-sm btn-light mr-2" (click)="cargarBandeja(inbox.pagina - 1)"
+            [disabled]="saving || inboxLoading || inbox.pagina <= 0">Anterior</button>
+          <button class="btn btn-sm btn-light" (click)="cargarBandeja(inbox.pagina + 1)"
+            [disabled]="saving || inboxLoading || inbox.pagina + 1 >= inbox.total_paginas">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-sm btn-outline-primary mb-3" (click)="toggleCalendario()" [disabled]="!permissionsReady || saving">
+    {{ calendarVisible ? 'Cerrar calendario' : 'Abrir calendario de ausencias aprobadas' }}</button>
+  <div class="card card-outline card-primary mb-3" *ngIf="calendarVisible">
+    <div class="card-header py-2 cabecera"><strong>Calendario de ausencias aprobadas</strong></div>
+    <div class="card-body detalle">
+      <div class="row">
+        <div class="col-md-2 mb-2"><label for="calendar-mode">Vista</label>
+          <select id="calendar-mode" class="form-control form-control-sm" [(ngModel)]="calendarMode" (ngModelChange)="invalidarCalendario()" [disabled]="saving">
+            <option value="MES">Mensual</option><option value="SEMANA">Semanal</option></select></div>
+        <div class="col-md-3 mb-2"><label for="calendar-date">Fecha del período</label>
+          <input id="calendar-date" type="date" min="1900-01-01" max="9999-12-31" class="form-control form-control-sm"
+            [(ngModel)]="calendarDate" (ngModelChange)="invalidarCalendario()" [disabled]="saving"></div>
+        <div class="col-md-4 mb-2"><label for="calendar-personal">Empleado</label>
+          <select id="calendar-personal" class="form-control form-control-sm" [(ngModel)]="calendarPersonal" (ngModelChange)="invalidarCalendario()" [disabled]="saving">
+            <option [ngValue]="0">Todos los empleados</option>
+            <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }}</option></select></div>
+        <div class="col-md-3 mb-2"><label for="calendar-type">Tipo</label>
+          <select id="calendar-type" class="form-control form-control-sm" [(ngModel)]="calendarType" (ngModelChange)="invalidarCalendario()" [disabled]="saving">
+            <option value="TODAS">Todos</option><option value="VACACION">Vacación</option><option value="PERMISO">Permiso</option><option value="LICENCIA">Licencia</option></select></div>
+      </div>
+      <button class="btn btn-sm btn-primary mb-2" (click)="cargarCalendario()" [disabled]="saving || calendarLoading">Consultar calendario</button>
+      <p class="small" role="status" *ngIf="calendarLoading">Cargando calendario...</p>
+      <div class="alert alert-danger" role="alert" *ngIf="calendarError">{{ calendarError }}</div>
+      <ng-container *ngIf="calendar">
+        <p class="small">{{ calendar.total_elementos }} solicitud(es) aprobada(s). Esta vista muestra {{ calendar.contenido.length }} de ellas, hasta 100 por página.
+          Los días sin eventos de esta página no acreditan disponibilidad ni asistencia.</p>
+        <p class="small text-muted">Sólo solicitudes aprobadas. Semana de lunes a domingo; no calcula días laborables ni feriados.</p>
+        <div class="calendar-grid" role="list" aria-label="Días del período">
+          <div class="calendar-day" *ngFor="let day of calendarDays" role="listitem">
+            <strong>{{ day.semana }} · {{ formatFecha(day.fecha) }}</strong>
+            <p class="small text-muted mb-0" *ngIf="!day.solicitudes.length">Sin eventos en esta página</p>
+            <button *ngFor="let row of day.solicitudes" class="btn btn-sm btn-outline-info calendar-event"
+              (click)="verDetalle(row)" [disabled]="saving">#{{ row.idrequest }} {{ row.apellidos }}, {{ row.nombres }} · {{ row.tipolicencia }}</button>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-end mt-2">
+          <span class="small mr-2">Página {{ calendar.total_paginas ? calendar.pagina + 1 : 0 }} / {{ calendar.total_paginas }}</span>
+          <button class="btn btn-sm btn-light mr-2" (click)="cargarCalendario(calendar.pagina - 1)" [disabled]="saving || calendarLoading || calendar.pagina <= 0">Anterior</button>
+          <button class="btn btn-sm btn-light" (click)="cargarCalendario(calendar.pagina + 1)" [disabled]="saving || calendarLoading || calendar.pagina + 1 >= calendar.total_paginas">Siguiente</button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
 
   <div class="card card-outline card-primary mb-3">
     <div class="card-header py-2 cabecera">
@@ -15,7 +141,7 @@
       <div class="row align-items-end">
         <div class="col-md-7 mb-2 mb-md-0">
           <label class="small text-muted mb-1">Empleado</label>
-          <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()">
+          <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()" [disabled]="saving || loading">
             <option [ngValue]="0">Seleccione personal...</option>
             <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">
               {{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}
@@ -23,29 +149,29 @@
           </select>
         </div>
         <div class="col-md-5 d-flex gap-sm">
-          <button class="btn btn-sm btn-primary" (click)="cargar()">Cargar</button>
-          <button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button>
+          <button class="btn btn-sm btn-primary" (click)="cargar()" [disabled]="saving || loading">Cargar</button>
+          <button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()" [disabled]="saving || loading">Refrescar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row" *ngIf="canWrite">
     <div class="col-lg-6">
       <div class="card card-outline card-info mb-3">
-        <div class="card-header py-2 cabecera"><strong>Crear balance</strong></div>
+        <div class="card-header py-2 cabecera"><strong>Crear saldo</strong></div>
         <div class="card-body py-2 detalle">
           <div class="row align-items-end">
             <div class="col-md-4 mb-2 mb-md-0">
               <label class="small text-muted mb-1">Año</label>
-              <input class="form-control form-control-sm" type="number" [(ngModel)]="balanceModel.anio">
+              <input class="form-control form-control-sm" type="number" min="1900" max="9999" step="1" [(ngModel)]="balanceModel.anio">
             </div>
             <div class="col-md-4 mb-2 mb-md-0">
               <label class="small text-muted mb-1">Días asignados</label>
-              <input class="form-control form-control-sm" type="number" [(ngModel)]="balanceModel.dias_asignados">
+              <input class="form-control form-control-sm" type="number" min="0" step="0.01" [(ngModel)]="balanceModel.dias_asignados">
             </div>
             <div class="col-md-4">
-              <button class="btn btn-sm btn-success btn-block" (click)="crearBalance()">Guardar balance</button>
+              <button class="btn btn-sm btn-success btn-block" (click)="crearBalance()" [disabled]="saving || loading || !idpersonal">Guardar saldo</button>
             </div>
           </div>
         </div>
@@ -71,28 +197,42 @@
             </div>
             <div class="col-md-4 mb-2">
               <label class="small text-muted mb-1">Fecha fin</label>
-              <input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechafin">
+              <input class="form-control form-control-sm" type="date" [min]="requestModel.fechainicio" [(ngModel)]="requestModel.fechafin">
             </div>
             <div class="col-md-8 mb-2">
               <label class="small text-muted mb-1">Motivo</label>
               <input class="form-control form-control-sm" [(ngModel)]="requestModel.motivo" placeholder="Motivo">
             </div>
             <div class="col-md-4 mb-2 d-flex align-items-end">
-              <button class="btn btn-sm btn-success btn-block" (click)="crearRequest()">Solicitar</button>
+              <button class="btn btn-sm btn-success btn-block" (click)="crearRequest()" [disabled]="!canSubmitRequest">Solicitar</button>
             </div>
             <div class="col-12">
-              <span class="badge badge-light border">{{ diasSolicitadosPreview }} día(s) solicitados</span>
+              <span class="badge badge-light border">{{ diasSolicitadosPreview }} día(s) calendario (incluye fines de semana)</span>
             </div>
+            <div class="col-12 text-danger small" *ngIf="crossYearVacation">Registre las vacaciones en solicitudes separadas por año.</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="card mb-3" *ngIf="canWrite && ajuste.idbalance">
+    <div class="card-header"><strong>Ajustar saldo #{{ ajuste.idbalance }}</strong></div>
+    <div class="card-body">
+      <p class="small">Un valor positivo aumenta asignados y disponibles; uno negativo los disminuye. Los días usados se conservan.</p>
+      <label for="ajuste-dias">Días (+/−)</label>
+      <input id="ajuste-dias" class="form-control mb-2" type="number" step="0.01" [(ngModel)]="ajuste.dias" [disabled]="saving || loading">
+      <label for="ajuste-motivo">Motivo obligatorio</label>
+      <textarea id="ajuste-motivo" class="form-control mb-2" maxlength="2000" [(ngModel)]="ajuste.motivo" [disabled]="saving || loading"></textarea>
+      <button class="btn btn-primary" (click)="guardarAjuste()" [disabled]="saving || loading">Registrar ajuste</button>
+      <button class="btn btn-light ml-2" (click)="ajuste.idbalance = 0" [disabled]="saving || loading">Cerrar</button>
+    </div>
+  </div>
+
   <div class="row">
     <div class="col-lg-5">
       <div class="card card-outline card-secondary mb-3">
-        <div class="card-header py-2 cabecera"><strong>Balances</strong></div>
+        <div class="card-header py-2 cabecera"><strong>Saldos</strong></div>
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-sm table-bordered table-hover mb-0">
@@ -101,7 +241,7 @@
                   <th>Año</th>
                   <th>Asignados</th>
                   <th>Usados</th>
-                  <th>Disponibles</th>
+                  <th>Disponibles</th><th>Estado</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody class="detalle">
@@ -110,9 +250,16 @@
                   <td>{{ b.dias_asignados }}</td>
                   <td>{{ b.dias_usados }}</td>
                   <td><strong>{{ b.dias_disponibles }}</strong></td>
+                  <td><span class="badge" [ngClass]="b.estado === true ? 'badge-success' : 'badge-secondary'">{{ b.estado === true ? 'Activo' : b.estado === false ? 'Inactivo' : 'Sin estado' }}</span></td>
+                  <td>
+                    <button *ngIf="canWrite" class="btn btn-sm btn-outline-primary" (click)="seleccionarAjuste(b)" [disabled]="saving || loading || b.estado !== true">Ajustar</button>
+                    <button *ngIf="canWrite" class="btn btn-sm btn-outline-secondary" (click)="abrirLibro(b)" [disabled]="saving || loading">Abrir libro</button>
+                    <button *ngIf="canWrite" class="btn btn-sm btn-outline-warning" (click)="cambiarEstadoSaldo(b)" [disabled]="saving || loading">{{ b.estado === true ? 'Inactivar' : 'Activar' }}</button>
+                    <button class="btn btn-sm btn-outline-info" (click)="verHistorialEstadoSaldo(b)" [disabled]="saving || loading">Historial de estado</button>
+                  </td>
                 </tr>
                 <tr *ngIf="!balances?.length">
-                  <td colspan="4" class="text-center text-muted">Sin balances registrados</td>
+                  <td colspan="6" class="text-center text-muted">Sin saldos registrados</td>
                 </tr>
               </tbody>
             </table>
@@ -130,6 +277,8 @@
             <option value="SOLICITADA">Solicitadas</option>
             <option value="APROBADA">Aprobadas</option>
             <option value="RECHAZADA">Rechazadas</option>
+            <option value="CANCELADA">Canceladas</option>
+            <option value="REVERTIDA">Revertidas</option>
           </select>
         </div>
 
@@ -159,8 +308,10 @@
                   <td>{{ formatFecha(r.fecha_aprobacion) }}</td>
                   <td>
                     <div class="btn-group btn-group-sm" role="group">
-                      <button class="btn btn-success" (click)="aprobar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Aprobar</button>
-                      <button class="btn btn-danger" (click)="rechazar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Rechazar</button>
+                      <button class="btn btn-success" (click)="aprobar(r.idrequest)" *ngIf="canWrite" [disabled]="saving || loading || r.estado !== 'SOLICITADA'">Aprobar</button>
+                      <button class="btn btn-danger" (click)="rechazar(r.idrequest)" *ngIf="canWrite" [disabled]="saving || loading || r.estado !== 'SOLICITADA'">Rechazar</button>
+                      <button class="btn btn-outline-secondary" (click)="cancelar(r.idrequest)" *ngIf="canWrite && r.estado === 'SOLICITADA'" [disabled]="saving || loading">Cancelar</button>
+                      <button class="btn btn-outline-warning" (click)="revertir(r.idrequest)" *ngIf="canWrite && r.estado === 'APROBADA'" [disabled]="saving || loading">Revertir</button>
                       <button class="btn btn-outline-info" (click)="verDetalle(r)">Detalle</button>
                     </div>
                   </td>
@@ -182,11 +333,104 @@
     </div>
   </div>
 
+  <div class="card mb-3" *ngIf="balanceStateLoading || balanceStateHistory || balanceStateError">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <strong>Historial de estado del saldo</strong><button class="btn btn-sm btn-light" (click)="cerrarHistorialEstadoSaldo()">Cerrar</button>
+    </div>
+    <div class="card-body small">
+      <p *ngIf="balanceStateLoading" role="status">Cargando cambios de estado...</p>
+      <p *ngIf="balanceStateError" class="text-danger" role="alert">{{ balanceStateError }}</p>
+      <ng-container *ngIf="balanceStateHistory">
+        <p>Saldo #{{ balanceStateHistory.idbalance }} · Año {{ balanceStateHistory.anio }} · {{ balanceStateHistory.estado === true ? 'Activo' : balanceStateHistory.estado === false ? 'Inactivo' : 'Sin estado' }}</p>
+        <p class="text-muted">Se muestran los cambios registrados. Los cambios anteriores pueden no tener eventos de auditoría.</p>
+        <div class="table-responsive"><table class="table table-sm table-bordered">
+          <thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th><th>Detalle y motivo</th></tr></thead>
+          <tbody><tr *ngFor="let event of balanceStateHistory.eventos">
+            <td>{{ event.fecha ? (event.fecha | date:'dd/MM/yyyy HH:mm:ss') : 'Sin fecha' }}</td>
+            <td>{{ historyAction(event.accion) }}</td><td>{{ event.usuario === null ? 'Sin usuario' : event.usuario }}</td><td class="text-break">{{ event.detalle }}</td>
+          </tr><tr *ngIf="!balanceStateHistory.eventos.length"><td colspan="4" class="text-center text-muted">Sin cambios de estado registrados</td></tr></tbody>
+        </table></div>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="card card-outline card-secondary mb-3">
+    <div class="card-header py-2 cabecera"><strong>Verificación del saldo y su libro</strong></div>
+    <div class="card-body detalle">
+      <p class="small mb-2">Compara el saldo actual con los movimientos registrados. Las aprobaciones antiguas sin consumo requieren revisar su evidencia. Esta consulta no modifica saldos.</p>
+      <p class="small text-muted mb-2">Las solicitudes se agrupan por año de inicio. Revise individualmente las solicitudes antiguas que crucen años.</p>
+      <div class="d-flex flex-wrap align-items-end mb-2">
+        <div class="mr-2 mb-2">
+          <label class="small mb-1" for="conciliacion-year">Ejercicio</label>
+          <select id="conciliacion-year" class="form-control form-control-sm" [(ngModel)]="conciliacionYear"
+            (change)="cambiarEjercicioConciliacion()" [disabled]="checking || exporting || saving || loading">
+            <option [ngValue]="0">Todos los años</option>
+            <option *ngFor="let year of reconciliationYears" [ngValue]="year">{{ year }}</option>
+          </select>
+        </div>
+        <button class="btn btn-sm btn-outline-primary mr-2 mb-2" (click)="verificarConciliacion()"
+          [disabled]="!permissionsReady || !idpersonal || checking || exporting || saving || loading">Verificar saldo</button>
+        <button class="btn btn-sm btn-outline-secondary mb-2" (click)="exportarConciliacion()"
+          [disabled]="!conciliacion || checking || exporting || saving || loading">Exportar CSV</button>
+      </div>
+      <p class="small text-muted mb-2">El CSV contiene una nueva verificación con su fecha de consulta.</p>
+      <p role="status" class="small" *ngIf="checking">Verificando saldo e historial...</p>
+      <p role="status" class="small" *ngIf="exporting">Preparando CSV...</p>
+      <ng-container *ngIf="conciliacion">
+        <p class="small text-muted">Consultado: {{ conciliacion.generado_en | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+        <p class="small text-muted" *ngIf="!conciliacion.ejercicios.length">Sin saldos ni vacaciones resueltas para el ejercicio consultado.</p>
+        <div class="border rounded p-2 mb-2" *ngFor="let row of conciliacion.ejercicios">
+          <div class="d-flex flex-wrap justify-content-between mb-2">
+            <strong>{{ row.anio === null ? 'Sin año identificable' : row.anio }} · Saldo {{ row.idbalance || 'sin registro único' }}</strong>
+            <span class="badge" [ngClass]="row.estado_libro === 'COINCIDE' ? 'badge-success' : 'badge-warning'">
+              {{ reconciliationLabel(row.estado_libro) }}
+            </span>
+          </div>
+          <p class="small mb-2" *ngIf="row.activo === false">Saldo inactivo. Se conserva la verificación de su historial.</p>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-2">
+              <thead><tr><th>Días</th><th>Saldo actual</th><th>Libro</th><th>Diferencia (actual − libro)</th></tr></thead>
+              <tbody>
+                <tr><th>Asignados</th>
+                  <td>{{ row.asignados_actuales === null ? '—' : (row.asignados_actuales | number:'1.0-2') }}</td>
+                  <td>{{ row.asignados_libro === null ? '—' : (row.asignados_libro | number:'1.0-2') }}</td>
+                  <td>{{ row.diferencia_asignados === null ? '—' : (row.diferencia_asignados | number:'1.0-2') }}</td></tr>
+                <tr><th>Usados</th>
+                  <td>{{ row.usados_actuales === null ? '—' : (row.usados_actuales | number:'1.0-2') }}</td>
+                  <td>{{ row.usados_libro === null ? '—' : (row.usados_libro | number:'1.0-2') }}</td>
+                  <td>{{ row.diferencia_usados === null ? '—' : (row.diferencia_usados | number:'1.0-2') }}</td></tr>
+                <tr><th>Disponibles</th>
+                  <td>{{ row.disponibles_actuales === null ? '—' : (row.disponibles_actuales | number:'1.0-2') }}</td>
+                  <td>{{ row.disponibles_libro === null ? '—' : (row.disponibles_libro | number:'1.0-2') }}</td>
+                  <td>{{ row.diferencia_disponibles === null ? '—' : (row.diferencia_disponibles | number:'1.0-2') }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small mb-2">{{ row.movimientos }} movimiento(s): apertura {{ row.apertura | number:'1.0-2' }},
+            consumos {{ row.consumos | number:'1.0-2' }}, reintegros {{ row.reintegros | number:'1.0-2' }},
+            ajustes {{ row.ajustes | number:'1.0-2' }}.</p>
+          <p class="small text-warning mb-2" *ngIf="row.solicitudes_sin_consumo.length">
+            Revisar solicitudes sin consumo registrado: {{ row.solicitudes_sin_consumo.join(', ') }}.
+          </p>
+          <ul class="small mb-0" *ngIf="row.alertas.length"><li *ngFor="let alerta of row.alertas">{{ alerta }}</li></ul>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
   <div class="card card-outline card-info" *ngIf="selectedRequest">
-    <div class="card-header py-2 cabecera"><strong>Detalle solicitud #{{ selectedRequest.idrequest }}</strong></div>
+    <div class="card-header py-2 cabecera d-flex justify-content-between align-items-center">
+      <strong>Detalle e historial de solicitud #{{ selectedRequest.idrequest }}</strong>
+      <div>
+        <button class="btn btn-sm btn-outline-secondary mr-1" (click)="cargarHistorial()" [disabled]="historyLoading || saving">Actualizar historial</button>
+        <button class="btn btn-sm btn-light" (click)="limpiarDetalle()">Cerrar</button>
+      </div>
+    </div>
     <div class="card-body py-2 detalle small">
+      <div *ngIf="selectedRequest.idpersonal"><strong>Empleado:</strong> {{ selectedRequest.apellidos }}, {{ selectedRequest.nombres }} (#{{ selectedRequest.idpersonal }})</div>
       <div><strong>Tipo:</strong> {{ selectedRequest.tipolicencia }}</div>
       <div><strong>Estado:</strong> {{ selectedRequest.estado }}</div>
+      <div><strong>Creación:</strong> {{ formatFecha(selectedRequest.feccrea) || 'Sin fecha registrada' }}</div>
       <div>
         <strong>Inicio:</strong> {{ formatFecha(selectedRequest.fechainicio) }} |
         <strong>Fin:</strong> {{ formatFecha(selectedRequest.fechafin) }}
@@ -194,6 +438,90 @@
       <div><strong>Días:</strong> {{ selectedRequest.dias_solicitados }}</div>
       <div><strong>Motivo:</strong> {{ selectedRequest.motivo || '-' }}</div>
       <div><strong>Obs. aprobación:</strong> {{ selectedRequest.observacion_aprobacion || '-' }}</div>
+      <div *ngIf="selectedRequest.aprobador_id"><strong>Aprobación/rechazo:</strong> usuario {{ selectedRequest.aprobador_id }} · {{ formatFecha(selectedRequest.fecha_aprobacion) }}</div>
+      <div *ngIf="selectedRequest.resuelto_por">
+        <strong>Cancelación/reversión:</strong> {{ selectedRequest.motivo_resolucion }} |
+        <strong>Usuario:</strong> {{ selectedRequest.resuelto_por }} |
+        {{ selectedRequest.fecha_resolucion | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+      <p class="mt-3 mb-2" role="status" *ngIf="historyLoading">Cargando eventos y movimientos de la solicitud...</p>
+      <p class="text-danger mt-2 mb-0" role="alert" *ngIf="historyError">{{ historyError }}</p>
+      <ng-container *ngIf="history">
+        <p class="text-muted mt-3 mb-2">Consultado: {{ history.consultado_en | date:'dd/MM/yyyy HH:mm:ss' }}. Se muestran los eventos registrados; el histórico anterior puede estar incompleto.</p>
+        <ul class="text-warning mb-2" *ngIf="history.advertencias.length"><li *ngFor="let advertencia of history.advertencias">{{ advertencia }}</li></ul>
+        <h6>Eventos de la solicitud</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th><th>Observación o motivo</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let event of history.eventos">
+                <td>{{ event.fecha ? (event.fecha | date:'dd/MM/yyyy HH:mm:ss') : 'Sin fecha' }}</td>
+                <td>{{ historyAction(event.accion) }}</td><td>{{ event.usuario === null ? 'Sin usuario' : event.usuario }}</td>
+                <td class="text-break">{{ event.detalle || 'Sin observación registrada' }}</td>
+              </tr>
+              <tr *ngIf="!history.eventos.length"><td colspan="4" class="text-muted text-center">Sin eventos de auditoría registrados</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h6>Movimientos vinculados a esta solicitud</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered mb-0">
+            <thead><tr><th>Fecha</th><th>Movimiento</th><th>Año / saldo</th><th>Días (+/−)</th><th>Disponible antes → después</th><th>Usuario</th><th>Motivo / origen</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let movement of history.movimientos">
+                <td>{{ movement.fecha | date:'dd/MM/yyyy HH:mm:ss' }}</td><td>{{ movement.tipo }}</td>
+                <td>{{ movement.anio }} / #{{ movement.idbalance }}</td><td>{{ movement.dias | number:'1.0-2' }}</td>
+                <td>{{ movement.disponibles_antes | number:'1.0-2' }} → {{ movement.disponibles_despues | number:'1.0-2' }}</td>
+                <td>{{ movement.usuario }}</td><td class="text-break">{{ movement.motivo || 'Sin motivo registrado' }}
+                  <span *ngIf="movement.idmovement_origen" class="d-block">Consumo original #{{ movement.idmovement_origen }}</span></td>
+              </tr>
+              <tr *ngIf="!history.movimientos.length"><td colspan="7" class="text-muted text-center">Sin movimientos financieros vinculados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="card card-outline card-secondary mt-3">
+    <div class="card-header py-2 cabecera d-flex justify-content-between align-items-center">
+      <strong>Movimientos del saldo de vacaciones</strong>
+      <select class="form-control form-control-sm filtro-estado" aria-label="Año de los movimientos"
+        [(ngModel)]="movementYear" (ngModelChange)="cambiarFiltroMovimientos()" [disabled]="saving || loading">
+        <option [ngValue]="0">Todos los años</option>
+        <option *ngFor="let year of movementYears" [ngValue]="year">{{ year }}</option>
+      </select>
+    </div>
+    <div class="card-body p-0">
+      <p class="small text-muted px-3 pt-2 mb-2">La apertura refleja el saldo al iniciar el registro. Los consumos anteriores no se detallan ni se reintegran automáticamente.</p>
+      <div class="px-3 pb-2">
+        <button class="btn btn-sm btn-outline-primary" (click)="exportarLibro()"
+          [disabled]="!permissionsReady || !idpersonal || !movementYear || saving || loading || movementExporting">
+          {{ movementExporting ? 'Exportando...' : 'Exportar libro anual CSV' }}</button>
+        <span class="small text-muted ml-2">Seleccione un año. Incluye todos sus movimientos registrados, consultados al descargar; no sólo la página visible.</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="cabecera"><tr>
+            <th>Fecha</th><th>Año</th><th>Movimiento</th><th>Solicitud</th><th>Días (+/−)</th>
+            <th>Disponible antes</th><th>Disponible después</th><th>Usuario</th><th>Motivo</th>
+          </tr></thead>
+          <tbody class="detalle">
+            <tr *ngFor="let m of filteredMovements">
+              <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ m.anio }}</td><td>{{ m.tipo }}</td>
+              <td>{{ m.idrequest || '—' }}<span *ngIf="m.idmovement_origen" class="d-block small">Origen #{{ m.idmovement_origen }}</span></td>
+              <td>{{ m.dias | number:'1.0-2' }}</td><td>{{ m.disponibles_antes | number:'1.0-2' }}</td>
+              <td>{{ m.disponibles_despues | number:'1.0-2' }}</td><td>{{ m.usuario }}</td><td>{{ m.motivo || '—' }}</td>
+            </tr>
+            <tr *ngIf="!filteredMovements.length"><td colspan="9" class="text-center text-muted">Sin movimientos registrados para este filtro</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer py-2 d-flex justify-content-end align-items-center" *ngIf="movements.length">
+      <button class="btn btn-sm btn-light mr-2" (click)="movementPage = movementPage - 1" [disabled]="movementPage <= 1">Anterior</button>
+      <span class="small mr-2">Página {{ movementPage }} / {{ movementTotalPages }}</span>
+      <button class="btn btn-sm btn-light" (click)="movementPage = movementPage + 1" [disabled]="movementPage >= movementTotalPages">Siguiente</button>
     </div>
   </div>
 </div>

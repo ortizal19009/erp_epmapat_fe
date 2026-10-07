@@ -22,7 +22,13 @@ export class AuthGuard implements CanActivate {
     return this.perfilAcceso.loadForCurrentUser().pipe(
       switchMap((loaded) => {
         if (!loaded) {
-          this.router.navigate(['/inicio']);
+          if (this.perfilAcceso.verificationErrorStatus === 401) {
+            this.authService.logout();
+          } else {
+            this.router.navigate(['/service-unavailable'], {
+              queryParams: { status: String(this.perfilAcceso.verificationErrorStatus ?? 503) },
+            });
+          }
           return of(false);
         }
         if (this.authService.idusuario === 1) return of(true);

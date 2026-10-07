@@ -35,18 +35,46 @@ export class AutorizaService implements OnDestroy, CanActivate {
     }
   }
 
-  constructor(private router: Router, private defService: DefinirService) { }
+  constructor(private router: Router, private defService: DefinirService) {
+    this.restoreSessionFromStorage();
+  }
+
+  saveSession(values: any, token?: string): void {
+    // Escapar Unicode mantiene compatibilidad con los lectores legacy de abc.
+    const json = JSON.stringify(values).replace(/[\u007f-\uffff]/g,
+      char => '\\u' + char.charCodeAt(0).toString(16).padStart(4, '0'));
+    sessionStorage.setItem('abc', btoa(json));
+    if (token !== undefined) sessionStorage.setItem('webJwt', token);
+    localStorage.setItem('sessionlog', 'true');
+  }
+
+  private readStoredSession(encoded: string): any {
+    const binary = atob(encoded);
+    try {
+      return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(
+        Uint8Array.from(binary, char => char.charCodeAt(0))
+      ));
+    } catch {
+      // Compatibilidad con sesiones guardadas antes de usar UTF-8.
+      return JSON.parse(binary);
+    }
+  }
 
   private restoreSessionFromStorage(): boolean {
     const retrievedEncodedValues = sessionStorage.getItem('abc');
-    const sessionlog = localStorage.getItem('sessionlog');
+    const token = sessionStorage.getItem('webJwt');
 
-    if (!retrievedEncodedValues || sessionlog !== 'true') {
+    if (!retrievedEncodedValues || !token) {
+      this.sessionlog = false;
       return false;
     }
 
     try {
-      const retrievedValues = JSON.parse(atob(retrievedEncodedValues));
+      const retrievedValues = this.readStoredSession(retrievedEncodedValues);
+      if (!Number(retrievedValues.idusuario)) {
+        this.clearSession();
+        return false;
+      }
       this.sessionlog = true;
       this.idusuario = +retrievedValues.idusuario || 0;
       this.alias = retrievedValues.alias;
@@ -60,9 +88,15 @@ export class AutorizaService implements OnDestroy, CanActivate {
         retrievedValues?.object?.moduloActual ??
         retrievedValues?.moduActual ??
         this.modulo;
-      this.modules =
-        retrievedValues.modules ??
-        JSON.parse(sessionStorage.getItem('modulos') || '[]');
+      this.modules = Array.isArray(retrievedValues.modules) ? retrievedValues.modules : [];
+      if (!this.modules.length) {
+        try {
+          const cached = JSON.parse(sessionStorage.getItem('modulos') || '[]');
+          this.modules = Array.isArray(cached) ? cached : [];
+        } catch {
+          sessionStorage.removeItem('modulos');
+        }
+      }
       return true;
     } catch {
       this.clearSession();
@@ -135,14 +169,14 @@ export class AutorizaService implements OnDestroy, CanActivate {
     const cambioModulo = this.moduActual !== opcion;
     this.modulo = opcion;
     this.moduActual = opcion;
-    const values = JSON.parse(atob(sessionStorage.getItem('abc')!));
+    const values = this.readStoredSession(sessionStorage.getItem('abc')!);
     values.object = values.object || {};
     values.object.modulo = opcion;
     values.object.moduActual = opcion;
     values.modulo = opcion;
     values.moduActual = opcion;
 
-    sessionStorage.setItem('abc', btoa(JSON.stringify(values)));
+    this.saveSession(values);
     if (cambioModulo) {
       this.router.navigate(['/inicio']);
     }
