@@ -2,6 +2,7 @@ import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { CorreosEnviadosService } from 'src/app/servicios/administracion/correos-enviados.service';
@@ -10,6 +11,7 @@ import { AirxreteService } from 'src/app/servicios/contabilidad/airxrete.service
 import { FecReteimpuService } from 'src/app/servicios/contabilidad/fec-reteimpu.service';
 import { FecRetencionesService } from 'src/app/servicios/contabilidad/fec-retenciones.service';
 import { RetencionProcesadaResponse, RetencionesSriService } from 'src/app/servicios/contabilidad/retenciones-sri.service';
+import { getRetencionSriErrorDetail } from 'src/app/servicios/contabilidad/retenciones-sri-error';
 import { RetencionesService } from 'src/app/servicios/contabilidad/retenciones.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 
@@ -539,14 +541,18 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       } catch (error: any) {
          const estado = this.normalizarEstadoSri(error?.error?.estado);
          const detalle = this.getSriErrorDetail(error, 'No se pudo procesar la retención');
-         const correoNoDisponible = estado === 'CORREO_NO_DISPONIBLE' || error?.status === 503 || error?.error?.status === 503;
+         const correoNoDisponible = estado === 'CORREO_NO_DISPONIBLE';
          if (correoNoDisponible) {
             console.warn(error);
-            this.authService.swal('warning', detalle);
          } else {
             console.error(error);
-            this.authService.swal('error', detalle);
          }
+         await Swal.fire({
+            icon: correoNoDisponible ? 'warning' : 'error',
+            title: 'No se pudo procesar la retención',
+            text: detalle,
+            confirmButtonText: 'Aceptar'
+         });
       } finally {
          this.accionEnCursoId = null;
       }
@@ -808,13 +814,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
    }
 
    private getSriErrorDetail(error: any, fallback: string): string {
-      return (
-         error?.error?.detalle ||
-         error?.error?.message ||
-         error?.error?.error ||
-         error?.message ||
-         fallback
-      );
+      return getRetencionSriErrorDetail(error, fallback);
    }
 
    private iniciarStreamRetenciones(): void {
