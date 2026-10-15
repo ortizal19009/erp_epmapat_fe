@@ -1,42 +1,87 @@
-<div class="container-fluid mt-2 rrhh-page">
-  <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
-    <h5 class="mb-0">Expediente digital (TH Files)</h5>
-    <a *ngIf="idpersonal" class="btn btn-outline-secondary btn-sm ml-auto" routerLink="/info-personal" [queryParams]="{idpersonal: idpersonal}">Volver a la ficha</a>
+<main class="dossier-page">
+  <header class="page-heading">
+    <div><p class="eyebrow">TALENTO HUMANO <span>/</span> DOCUMENTACIÓN</p><h1>Expediente digital</h1><p class="subtitle">Todos los documentos del empleado, organizados en un solo lugar.</p></div>
+    <a *ngIf="idpersonal" class="back-link" routerLink="/info-personal" [queryParams]="{idpersonal:idpersonal}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver a la ficha</a>
+  </header>
+
+  <div class="notice success" *ngIf="msg" role="status"><i class="bi bi-check-circle"></i>{{ msg }}</div>
+  <div class="notice error" *ngIf="error" role="alert"><i class="bi bi-exclamation-circle"></i>{{ error }}</div>
+  <p *ngIf="!permissionsReady && !error" role="status">Verificando acceso al expediente…</p>
+
+  <section class="employee-banner">
+    <div class="employee-identity"><div class="employee-avatar">{{ initials }}</div><div><span class="section-caption">EXPEDIENTE PERSONAL</span><h2>{{ employeeName }}</h2><p>{{ employee.identificacion || 'Sin identificación' }}<span *ngIf="employee.codigo"> · Código {{ employee.codigo }}</span></p></div></div>
+    <div class="employee-selector"><label for="dossier-employee">Consultar otro empleado</label><select id="dossier-employee" [(ngModel)]="idpersonal" (change)="cambiarPersonal()" [disabled]="!permissionsReady || saving || !!stateSaving || formOpen"><option [ngValue]="0">Seleccione un empleado</option><option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }} {{ p.nombres }} · {{ p.identificacion }}</option></select></div>
+  </section>
+
+  <section class="summary-grid" aria-label="Resumen del expediente">
+    <div class="summary-card"><span class="stat-icon blue"><i class="bi bi-files"></i></span><div><strong>{{ files.length }}</strong><span>Documentos registrados</span></div></div>
+    <div class="summary-card"><span class="stat-icon green"><i class="bi bi-shield-check"></i></span><div><strong>{{ activeCount }}</strong><span>Activos sin vencer</span></div></div>
+    <div class="summary-card"><span class="stat-icon amber"><i class="bi bi-clock-history"></i></span><div><strong>{{ expiringCount }}</strong><span>Vencen en 30 días</span></div></div>
+    <div class="summary-card"><span class="stat-icon gray"><i class="bi bi-archive"></i></span><div><strong>{{ archivedCount }}</strong><span>Archivados</span></div></div>
+  </section>
+
+  <div class="dossier-layout">
+    <aside class="category-panel"><h3>Carpetas del expediente</h3><button type="button" class="category-button" [class.selected]="!category" [attr.aria-pressed]="!category" (click)="category='';filterChanged()"><i class="bi bi-grid"></i><span>Todos los documentos</span><b>{{ files.length }}</b></button><button type="button" class="category-button" *ngFor="let c of categories" [class.selected]="category===c.value" [attr.aria-pressed]="category===c.value" (click)="category=c.value;filterChanged()"><i class="bi" [ngClass]="c.icon"></i><span>{{ c.label }}</span><b>{{ countCategory(c.value) }}</b></button><div class="folder-note"><i class="bi bi-info-circle"></i><p>Archivar conserva el documento y permite recuperarlo cuando lo necesite.</p></div></aside>
+
+    <section class="documents-panel">
+      <div class="documents-heading"><div><h2>{{ category ? categoryName(category) : 'Documentos del empleado' }}</h2><p>{{ filtered.length }} documento(s) en esta vista</p></div><button type="button" class="primary-button" *ngIf="canWrite" [disabled]="!idpersonal || loading || saving || !!stateSaving" (click)="openForm()"><i class="bi bi-plus-lg"></i> Nuevo documento</button></div>
+      <div class="filters">
+        <div class="search-field"><i class="bi bi-search" aria-hidden="true"></i><input type="search" aria-label="Buscar documentos" placeholder="Buscar por nombre, número o emisor…" [(ngModel)]="query" (ngModelChange)="filterChanged()"></div>
+        <select aria-label="Filtrar por estado" [(ngModel)]="stateFilter" (change)="filterChanged()"><option value="">Todos los estados</option><option value="ACTIVO">Activos</option><option value="ARCHIVADO">Archivados</option></select>
+        <select aria-label="Filtrar por vencimiento" [(ngModel)]="expiryFilter" (change)="filterChanged()"><option value="">Cualquier vigencia</option><option value="VIGENTE">Vigentes</option><option value="POR_VENCER">Vencen pronto</option><option value="VENCIDO">Vencidos</option><option value="SIN_FECHA">Sin vencimiento</option></select>
+        <button type="button" class="icon-button" aria-label="Limpiar filtros" title="Limpiar filtros" (click)="clearFilters()"><i class="bi bi-arrow-counterclockwise"></i></button>
+      </div>
+      <div class="read-only-note" *ngIf="permissionsReady && !canWrite"><i class="bi bi-eye"></i> Su acceso permite consultar y descargar documentos.</div>
+      <div class="empty-state" *ngIf="loading" role="status"><span class="spinner-border spinner-border-sm"></span><h3>Cargando expediente…</h3></div>
+      <div class="empty-state" *ngIf="!loading && !pageFiles.length"><i class="bi bi-folder2-open"></i><h3>{{ files.length ? 'Sin resultados para estos filtros' : 'Su expediente empieza aquí' }}</h3><p>{{ files.length ? 'Pruebe otro nombre, categoría o estado.' : 'Registre contratos, certificados y documentos para mantener su información organizada.' }}</p><button *ngIf="files.length" class="secondary-button" type="button" (click)="clearFilters()">Limpiar filtros</button><button *ngIf="!files.length && canWrite" class="primary-button" type="button" (click)="openForm()" [disabled]="!idpersonal">Registrar primer documento</button></div>
+
+      <div class="document-grid" *ngIf="!loading">
+        <article class="document-card" *ngFor="let f of pageFiles" [class.archived]="f.estado==='ARCHIVADO'">
+          <div class="card-top"><span class="document-icon" [class.reference]="f.origen!=='ARCHIVO'"><i class="bi" [ngClass]="f.origen==='ARCHIVO' ? 'bi-file-earmark-text' : 'bi-link-45deg'"></i></span><span class="category-tag">{{ categoryName(f.tipo_doc) }}</span></div>
+          <h3>{{ f.nombre_archivo }}</h3><p class="document-description">{{ f.descripcion || f.emisor || 'Sin observaciones adicionales.' }}</p>
+          <div class="document-badges"><span class="status-badge" [class.archived-badge]="f.estado==='ARCHIVADO'">{{ f.estado==='ARCHIVADO' ? 'Archivado' : f.estado==='ACTIVO' || !f.estado ? 'Activo' : f.estado }}</span><span class="expiry-badge" [class.expired]="expiry(f)==='VENCIDO'" [class.expiring]="expiry(f)==='POR_VENCER'">{{ expiryLabel(f) }}</span></div>
+          <div class="document-meta"><span><i class="bi bi-layers"></i> Versión {{ f.version_doc || 1 }}</span><span>{{ f.origen==='ARCHIVO' ? sizeLabel(f.tamano_bytes || 0) : 'Enlace / ruta' }}</span></div>
+          <p class="document-date" *ngIf="f.fecha_vencimiento"><i class="bi bi-calendar-event"></i> Vencimiento: {{ f.fecha_vencimiento }}</p>
+          <div class="document-actions"><button type="button" (click)="detail=f"><i class="bi bi-eye"></i> Detalle</button><button type="button" *ngIf="f.origen==='ARCHIVO'" (click)="descargar(f)" [disabled]="!!downloading"><i class="bi bi-download"></i> {{ downloading===f.idfile ? 'Descargando…' : 'Descargar' }}</button><a *ngIf="safeLink(f)" [href]="safeLink(f)" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Abrir</a><button type="button" *ngIf="canWrite" [disabled]="!!stateSaving || saving" (click)="cambiarEstado(f)" [attr.aria-label]="(f.estado==='ARCHIVADO' ? 'Restaurar ' : 'Archivar ')+f.nombre_archivo"><i class="bi" [ngClass]="f.estado==='ARCHIVADO' ? 'bi-arrow-counterclockwise' : 'bi-archive'"></i><span>{{ f.estado==='ARCHIVADO' ? 'Restaurar' : 'Archivar' }}</span></button></div>
+        </article>
+      </div>
+      <footer class="pagination-row" *ngIf="!loading && filtered.length"><span>{{ filtered.length }} documento(s)</span><div><button type="button" class="icon-button" aria-label="Página anterior" [disabled]="page<=1" (click)="page=page-1"><i class="bi bi-chevron-left"></i></button><span>Página {{ page }} de {{ totalPages }}</span><button type="button" class="icon-button" aria-label="Página siguiente" [disabled]="page>=totalPages" (click)="page=page+1"><i class="bi bi-chevron-right"></i></button></div></footer>
+    </section>
   </div>
 
-  <div class="alert alert-success py-1" *ngIf="msg">{{ msg }}</div>
-  <div class="alert alert-danger py-1" *ngIf="error">{{ error }}</div>
+  <div class="modal-backdrop-custom" *ngIf="formOpen" (click)="closeForm()">
+    <form class="document-dialog" role="dialog" aria-modal="true" aria-labelledby="document-form-title" (click)="$event.stopPropagation()" (ngSubmit)="guardar()" #documentForm="ngForm">
+      <header class="dialog-header"><div><p class="eyebrow">REGISTRO DOCUMENTAL</p><h2 id="document-form-title">Nuevo documento</h2><p>Se añadirá al expediente de {{ employeeName }}.</p></div><button type="button" class="icon-button" aria-label="Cerrar formulario" [disabled]="saving" (click)="closeForm()"><i class="bi bi-x-lg"></i></button></header>
+      <div class="dialog-body">
+        <div class="notice error" *ngIf="formError" role="alert">{{ formError }}</div>
+        <fieldset [disabled]="saving">
+          <div class="source-options"><label [class.chosen]="mode==='ARCHIVO'"><input type="radio" name="source" value="ARCHIVO" [(ngModel)]="mode" (change)="changeMode()"><i class="bi bi-cloud-arrow-up"></i><span><strong>Subir un archivo</strong><small>Adjunte el documento desde su equipo.</small></span></label><label [class.chosen]="mode==='REFERENCIA'"><input type="radio" name="source" value="REFERENCIA" [(ngModel)]="mode" (change)="changeMode()"><i class="bi bi-link-45deg"></i><span><strong>Registrar enlace o ruta</strong><small>Referencie un documento existente.</small></span></label></div>
 
-  <div class="card p-2 mb-3 detalle">
-    <div class="row mb-2">
-      <div class="col-sm-5">
-        <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()">
-          <option [ngValue]="0">Seleccione personal...</option>
-          <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}</option>
-        </select>
+          <div class="drop-zone" *ngIf="mode==='ARCHIVO'" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
+            <input id="dossier-file" class="file-input" type="file" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" (change)="onFile($event)">
+            <label for="dossier-file"><i class="bi" [ngClass]="selectedFile ? 'bi-file-earmark-check' : 'bi-cloud-arrow-up'"></i><strong>{{ selectedFile ? selectedFile.name : 'Arrastre un archivo o haga clic para seleccionarlo' }}</strong><span>{{ selectedFile ? sizeLabel(selectedFile.size)+' · Haga clic para cambiarlo' : 'PDF, JPG, PNG, DOCX o XLSX · Máximo 10 MB' }}</span></label>
+          </div>
+          <div class="field" *ngIf="mode==='REFERENCIA'"><label for="document-url">Enlace o ruta <span>*</span></label><input id="document-url" name="ruta" [(ngModel)]="model.ruta_archivo" [required]="mode==='REFERENCIA'" maxlength="500" placeholder="https://… o ruta del documento"><small>Los enlaces HTTP y HTTPS pueden abrirse desde el expediente.</small></div>
+          <div class="form-grid">
+            <div class="field full"><label for="document-name">Nombre del documento <span>*</span></label><input id="document-name" name="nombre" [(ngModel)]="model.nombre_archivo" required maxlength="255" placeholder="Ej. Contrato de trabajo 2026"></div>
+            <div class="field"><label for="document-category">Categoría <span>*</span></label><select id="document-category" name="categoria" [(ngModel)]="model.tipo_doc" required><option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option></select></div>
+            <div class="field"><label for="document-number">Número de documento</label><input id="document-number" name="numero" [(ngModel)]="model.numero_documento" maxlength="120" placeholder="Ej. TH-2026-001"></div>
+            <div class="field full"><label for="document-issuer">Emisor / institución</label><input id="document-issuer" name="emisor" [(ngModel)]="model.emisor" maxlength="150" placeholder="Entidad que emite el documento"></div>
+            <div class="field"><label for="document-issued">Fecha de emisión</label><input id="document-issued" type="date" name="emision" [(ngModel)]="model.fecha_emision"></div>
+            <div class="field"><label for="document-expires">Fecha de vencimiento</label><input id="document-expires" type="date" name="vencimiento" [min]="model.fecha_emision" [(ngModel)]="model.fecha_vencimiento"><small>Déjela vacía si no tiene vencimiento.</small></div>
+            <div class="field"><label for="document-version">Versión <span>*</span></label><input id="document-version" type="number" min="1" max="9999" step="1" name="version" [(ngModel)]="model.version_doc" required></div>
+            <div class="field full"><label for="document-description">Observaciones</label><textarea id="document-description" name="descripcion" [(ngModel)]="model.descripcion" maxlength="2000" rows="3" placeholder="Descripción, alcance o información relevante del documento"></textarea><small>{{ model.descripcion.length }}/2000 caracteres</small></div>
+          </div>
+        </fieldset>
       </div>
-      <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="cargar()">Cargar</button></div>
-    </div>
-
-    <div class="row">
-      <div class="col-sm-2">
-        <select class="form-control form-control-sm" [(ngModel)]="model.tipo_doc">
-          <option>CONTRATO</option><option>CERTIFICADO</option><option>CEDULA</option><option>OTRO</option>
-        </select>
-      </div>
-      <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="model.nombre_archivo" placeholder="Nombre archivo"></div>
-      <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="model.ruta_archivo" placeholder="Ruta archivo"></div>
-      <div class="col-sm-2"><input class="form-control form-control-sm" [(ngModel)]="model.hash_archivo" placeholder="Hash (opcional)"></div>
-      <div class="col-sm-2"><button class="btn btn-sm btn-success" (click)="guardar()">Registrar</button></div>
-    </div>
+      <footer class="dialog-footer"><span><i class="bi bi-shield-check"></i> Registro asociado al empleado</span><div><button type="button" class="secondary-button" [disabled]="saving" (click)="closeForm()">Cancelar</button><button type="submit" class="primary-button" [disabled]="saving || documentForm.invalid || (mode==='ARCHIVO' && !selectedFile)"><span *ngIf="saving" class="spinner-border spinner-border-sm"></span><i *ngIf="!saving" class="bi bi-check2"></i> {{ saving ? 'Guardando documento…' : 'Guardar documento' }}</button></div></footer>
+    </form>
   </div>
 
-  <table class="table table-sm table-bordered">
-    <thead class="cabecera"><tr><th>ID</th><th>Tipo</th><th>Nombre</th><th>Ruta</th><th>Versión</th><th>Estado</th></tr></thead>
-    <tbody class="detalle">
-      <tr *ngFor="let f of files">
-        <td>{{f.idfile}}</td><td>{{f.tipo_doc}}</td><td>{{f.nombre_archivo}}</td><td>{{f.ruta_archivo}}</td><td>{{f.version_doc}}</td><td>{{f.estado}}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+  <aside class="detail-panel" *ngIf="detail" aria-labelledby="document-detail-title">
+    <header><span class="section-caption">INFORMACIÓN DEL DOCUMENTO</span><button type="button" class="icon-button" aria-label="Cerrar detalle" (click)="detail=null"><i class="bi bi-x-lg"></i></button></header>
+    <span class="document-icon"><i class="bi bi-file-earmark-text"></i></span><h2 id="document-detail-title">{{ detail.nombre_archivo }}</h2><p>{{ categoryName(detail.tipo_doc) }}</p>
+    <dl><dt>Estado</dt><dd>{{ detail.estado || 'ACTIVO' }}</dd><dt>Número</dt><dd>{{ detail.numero_documento || 'No registrado' }}</dd><dt>Emisor</dt><dd>{{ detail.emisor || 'No registrado' }}</dd><dt>Emisión</dt><dd>{{ detail.fecha_emision || 'No registrada' }}</dd><dt>Vencimiento</dt><dd>{{ detail.fecha_vencimiento || 'Sin vencimiento' }}</dd><dt>Versión</dt><dd>{{ detail.version_doc || 1 }}</dd><dt>Registrado</dt><dd>{{ detail.feccrea || 'No registrado' }}</dd><dt>Observaciones</dt><dd class="multiline">{{ detail.descripcion || 'Sin observaciones' }}</dd><dt>Referencia / ubicación</dt><dd class="break-word">{{ detail.ruta_archivo }}</dd><dt *ngIf="detail.hash_archivo">Huella digital del archivo</dt><dd *ngIf="detail.hash_archivo" class="break-word hash">{{ detail.hash_archivo }}</dd></dl>
+    <button type="button" class="primary-button" *ngIf="detail.origen==='ARCHIVO'" (click)="descargar(detail)" [disabled]="!!downloading"><i class="bi bi-download"></i> Descargar archivo</button><a class="primary-button" *ngIf="safeLink(detail)" [href]="safeLink(detail)" target="_blank" rel="noopener noreferrer">Abrir enlace <i class="bi bi-box-arrow-up-right"></i></a>
+  </aside>
+</main>

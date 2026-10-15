@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": ["src/app/componentes/rrhh/th-files/**/*.spec.ts", "src/**/*.d.ts"]
+}
