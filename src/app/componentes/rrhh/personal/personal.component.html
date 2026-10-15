@@ -125,7 +125,7 @@
             <th class="sortable" (click)="ordenar('cargo')">Cargo <i class="bi" [ngClass]="sortIcon('cargo')"></i></th>
             <th class="sortable" (click)="ordenar('tipoContrato')">Contrato <i class="bi" [ngClass]="sortIcon('tipoContrato')"></i></th>
             <th class="sortable" (click)="ordenar('estadoLaboral')">Estado <i class="bi" [ngClass]="sortIcon('estadoLaboral')"></i></th>
-            <th style="width: 170px;">Acciones</th>
+            <th style="width: 120px;">Acciones</th>
           </tr>
         </thead>
         <tbody class="detalle">
@@ -156,25 +156,28 @@
             </td>
             <td>
               <div class="btn-group btn-group-sm">
-                <button class="btn btn-outline-primary" type="button" title="Ver detalle" (click)="onInfoPersonal(personal)">
-                  <i class="bi bi-eye"></i>
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" data-bs-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false" [attr.aria-label]="'Acciones de ' + nombreCompleto(personal)">
+                  <i class="bi bi-three-dots mr-1" aria-hidden="true"></i>Acciones
                 </button>
-                <button class="btn btn-outline-secondary" type="button" title="Editar" (click)="onEditPersonal(personal)">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-outline-danger" type="button" title="Activar o desactivar" (click)="onDeletePersonal(personal)">
-                  <i class="bi bi-power"></i>
-                </button>
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown">
-                  <i class="bi bi-three-dots"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <button class="dropdown-item" type="button" *ngFor="let action of quickActions" (click)="accionRapida(personal, action.label)">
+                <div class="dropdown-menu dropdown-menu-right dropdown-menu-end">
+                  <button class="dropdown-item" type="button" (click)="onInfoPersonal(personal)">
+                    <i class="bi bi-eye mr-2" aria-hidden="true"></i>Ver detalle
+                  </button>
+                  <button class="dropdown-item" type="button" (click)="onEditPersonal(personal)">
+                    <i class="bi bi-pencil mr-2" aria-hidden="true"></i>Editar
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" type="button" *ngFor="let action of accionesDisponibles(personal)" (click)="accionRapida(personal, action.label)">
                     <i class="bi mr-2" [ngClass]="action.icon"></i>{{ action.label }}
                   </button>
                   <div class="dropdown-divider"></div>
                   <button class="dropdown-item" type="button" (click)="imprimirFicha(personal)">
                     <i class="bi bi-printer mr-2"></i>Imprimir ficha
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item text-danger" type="button" (click)="onDeletePersonal(personal)">
+                    <i class="bi bi-power mr-2" aria-hidden="true"></i>Activar o desactivar
                   </button>
                 </div>
               </div>

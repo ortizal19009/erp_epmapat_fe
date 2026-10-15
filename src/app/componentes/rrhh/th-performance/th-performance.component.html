@@ -1,0 +1,42 @@
+<div class="container-fluid mt-2">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Evaluaciones de desempeño</h4>
+    <a *ngIf="idpersonal" class="btn btn-outline-secondary btn-sm" routerLink="/info-personal" [queryParams]="{idpersonal: idpersonal}">Volver a la ficha</a>
+  </div>
+  <div *ngIf="error" class="alert alert-danger" role="alert">{{ error }}</div>
+  <div *ngIf="msg" class="alert alert-success" role="status">{{ msg }}</div>
+  <label for="evaluation-personal">Empleado</label>
+  <select id="evaluation-personal" class="form-control mb-3" [(ngModel)]="idpersonal" (change)="cambiarPersonal()" [disabled]="saving || !permissionsReady">
+    <option [ngValue]="0">Seleccione un empleado</option>
+    <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }} {{ p.nombres }}</option>
+  </select>
+  <form class="card p-3 mb-3" *ngIf="canWrite && idpersonal" (ngSubmit)="guardar()" #reviewForm="ngForm">
+    <h5>Registrar evaluación</h5>
+    <fieldset [disabled]="saving || loading">
+      <div class="row">
+        <div class="col-md-4 mb-2"><label for="review-period">Período</label><input id="review-period" class="form-control" name="periodo" [(ngModel)]="model.periodo" maxlength="40" required placeholder="Ej. 2026 - segundo semestre"></div>
+        <div class="col-md-4 mb-2"><label for="review-date">Fecha de evaluación</label><input id="review-date" class="form-control" type="date" name="fecha" [(ngModel)]="model.fecha" required></div>
+        <div class="col-md-4 mb-2"><label for="review-score">Puntaje (0–100)</label><input id="review-score" class="form-control" type="number" min="0" max="100" step="0.01" name="puntaje" [(ngModel)]="model.puntaje" required></div>
+      </div>
+      <label for="review-reviewer">Evaluador</label><input id="review-reviewer" class="form-control mb-2" name="evaluador" [(ngModel)]="model.evaluador" maxlength="120" required>
+      <label for="review-notes">Observaciones</label><textarea id="review-notes" class="form-control mb-2" name="observaciones" [(ngModel)]="model.observaciones" maxlength="2000" rows="3" required></textarea>
+      <label for="review-plan">Plan de mejora (opcional)</label><textarea id="review-plan" class="form-control mb-3" name="planMejora" [(ngModel)]="model.planMejora" maxlength="2000" rows="2"></textarea>
+      <button class="btn btn-primary" type="submit" [disabled]="reviewForm.invalid || saving || loading">{{ saving ? 'Guardando...' : 'Guardar evaluación' }}</button>
+    </fieldset>
+  </form>
+  <p *ngIf="permissionsReady && !canWrite" class="text-muted">Su acceso permite consultar evaluaciones.</p>
+  <h5>Historial de evaluaciones <small>({{ totalElements }})</small></h5>
+  <p *ngIf="loading" role="status">Cargando evaluaciones...</p>
+  <p *ngIf="!loading && idpersonal && !reviews.length && !error">Sin evaluaciones registradas para este empleado.</p>
+  <div class="table-responsive" *ngIf="reviews.length">
+    <table class="table table-bordered table-sm">
+      <thead><tr><th>Fecha</th><th>Período</th><th>Puntaje</th><th>Evaluador</th><th>Observaciones</th><th>Plan de mejora</th></tr></thead>
+      <tbody><tr *ngFor="let r of reviews"><td>{{ r.fecha }}</td><td>{{ r.periodo }}</td><td>{{ r.puntaje | number:'1.0-2' }}/100</td><td>{{ r.evaluador }}</td><td class="review-text">{{ r.observaciones }}</td><td class="review-text">{{ r.planMejora || 'Sin plan registrado' }}</td></tr></tbody>
+    </table>
+  </div>
+  <div class="d-flex align-items-center gap-2" *ngIf="totalPages > 1">
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargar(page - 1)" [disabled]="page === 0 || saving || loading">Anterior</button>
+    <span>Página {{ page + 1 }} de {{ totalPages }}</span>
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargar(page + 1)" [disabled]="page + 1 >= totalPages || saving || loading">Siguiente</button>
+  </div>
+</div>

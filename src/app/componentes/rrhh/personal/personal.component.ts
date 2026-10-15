@@ -7,6 +7,7 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { CargosService } from 'src/app/servicios/rrhh/cargos.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 import { TpcontratosService } from 'src/app/servicios/rrhh/tpcontratos.service';
+import { linkedUserState } from '../shared/personal-user-state';
 
 interface SortState {
   field: string;
@@ -237,14 +238,16 @@ export class PersonalComponent implements OnInit {
 
   accionRapida(personal: any, accion: string) {
     if (accion === 'Crear usuario') {
+      if (linkedUserState(personal) !== false) return;
       this.s_personal.crearUsuarioSistema(personal.idpersonal).subscribe({
-        next: () => alert('Solicitud de usuario enviada.'),
+        next: () => { this.buscarPersonal(false); alert('Solicitud de usuario enviada.'); },
         error: () => alert('Endpoint de creacion de usuario pendiente en backend.'),
       });
       return;
     }
 
     if (accion === 'Resetear contraseña') {
+      if (linkedUserState(personal) !== true) return;
       this.s_personal.resetearPassword(personal.idpersonal).subscribe({
         next: () => alert('Password reseteado correctamente.'),
         error: () => alert('Endpoint de reset pendiente en backend.'),
@@ -253,6 +256,12 @@ export class PersonalComponent implements OnInit {
     }
 
     this.onInfoPersonal(personal);
+  }
+
+  accionesDisponibles(personal: any) {
+    const linked = linkedUserState(personal);
+    return this.quickActions.filter(action => action.label === 'Crear usuario' ? linked === false
+      : action.label === 'Resetear contraseña' ? linked === true : true);
   }
 
   imprimirFicha(personal: any) {

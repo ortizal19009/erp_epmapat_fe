@@ -1,6 +1,7 @@
 <div class="container-fluid mt-2 rrhh-page">
   <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
     <h5 class="mb-0">Expediente digital (TH Files)</h5>
+    <a *ngIf="idpersonal" class="btn btn-outline-secondary btn-sm ml-auto" routerLink="/info-personal" [queryParams]="{idpersonal: idpersonal}">Volver a la ficha</a>
   </div>
 
   <div class="alert alert-success py-1" *ngIf="msg">{{ msg }}</div>

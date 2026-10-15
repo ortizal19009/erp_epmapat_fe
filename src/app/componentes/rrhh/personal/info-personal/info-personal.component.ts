@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
@@ -7,6 +7,8 @@ import { ThActionsService } from 'src/app/servicios/rrhh/th-actions.service';
 import { ThAuditService } from 'src/app/servicios/rrhh/th-audit.service';
 import { ThFilesService } from 'src/app/servicios/rrhh/th-files.service';
 import { ThLeaveService } from 'src/app/servicios/rrhh/th-leave.service';
+import { PerformanceReview, ThPerformanceService } from 'src/app/servicios/rrhh/th-performance.service';
+import { linkedUserState } from '../../shared/personal-user-state';
 
 @Component({
   selector: 'app-info-personal',
@@ -23,6 +25,8 @@ export class InfoPersonalComponent implements OnInit {
   historial: any[] = [];
   documentos: any[] = [];
   auditoria: any[] = [];
+  evaluaciones: PerformanceReview[] = [];
+  errorEvaluaciones = '';
 
   tabs = [
     { id: 'resumen', label: 'Resumen', icon: 'bi-grid-1x2' },
@@ -40,11 +44,16 @@ export class InfoPersonalComponent implements OnInit {
     private leaveService: ThLeaveService,
     private filesService: ThFilesService,
     private actionsService: ThActionsService,
-    private auditService: ThAuditService
+    private auditService: ThAuditService,
+    private route: ActivatedRoute,
+    private performanceService: ThPerformanceService
   ) {}
 
   ngOnInit(): void {
-    this.personalId = Number(sessionStorage.getItem('idpersonalToInfo'));
+    const requested = this.route.snapshot.queryParamMap.get('idpersonal');
+    const id = Number(requested ?? sessionStorage.getItem('idpersonalToInfo'));
+    this.personalId = Number.isSafeInteger(id) && id > 0 ? id : 0;
+    if (this.personalId) sessionStorage.setItem('idpersonalToInfo', String(this.personalId));
     sessionStorage.setItem('ventana', '/personal');
     const coloresJSON = sessionStorage.getItem('/personal');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -59,6 +68,7 @@ export class InfoPersonalComponent implements OnInit {
 
   loadDashboard() {
     this.cargando = true;
+    this.errorEvaluaciones = '';
     forkJoin({
       personal: this.s_personal.getPersonalById(this.personalId).pipe(catchError(() => of({}))),
       vacaciones: this.leaveService
@@ -76,6 +86,10 @@ export class InfoPersonalComponent implements OnInit {
       auditoria: this.auditService
         .byEntidadRegistro('PERSONAL', this.personalId)
         .pipe(catchError(() => of([]))),
+      evaluaciones: this.performanceService.byPersonal(this.personalId, 0, 5).pipe(catchError(() => {
+        this.errorEvaluaciones = 'No se pudieron consultar las evaluaciones o no tiene acceso a ellas.';
+        return of({ content: [] });
+      })),
     }).subscribe({
       next: (data: any) => {
         this.personal = data.personal || {};
@@ -84,6 +98,7 @@ export class InfoPersonalComponent implements OnInit {
         this.historial = this.toArray(data.historial);
         this.documentos = this.toArray(data.documentos);
         this.auditoria = this.toArray(data.auditoria);
+        this.evaluaciones = this.toArray(data.evaluaciones);
         this.cargando = false;
       },
       error: () => {
@@ -96,6 +111,11 @@ export class InfoPersonalComponent implements OnInit {
     this.router.navigate(['/personal']);
   }
 
+  abrirGestion(destino: 'th-leave' | 'th-files' | 'th-performance') {
+    if (!this.personalId) return;
+    this.router.navigate([`/${destino}`], { queryParams: { idpersonal: this.personalId } });
+  }
+
   editar() {
     sessionStorage.setItem('idpersonalToModi', String(this.personalId));
     this.router.navigate(['/modi-personal']);
@@ -106,18 +126,22 @@ export class InfoPersonalComponent implements OnInit {
   }
 
   crearUsuario() {
+    if (this.activeTab !== 'usuario' || !this.personalId || linkedUserState(this.personal) !== false) return;
     this.s_personal.crearUsuarioSistema(this.personalId).subscribe({
-      next: () => alert('Solicitud de usuario enviada.'),
+      next: () => { this.loadDashboard(); alert('Solicitud de usuario enviada.'); },
       error: () => alert('Endpoint de usuario pendiente en backend.'),
     });
   }
 
   resetPassword() {
+    if (this.activeTab !== 'usuario' || !this.personalId || linkedUserState(this.personal) !== true) return;
     this.s_personal.resetearPassword(this.personalId).subscribe({
       next: () => alert('Password reseteado correctamente.'),
       error: () => alert('Endpoint de reset pendiente en backend.'),
     });
   }
+
+  get estadoUsuarioVinculado(): boolean | null { return linkedUserState(this.personal); }
 
   nombreCompleto(): string {
     return `${this.personal?.apellidos || ''} ${this.personal?.nombres || ''}`.trim();
@@ -168,15 +192,15 @@ export class InfoPersonalComponent implements OnInit {
   }
 
   diasGanados(): number {
-    return this.sumBy(['diasGanados', 'ganados', 'totalDias']);
+    return this.sumBy(['dias_asignados', 'diasGanados', 'ganados', 'totalDias']);
   }
 
   diasUsados(): number {
-    return this.sumBy(['diasUsados', 'usados', 'diasTomados']);
+    return this.sumBy(['dias_usados', 'diasUsados', 'usados', 'diasTomados']);
   }
 
   diasPendientes(): number {
-    const explicit = this.sumBy(['diasPendientes', 'pendientes', 'saldo']);
+    const explicit = this.sumBy(['dias_disponibles', 'diasPendientes', 'pendientes', 'saldo']);
     return explicit || Math.max(0, this.diasGanados() - this.diasUsados());
   }
 

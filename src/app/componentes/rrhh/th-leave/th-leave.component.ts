@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Optional } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { personalFromContext } from '../shared/personal-context';
 import { forkJoin, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ColoresService } from 'src/app/compartida/colores.service';
@@ -179,7 +181,8 @@ export class ThLeaveComponent implements OnInit {
     private service: ThLeaveService,
     private personalService: PersonalService,
     private coloresService: ColoresService,
-    public authService: AutorizaService
+    public authService: AutorizaService,
+    @Optional() private route: ActivatedRoute | null = null
   ) {}
 
   ngOnInit(): void {
@@ -197,8 +200,9 @@ export class ThLeaveComponent implements OnInit {
           next: (data: any) => {
             this.personalList = data || [];
             if (this.personalList.length) {
-              this.idpersonal = this.personalList[0].idpersonal;
-              this.cargar();
+              this.idpersonal = personalFromContext(this.personalList, this.route?.snapshot.queryParamMap.get('idpersonal') ?? null);
+              if (this.idpersonal) this.cargar();
+              else this.error = 'El empleado del enlace no está disponible. Seleccione un empleado válido.';
             }
           },
           error: (e) => this.error = this.errorMessage(e, 'No se pudo cargar el personal')

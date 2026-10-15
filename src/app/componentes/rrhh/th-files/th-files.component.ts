@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { personalFromContext } from '../shared/personal-context';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
@@ -31,7 +33,8 @@ export class ThFilesComponent implements OnInit {
     private personalService: PersonalService,
     private filesService: ThFilesService,
     private coloresService: ColoresService,
-    public authService: AutorizaService
+    public authService: AutorizaService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -44,8 +47,9 @@ export class ThFilesComponent implements OnInit {
       next: (d: any) => {
         this.personalList = d || [];
         if (this.personalList.length) {
-          this.idpersonal = this.personalList[0].idpersonal;
-          this.cargar();
+          this.idpersonal = personalFromContext(this.personalList, this.route.snapshot.queryParamMap.get('idpersonal'));
+          if (this.idpersonal) this.cargar();
+          else this.error = 'El empleado del enlace no está disponible. Seleccione un empleado válido.';
         }
       }
     });
@@ -80,6 +84,7 @@ export class ThFilesComponent implements OnInit {
 
   guardar() {
     this.msg = ''; this.error = '';
+    if (!this.idpersonal) { this.error = 'Seleccione un empleado para registrar el documento'; return; }
     if (!this.model.nombre_archivo || !this.model.ruta_archivo) {
       this.error = 'Nombre y ruta son obligatorios';
       return;

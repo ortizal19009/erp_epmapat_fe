@@ -34,14 +34,20 @@
         </div>
       </div>
       <div class="profile-side">
-        <button class="btn btn-light btn-sm" type="button" (click)="crearUsuario()">
+        <button *ngIf="estadoUsuarioVinculado === false" class="btn btn-light btn-sm" type="button" [disabled]="activeTab !== 'usuario'" (click)="crearUsuario()">
           <i class="bi bi-person-plus"></i> Crear usuario
         </button>
-        <button class="btn btn-light btn-sm" type="button" (click)="resetPassword()">
-          <i class="bi bi-key"></i> Reset password
+        <button *ngIf="estadoUsuarioVinculado === true" class="btn btn-light btn-sm" type="button" [disabled]="activeTab !== 'usuario'" (click)="resetPassword()">
+          <i class="bi bi-key"></i> Resetear contraseña
         </button>
       </div>
     </section>
+
+    <nav class="employee-shortcuts sombra" aria-label="Gestiones del empleado" *ngIf="personalId">
+      <button class="btn btn-outline-primary" type="button" [disabled]="activeTab !== 'vacaciones'" (click)="abrirGestion('th-leave')"><i class="bi bi-calendar2-plus" aria-hidden="true"></i> Registrar vacaciones</button>
+      <button class="btn btn-outline-primary" type="button" [disabled]="activeTab !== 'documentos'" (click)="abrirGestion('th-files')"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Añadir documento</button>
+      <button class="btn btn-outline-primary" type="button" [disabled]="activeTab !== 'evaluacion'" (click)="abrirGestion('th-performance')"><i class="bi bi-clipboard-check" aria-hidden="true"></i> Registrar evaluación</button>
+    </nav>
 
     <div class="kpi-grid">
       <div class="kpi-card" *ngFor="let kpi of kpis()">
@@ -102,7 +108,7 @@
         <div class="info-card">
           <h6>Solicitudes recientes</h6>
           <div class="mini-row" *ngFor="let solicitud of solicitudesVacaciones">
-            <span>{{ solicitud.fechaInicio || solicitud.desde || 'N/D' }}</span>
+            <span>{{ solicitud.fechainicio || solicitud.fechaInicio || solicitud.desde || 'N/D' }}</span>
             <strong>{{ solicitud.estado || 'Registrada' }}</strong>
           </div>
           <p class="text-muted mb-0" *ngIf="solicitudesVacaciones.length === 0">Sin solicitudes registradas.</p>
@@ -128,7 +134,7 @@
       <div class="document-grid">
         <div class="document-card" *ngFor="let doc of documentos">
           <i class="bi bi-file-earmark-text"></i>
-          <strong>{{ doc.nombre || doc.tipo || 'Documento' }}</strong>
+          <strong>{{ doc.nombre_archivo || doc.nombre || doc.tipo_doc || doc.tipo || 'Documento' }}</strong>
           <span>{{ doc.estado || 'Vigente' }}</span>
         </div>
         <div class="document-card muted" *ngIf="documentos.length === 0">
@@ -144,7 +150,7 @@
         <div class="info-card">
           <h6>Cuenta del sistema</h6>
           <dl>
-            <dt>Usuario</dt><dd>{{ personal.usuarioSistema || 'No vinculado' }}</dd>
+            <dt>Usuario</dt><dd>{{ personal.usuarioSistema || (estadoUsuarioVinculado === true ? 'Usuario vinculado' : estadoUsuarioVinculado === false ? 'No vinculado' : 'No disponible') }}</dd>
             <dt>Roles</dt><dd>{{ personal.roles || 'Empleado' }}</dd>
             <dt>Ultimo acceso</dt><dd>{{ personal.ultimoAcceso || 'Sin registros' }}</dd>
             <dt>Estado cuenta</dt><dd>{{ personal.estadoCuenta || 'Pendiente' }}</dd>
@@ -165,8 +171,14 @@
       <div class="info-grid">
         <div class="info-card">
           <h6>Evaluacion de desempeno</h6>
-          <div class="score-ring">92%</div>
-          <p class="text-muted">Indicador visual preparado para conectar evaluaciones, metas y observaciones.</p>
+          <p class="text-muted" *ngIf="errorEvaluaciones" role="alert">{{ errorEvaluaciones }}</p>
+          <p class="text-muted" *ngIf="!errorEvaluaciones && !evaluaciones.length">Sin evaluaciones registradas.</p>
+          <div class="mb-3" *ngFor="let evaluacion of evaluaciones">
+            <strong>{{ evaluacion.periodo }} · {{ evaluacion.puntaje | number:'1.0-2' }}/100</strong>
+            <div>{{ evaluacion.fecha }} · {{ evaluacion.evaluador }}</div>
+            <p class="mb-1">{{ evaluacion.observaciones }}</p>
+            <p *ngIf="evaluacion.planMejora" class="text-muted mb-0">Plan de mejora: {{ evaluacion.planMejora }}</p>
+          </div>
         </div>
         <div class="info-card">
           <h6>Capacitaciones</h6>

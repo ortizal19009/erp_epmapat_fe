@@ -1,6 +1,7 @@
 <div class="container-fluid mt-2 rrhh-page">
   <div class="d-flex justify-content-between align-items-center mb-2 px-2 py-2 cabecera sombra border rounded">
     <h5 class="mb-0">Vacaciones, permisos y licencias</h5>
+    <a *ngIf="idpersonal" class="btn btn-outline-secondary btn-sm" routerLink="/info-personal" [queryParams]="{idpersonal: idpersonal}">Volver a la ficha</a>
     <span class="text-muted small">Usuario de sesión: <strong>{{ aprobadorId }}</strong></span>
   </div>
 

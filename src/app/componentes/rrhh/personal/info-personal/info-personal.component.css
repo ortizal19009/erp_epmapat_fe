@@ -277,6 +277,7 @@ dd {
 }
 
 @media print {
+  .employee-shortcuts { display: none; }
   .dashboard-header,
   .dashboard-tabs,
   .profile-side {
@@ -287,6 +288,16 @@ dd {
     background: #fff;
     padding: 0;
   }
+}
+
+.employee-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 8px;
 }
 
 @media (max-width: 768px) {

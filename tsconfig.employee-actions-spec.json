@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/componentes/rrhh/shared/personal-context.spec.ts",
+    "src/app/componentes/rrhh/shared/personal-user-state.spec.ts",
+    "src/app/componentes/rrhh/personal/info-personal/info-personal.component.spec.ts",
+    "src/app/componentes/rrhh/th-performance/th-performance.component.spec.ts",
+    "src/app/componentes/rrhh/th-leave/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}
