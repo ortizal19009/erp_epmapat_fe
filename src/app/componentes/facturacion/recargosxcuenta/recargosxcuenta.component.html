@@ -47,6 +47,9 @@
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
               <i class="bi bi-printer"></i>&nbsp; Imprimir
             </button>
+            <button class="dropdown-item" type="button" (click)="exportarExcel()" [disabled]="exportando">
+              <i class="bi bi-file-earmark-excel"></i>&nbsp; {{ exportando ? 'Exportando…' : 'Exportar Excel' }}
+            </button>
           </div>
         </div>
       </div>

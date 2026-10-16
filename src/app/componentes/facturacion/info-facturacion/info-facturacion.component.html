@@ -29,8 +29,8 @@
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
             <i class="bi bi-printer"></i>&nbsp; Imprimir
           </button>
-          <button class="dropdown-item" type="button">
-            <i class="bi-file-earmark-arrow-down"></i><span>&nbsp; Exportar</span>
+          <button class="dropdown-item" type="button" (click)="exportarExcel()" [disabled]="exportando || !facturacion.idfacturacion">
+            <i class="bi bi-file-earmark-excel"></i><span>&nbsp; {{ exportando ? 'Exportando…' : 'Exportar Excel' }}</span>
           </button>
         </div>
 
@@ -40,6 +40,7 @@
       </div>
     </div>
 
+    <div *ngIf="exportError" class="alert alert-danger" role="alert">{{ exportError }}</div>
     <div class="row mb-3 summary-grid">
       <div class="col-sm-6 col-lg-3 mb-3">
         <div class="summary-card">

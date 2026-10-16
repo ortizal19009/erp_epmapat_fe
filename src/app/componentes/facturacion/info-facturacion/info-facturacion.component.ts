@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FacturacionService } from 'src/app/servicios/facturacion.service';
 import { LiquidafacService } from 'src/app/servicios/liquidafac.service';
+import { firstValueFrom } from 'rxjs';
+import { descargarExcel, fechaExcel, libroFacturacion } from '../facturacion-excel';
 
 @Component({
   selector: 'app-info-facturacion',
@@ -15,6 +17,27 @@ export class InfoFacturacionComponent implements OnInit {
   totfac = 0;
   planillasCobradas = 0;
   planillasPendientes = 0;
+  exportando = false;
+  exportError = '';
+
+  crearExcel() {
+    return libroFacturacion(`Planillas de facturación #${this.facturacion.idfacturacion}`,
+      ['Cuota', 'Planilla', 'Fecha emisión', 'Nro. factura', 'Estado', 'Fecha cobro', 'Valor'],
+      this._liquidafac.map(item => [Number(item.cuota || 0), item.idfactura_facturas?.idfactura ?? '',
+        fechaExcel(item.idfactura_facturas?.feccrea), item.idfactura_facturas?.nrofactura || 'Pendiente',
+        this.esPlanillaPagada(item) ? 'Pagada' : 'Pendiente', fechaExcel(item.idfactura_facturas?.fechacobro),
+        this.getValorPlanilla(item)]), [7], [7], `${this.facturacion.nomcli} · ${this.facturacion.descripcion}`);
+  }
+  async exportarExcel() {
+    if (this.exportando || !this.facturacion.idfacturacion) return;
+    this.exportando = true; this.exportError = '';
+    try {
+      const data = await firstValueFrom(this.liqfacService.getByIdfacturacion(this.facturacion.idfacturacion));
+      this._liquidafac = Array.isArray(data) ? data : []; this.subtotal();
+      await descargarExcel(this.crearExcel(), `Facturacion_${this.facturacion.idfacturacion}_planillas`);
+    } catch { this.exportError = 'No se pudo exportar el detalle de planillas. Intente nuevamente.'; }
+    finally { this.exportando = false; }
+  }
 
   constructor(
     private factuService: FacturacionService,

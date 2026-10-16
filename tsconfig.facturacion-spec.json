@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "compilerOptions": { "types": ["jasmine", "jquery"] },
+  "include": ["src/app/componentes/facturacion/facturacion-excel.spec.ts", "src/**/*.d.ts"]
+}

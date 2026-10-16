@@ -8,7 +8,7 @@ import { Facturacion } from 'src/app/modelos/facturacion.model';
 import { FacturacionService } from 'src/app/servicios/facturacion.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import * as ExcelJS from 'exceljs';
+import { descargarExcel, fechaExcel, libroFacturacion } from '../facturacion-excel';
 
 @Component({
   selector: 'app-facturacion',
@@ -399,170 +399,28 @@ export class FacturacionComponent implements OnInit {
       : 'Facturacion';
   }
 
-  exporta() {
+  exportando = false;
+  crearExcel() {
+    const rows = this.registrosFiltrados;
+    const context = `Desde ${this.formBuscar.value.del || ''} hasta ${this.formBuscar.value.al || ''} · ${rows.length} registros · Filtro: ${this.filtro || 'Todos'}`;
     if (this.soloPendientesCuotas) {
-      this.exportaPendientesCuotas();
-      return;
+      return libroFacturacion('Facturación con cuotas pendientes',
+        ['Nro.', 'Fecha', 'Cliente', 'Descripción', 'Cuotas', 'Pagadas', 'Pendientes', 'Valor pendiente'],
+        rows.map(item => [item.idfacturacion, fechaExcel(item.feccrea), this.getClientePendiente(item), item.descripcion,
+          Number(item.cuotas || 0), Number(item.planillasPagadas || 0), Number(item.planillasPendientes || 0), Number(item.valorPendiente || 0)]),
+        [8], [7, 8], context);
     }
-    //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Facturación');
-
-    let titulo = 'Facturación:';
-    if (this.formBuscar.value.desde)
-      titulo = titulo + ' Desde ' + this.formBuscar.value.desde;
-    if (this.formBuscar.value.hasta)
-      titulo = titulo + ' Hasta ' + this.formBuscar.value.hasta;
-    if (this.formBuscar.value.cliente)
-      titulo = titulo + ' Cliente ' + this.formBuscar.value.cliente;
-    if (!this.formBuscar.value.desde && !this.formBuscar.value.hasta)
-      titulo =
-        titulo +
-        ' del ' +
-        this.formBuscar.value.del +
-        ' al ' +
-        this.formBuscar.value.al;
-    worksheet.addRow(['', '', titulo]);
-
-    // Celda C1
-    const cellC1 = worksheet.getCell('C1');
-    const customStyle = {
-      font: {
-        name: 'Times New Roman',
-        bold: true,
-        size: 14,
-        color: { argb: '002060' },
-      },
-    };
-    cellC1.font = customStyle.font;
-
-    worksheet.addRow([]);
-
-    const cabecera = [
-      'Nro',
-      'Fecha',
-      'Cliente',
-      'Descripción',
-      'Valor',
-      'Cuotas',
-    ];
-    const headerRowCell = worksheet.addRow(cabecera);
-    headerRowCell.eachCell((cell) => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: '002060' },
-      };
-      cell.font = {
-        bold: true,
-        name: 'Times New Roman',
-        color: { argb: 'FFFFFF' },
-      };
-    });
-
-    // Agrega los datos a la hoja de cálculo
-    this._facturacion.forEach((item: any) => {
-      const row = [
-        item.idfacturacion,
-        ,
-        this.getClientePendiente(item),
-        item.descripcion,
-        item.total,
-        item.cuotas,
-      ];
-      let fila = worksheet.addRow(row);
-      if (item.feccrea != null) {
-        let celdaBi = fila.getCell('B'); //Celda de la Fecha
-        let año = item.feccrea.toString().slice(0, 4);
-        let mes = item.feccrea.toString().slice(5, 7);
-        let dia = item.feccrea.toString().slice(8, 10);
-        let fecha = `DATE(${año},${mes},${dia})`;
-        celdaBi.value = {
-          formula: fecha,
-          result: 0,
-          sharedFormula: undefined,
-          date1904: false,
-        };
-        celdaBi.numFmt = 'dd-mm-yyyy';
-      }
-    });
-
-    //Coloca la fila del Total
-    worksheet.addRow(['', '', 'TOTAL']);
-    worksheet.getCell('C' + (this._facturacion.length + 4).toString()).font = {
-      bold: true,
-    };
-    let celdaE = worksheet.getCell(
-      'E' + (this._facturacion.length + 4).toString()
-    );
-    celdaE.numFmt = '#,##0.00';
-    celdaE.font = { bold: true };
-    celdaE.value = {
-      formula:
-        'SUM(E4:' + 'E' + (this._facturacion.length + 3).toString() + ')',
-      result: 0,
-      sharedFormula: undefined,
-      date1904: false,
-    };
-
-    // Establece el ancho de las columnas
-    const anchoConfig = [
-      { columnIndex: 2, widthInChars: 12 },
-      { columnIndex: 3, widthInChars: 45 },
-      { columnIndex: 4, widthInChars: 60 },
-      { columnIndex: 5, widthInChars: 10 },
-      { columnIndex: 8, widthInChars: 25 },
-    ];
-    anchoConfig.forEach((config) => {
-      worksheet.getColumn(config.columnIndex).width = config.widthInChars;
-    });
-
-    // Columnas centradas
-    const columnsToCenter = [1, 2, 6];
-    columnsToCenter.forEach((columnIndex) => {
-      worksheet
-        .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell) => {
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        });
-    });
-    // Columnas a la derecha
-    let columnsToRigth = [5];
-    columnsToRigth.forEach((columnIndex) => {
-      worksheet
-        .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell) => {
-          cell.alignment = { horizontal: 'right' };
-        });
-    });
-
-    // Formato numérico
-    const numeroStyle = { numFmt: '#,##0.00' };
-    const columnsToFormat = [5];
-    for (let i = 4; i <= this._facturacion.length + 3; i++) {
-      columnsToFormat.forEach((columnIndex) => {
-        const cell = worksheet.getCell(i, columnIndex);
-        cell.style = numeroStyle;
-      });
-    }
-
-    // Crea un archivo Excel
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      const url = window.URL.createObjectURL(blob);
-
-      // Crear un enlace para descargar el archivo
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${this.archExportar}.xlsx`; // Usa el nombre proporcionado por el usuario
-      a.click();
-
-      window.URL.revokeObjectURL(url); // Libera recursos
-    });
+    return libroFacturacion('Facturación', ['Nro.', 'Fecha', 'Cliente', 'Descripción', 'Valor', 'Cuotas'],
+      rows.map(item => [item.idfacturacion, fechaExcel(item.feccrea), this.getClientePendiente(item), item.descripcion,
+        Number(item.total || 0), Number(item.cuotas || 0)]), [5], [5], context);
   }
-
+  async exporta() {
+    if (this.exportando) return;
+    this.exportando = true;
+    try { await descargarExcel(this.crearExcel(), this.archExportar); }
+    catch { this.authService.swal('error', 'No se pudo generar el archivo Excel. Intente nuevamente.'); }
+    finally { this.exportando = false; }
+  }
   togglePendientesCuotas() {
     this.soloPendientesCuotas = !this.soloPendientesCuotas;
     this.buscar();
@@ -792,89 +650,6 @@ export class FacturacionComponent implements OnInit {
     });
 
     this.abrirPdf(doc, m_izquierda);
-  }
-
-  private exportaPendientesCuotas() {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Cuotas pendientes');
-    worksheet.addRow(['', '', 'Facturacion con cuotas pendientes']);
-    worksheet.getCell('C1').font = {
-      name: 'Times New Roman',
-      bold: true,
-      size: 14,
-      color: { argb: '002060' },
-    };
-    worksheet.addRow([]);
-
-    const cabecera = [
-      'Nro',
-      'Fecha',
-      'Cliente',
-      'Descripcion',
-      'Cuotas',
-      'Pagadas',
-      'Pendientes',
-      'Valor pendiente',
-    ];
-    const headerRowCell = worksheet.addRow(cabecera);
-    headerRowCell.eachCell((cell) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '002060' } };
-      cell.font = { bold: true, name: 'Times New Roman', color: { argb: 'FFFFFF' } };
-    });
-
-    this.facturacionesPendientes.forEach((item) => {
-      const fila = worksheet.addRow([
-        item.idfacturacion,
-        '',
-        item.cliente,
-        item.descripcion,
-        item.cuotas,
-        item.planillasPagadas,
-        item.planillasPendientes,
-        item.valorPendiente,
-      ]);
-      if (item.feccrea != null) {
-        const fecha = new Date(item.feccrea);
-        const celda = fila.getCell('B');
-        celda.value = fecha;
-        celda.numFmt = 'dd-mm-yyyy';
-      }
-    });
-
-    worksheet.addRow(['', '', '', 'TOTAL', '', '', this.totalFacturasPendientes, this.totalValorPendiente]);
-    const totalRow = this.facturacionesPendientes.length + 4;
-    worksheet.getCell(`D${totalRow}`).font = { bold: true };
-    worksheet.getCell(`G${totalRow}`).font = { bold: true };
-    worksheet.getCell(`H${totalRow}`).font = { bold: true };
-    worksheet.getCell(`H${totalRow}`).numFmt = '#,##0.00';
-
-    [1, 2, 5, 6, 7].forEach((columnIndex) => {
-      worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, (cell) => {
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      });
-    });
-    [8].forEach((columnIndex) => {
-      worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, (cell) => {
-        cell.alignment = { horizontal: 'right' };
-        cell.numFmt = '#,##0.00';
-      });
-    });
-    worksheet.getColumn(2).width = 15;
-    worksheet.getColumn(3).width = 38;
-    worksheet.getColumn(4).width = 42;
-    worksheet.getColumn(8).width = 18;
-
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${this.archExportar}.xlsx`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    });
   }
 
   private abrirPdf(doc: jsPDF, margenIzq: number) {

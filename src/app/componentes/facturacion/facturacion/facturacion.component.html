@@ -72,7 +72,7 @@
                 </button>
                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
                   (click)="exportar()">
-                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar
+                  <i class="bi bi-file-earmark-excel"></i> &nbsp; Exportar Excel
                 </button>
               </div>
             </div>
@@ -271,7 +271,7 @@
 
           <div class="row justify-content-center">
             <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
-              (click)="exporta()">
+              (click)="exporta()" [disabled]="exportando">
               <i class="fa fa-check-circle"></i>&nbsp; Aceptar
             </button>
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>

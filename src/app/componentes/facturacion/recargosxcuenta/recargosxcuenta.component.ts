@@ -2,6 +2,7 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { descargarExcel, fechaExcel, libroFacturacion } from '../facturacion-excel';
 import { PageResponse } from 'src/app/interfaces/page-response';
 import { Abonados } from 'src/app/modelos/abonados';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
@@ -280,6 +281,25 @@ export class RecargosxcuentaComponent implements OnInit {
       }
       pdfViewer.src = blobUrl;
     }
+  }
+
+  exportando = false;
+  crearExcel() {
+    return libroFacturacion('Recargos por cuenta',
+      ['Cuenta', 'Cliente', 'Ruta', 'Categoría', 'Estado', 'Fecha notificación', 'Fecha registro', 'Rubro', 'Recargo'],
+      this.recargosFiltrados.map(item => [item.idabonado_abonados?.idabonado ?? '',
+        item.idabonado_abonados?.responsableNombre ?? '', item.idabonado_abonados?.rutaDescripcion ?? '',
+        item.idabonado_abonados?.categoriaDescripcion ?? '', item.idabonado_abonados?.estadoDescripcion ?? '',
+        fechaExcel(item.fecha), fechaExcel(item.feccrea), item.idrubro_rubros?.descripcion ?? '',
+        Number(item.idrubro_rubros?.valor || 0)]), [9], [9],
+      `Emisión: ${this.emisionSelected?.emision || this.lastEmision?.emision || ''} · Filtro: ${this.filterTerm || 'Todos'}`);
+  }
+  async exportarExcel() {
+    if (this.exportando) return;
+    this.exportando = true;
+    try { await descargarExcel(this.crearExcel(), 'Recargos_por_cuenta'); }
+    catch { this.authService.swal('error', 'No se pudo generar el archivo Excel. Intente nuevamente.'); }
+    finally { this.exportando = false; }
   }
 
   private getEstadoCuentaLabel(estado: any): string {
