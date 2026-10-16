@@ -19,11 +19,11 @@
       <p class="small text-muted">Solicitudes de todos los empleados, ordenadas por número de solicitud de menor a mayor. Las fechas filtran solicitudes que se cruzan con el período.</p>
       <div class="row">
         <div class="col-md-3 mb-2">
-          <label for="inbox-personal">Empleado</label>
+          <label for="inbox-personal">Empleado</label><input class="form-control form-control-sm mb-1" type="search" aria-label="Buscar empleado en bandeja" placeholder="Cédula, nombre o apellido" [(ngModel)]="inboxPersonalQuery" [disabled]="saving || inboxLoading">
           <select id="inbox-personal" class="form-control form-control-sm" [(ngModel)]="inboxFilter.idpersonal"
             (ngModelChange)="invalidarBandeja()" [disabled]="saving || inboxLoading">
             <option [ngValue]="0">Todos los empleados</option>
-            <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }}</option>
+            <option *ngFor="let p of filtrarPersonal(inboxPersonalQuery)" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }}</option>
           </select>
         </div>
         <div class="col-md-2 mb-2">
@@ -102,10 +102,10 @@
         <div class="col-md-3 mb-2"><label for="calendar-date">Fecha del período</label>
           <input id="calendar-date" type="date" min="1900-01-01" max="9999-12-31" class="form-control form-control-sm"
             [(ngModel)]="calendarDate" (ngModelChange)="invalidarCalendario()" [disabled]="saving"></div>
-        <div class="col-md-4 mb-2"><label for="calendar-personal">Empleado</label>
+        <div class="col-md-4 mb-2"><label for="calendar-personal">Empleado</label><input type="search" class="form-control form-control-sm mb-1" aria-label="Buscar empleado en calendario" placeholder="Cédula, nombre o apellido" [(ngModel)]="calendarPersonalQuery" [disabled]="saving">
           <select id="calendar-personal" class="form-control form-control-sm" [(ngModel)]="calendarPersonal" (ngModelChange)="invalidarCalendario()" [disabled]="saving">
             <option [ngValue]="0">Todos los empleados</option>
-            <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }}</option></select></div>
+            <option *ngFor="let p of filtrarPersonal(calendarPersonalQuery)" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }} · {{ p.identificacion }}</option></select></div>
         <div class="col-md-3 mb-2"><label for="calendar-type">Tipo</label>
           <select id="calendar-type" class="form-control form-control-sm" [(ngModel)]="calendarType" (ngModelChange)="invalidarCalendario()" [disabled]="saving">
             <option value="TODAS">Todos</option><option value="VACACION">Vacación</option><option value="PERMISO">Permiso</option><option value="LICENCIA">Licencia</option></select></div>
@@ -141,10 +141,10 @@
     <div class="card-body py-2 detalle">
       <div class="row align-items-end">
         <div class="col-md-7 mb-2 mb-md-0">
-          <label class="small text-muted mb-1">Empleado</label>
+          <label class="small text-muted mb-1" for="leave-personal-search">Buscar empleado</label><input id="leave-personal-search" type="search" class="form-control form-control-sm mb-2" placeholder="Cédula, nombres o apellidos" [(ngModel)]="personalQuery" (keydown.enter)="buscarEmpleado()" [disabled]="saving || loading">
           <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()" [disabled]="saving || loading">
             <option [ngValue]="0">Seleccione personal...</option>
-            <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">
+            <option *ngFor="let p of filtrarPersonal(personalQuery)" [ngValue]="p.idpersonal">
               {{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}
             </option>
           </select>
@@ -154,6 +154,32 @@
           <button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()" [disabled]="saving || loading">Refrescar</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <section *ngIf="idpersonal && permissionsReady" class="card mb-3" aria-label="Resumen de vacaciones">
+    <div class="card-header cabecera"><strong>{{ empleadoActual.apellidos }}, {{ empleadoActual.nombres }}</strong> · {{ empleadoActual.identificacion }}</div>
+    <div class="card-body detalle">
+      <div class="row text-center">
+        <div class="col-md-4"><strong class="h4 d-block">{{ diasVigentes | number:'1.0-2' }}</strong>Días disponibles en saldos activos</div>
+        <div class="col-md-4"><strong class="h4 d-block">{{ diasGastados | number:'1.0-2' }}</strong>Días usados registrados</div>
+        <div class="col-md-4"><strong class="h4 d-block">{{ diasSolicitados | number:'1.0-2' }}</strong>Días solicitados, aún sin descontar</div>
+      </div>
+      <p class="small mt-3 mb-1">Vacaciones: 30 días por año cumplido desde la fecha de inicio del contrato. Próximo aniversario: <strong>{{ proximoAniversario ? formatFecha(proximoAniversario) : 'Registre la fecha de inicio en la ficha del empleado' }}</strong>.</p>
+      <p class="small text-muted mb-0">La acreditación automática conserva los saldos previos y comienza en el próximo aniversario desde su activación. Las reposiciones se suman al saldo del año elegido y se consumen mediante solicitudes de vacaciones. Permisos y licencias no descuentan ese saldo. Los saldos inactivos no se incluyen como disponibles; las solicitudes se descuentan del año de inicio al aprobarse.</p>
+    </div>
+  </section>
+
+  <div class="card card-outline card-info mb-3" *ngIf="canWrite && idpersonal">
+    <div class="card-header cabecera"><strong>Asignar días de reposición</strong></div>
+    <div class="card-body detalle">
+      <div class="row">
+        <div class="col-md-2"><label for="reposicion-year">Año del saldo</label><input id="reposicion-year" class="form-control form-control-sm" type="number" min="1900" max="9999" [(ngModel)]="reposicion.anio" [disabled]="saving || loading"></div>
+        <div class="col-md-2"><label for="reposicion-days">Días a asignar</label><input id="reposicion-days" class="form-control form-control-sm" type="number" min="0.01" step="0.01" [(ngModel)]="reposicion.dias" [disabled]="saving || loading"></div>
+        <div class="col-md-6"><label for="reposicion-reason">Motivo obligatorio</label><input id="reposicion-reason" class="form-control form-control-sm" maxlength="1950" [(ngModel)]="reposicion.motivo" placeholder="Ej. Reposición por jornada extraordinaria autorizada" [disabled]="saving || loading"></div>
+        <div class="col-md-2 d-flex align-items-end"><button class="btn btn-success btn-sm mt-2" (click)="asignarReposicion()" [disabled]="saving || loading">Asignar días</button></div>
+      </div>
+      <small>Se conservarán los días usados. Si no existe saldo para ese año, se creará con los días asignados.</small>
     </div>
   </div>
 
@@ -509,10 +535,10 @@
           </tr></thead>
           <tbody class="detalle">
             <tr *ngFor="let m of filteredMovements">
-              <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ m.anio }}</td><td>{{ m.tipo }}</td>
+              <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ m.anio }}</td><td>{{ movimientoLabel(m) }}</td>
               <td>{{ m.idrequest || '—' }}<span *ngIf="m.idmovement_origen" class="d-block small">Origen #{{ m.idmovement_origen }}</span></td>
               <td>{{ m.dias | number:'1.0-2' }}</td><td>{{ m.disponibles_antes | number:'1.0-2' }}</td>
-              <td>{{ m.disponibles_despues | number:'1.0-2' }}</td><td>{{ m.usuario }}</td><td>{{ m.motivo || '—' }}</td>
+              <td>{{ m.disponibles_despues | number:'1.0-2' }}</td><td>{{ m.usuario === 0 ? 'Sistema' : m.usuario }}</td><td>{{ m.motivo || '—' }}</td>
             </tr>
             <tr *ngIf="!filteredMovements.length"><td colspan="9" class="text-center text-muted">Sin movimientos registrados para este filtro</td></tr>
           </tbody>

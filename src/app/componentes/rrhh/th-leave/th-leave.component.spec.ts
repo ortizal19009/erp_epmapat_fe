@@ -12,6 +12,7 @@ describe('ThLeaveComponent', () => {
       'ajustarSaldo', 'abrirLibro', 'createBalance', 'createRequest', 'aprobar', 'rechazar', 'cancelar', 'revertir', 'getMovementsByPersonal',
       'verificarConciliacion', 'exportarConciliacion', 'getBandeja', 'getHistorial', 'cambiarEstadoSaldo', 'historialEstadoSaldo', 'exportarBandeja', 'getCalendario', 'exportarLibro'
     ]);
+    service.asignarReposicion = jasmine.createSpy('asignarReposicion');
     service.getBalancesByPersonal.and.returnValue(of([]));
     service.getRequestsByPersonal.and.returnValue(of([]));
     service.getMovementsByPersonal.and.returnValue(of([]));
@@ -22,6 +23,51 @@ describe('ThLeaveComponent', () => {
     component.canWrite = true;
     component.requestModel.fechainicio = '2026-10-10';
     component.requestModel.fechafin = '2026-10-12';
+  });
+
+  it('busca por cedula, nombres y apellidos sin distinguir acentos o mayusculas', () => {
+    component.personalList=[{idpersonal:7,nombres:'María José',apellidos:'Pérez López',identificacion:'0401234567'},
+      {idpersonal:8,nombres:'Juan',apellidos:'Torres',identificacion:'0409999999'}];
+    expect(component.filtrarPersonal('040123').length).toBe(1);
+    expect(component.filtrarPersonal('PEREZ maria')[0].idpersonal).toBe(7);
+    expect(component.filtrarPersonal('Torres')[0].idpersonal).toBe(8);
+    expect(component.filtrarPersonal('sin coincidencias')).toEqual([]);
+    spyOn(component,'cargar'); component.personalQuery='0401234567'; component.buscarEmpleado();
+    expect(component.idpersonal).toBe(7); expect(component.cargar).toHaveBeenCalled();
+  });
+  it('separa dias disponibles activos, usados historicos y solicitudes sin descontar', () => {
+    component.balances=[{estado:true,dias_disponibles:12,dias_usados:18},{estado:false,dias_disponibles:5,dias_usados:10}];
+    component.requests=[{estado:'SOLICITADA',tipolicencia:'VACACION',dias_solicitados:3},
+      {estado:'APROBADA',tipolicencia:'VACACION',dias_solicitados:2},{estado:'SOLICITADA',tipolicencia:'PERMISO',dias_solicitados:4}];
+    expect(component.diasVigentes).toBe(12); expect(component.diasGastados).toBe(28); expect(component.diasSolicitados).toBe(3);
+  });
+  it('conserva la clave al reintentar una reposicion y permite una nueva despues del exito', () => {
+    spyOn(window,'confirm').and.returnValue(true);
+    service.asignarReposicion.and.returnValues(throwError(() => ({status:500})),of({}),of({}));
+    component.reposicion={anio:2026,dias:2.5,motivo:'Trabajo extraordinario'};
+    component.asignarReposicion(); component.asignarReposicion();
+    const first=service.asignarReposicion.calls.argsFor(0)[1];
+    expect(service.asignarReposicion.calls.argsFor(1)[1].clave).toBe(first.clave);
+    expect(first.dias).toBe(2.5); expect(first.anio).toBe(2026);
+    expect(component.reposicion.dias).toBeNull();
+    component.reposicion={anio:2026,dias:2.5,motivo:'Trabajo extraordinario'}; component.asignarReposicion();
+    expect(service.asignarReposicion.calls.argsFor(2)[1].clave).not.toBe(first.clave);
+  });
+  it('rechaza reposicion negativa y no permite asignarla con acceso de lectura', () => {
+    component.reposicion={anio:2026,dias:-1,motivo:'Prueba'}; component.asignarReposicion();
+    expect(service.asignarReposicion).not.toHaveBeenCalled();
+    component.canWrite=false; component.reposicion.dias=2; component.asignarReposicion();
+    expect(service.asignarReposicion).not.toHaveBeenCalled();
+  });
+  it('calcula el siguiente aniversario sin adelantar el primer ano de contrato', () => {
+    jasmine.clock().install();
+    try {
+      jasmine.clock().mockDate(new Date(2026,9,16));
+      component.personalList=[{idpersonal:7,fecinicio:'2026-10-01'}];
+      expect(component.proximoAniversario).toBe('2027-10-01');
+      component.personalList=[{idpersonal:7,fecinicio:'2024-02-29'}];
+      expect(component.proximoAniversario).toBe('2027-02-28');
+    } finally { jasmine.clock().uninstall(); }
   });
 
   const report: ThLeaveReconciliation = { idpersonal: 7, generado_en: '2026-10-06T10:00:00', ejercicios: [] };

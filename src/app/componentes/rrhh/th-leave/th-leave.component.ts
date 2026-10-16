@@ -16,6 +16,59 @@ import { ThLeaveService, ThLeaveMovement, ThLeaveReconciliation, ThLeaveInbox, T
 export class ThLeaveComponent implements OnInit {
   idpersonal: number = 0;
   personalList: any[] = [];
+  personalQuery = '';
+  inboxPersonalQuery = '';
+  calendarPersonalQuery = '';
+  reposicion = {anio:new Date().getFullYear(), dias:null as number | null, motivo:''};
+  private reposicionIntent: {fingerprint:string; clave:string} | null = null;
+
+  filtrarPersonal(query: string): any[] {
+    const normalize = (value: any) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const words = normalize(query).trim().split(/\s+/).filter(Boolean);
+    return this.personalList.filter(p => words.every(word => normalize(`${p.identificacion || ''} ${p.nombres || ''} ${p.apellidos || ''}`).includes(word)));
+  }
+  buscarEmpleado() {
+    const results = this.filtrarPersonal(this.personalQuery);
+    if (results.length === 1) { this.idpersonal=Number(results[0].idpersonal); this.cargar(); }
+    else this.error=results.length ? 'Seleccione un empleado de los resultados.' : 'No se encontraron empleados para la búsqueda.';
+  }
+  get empleadoActual(): any { return this.personalList.find(p => Number(p.idpersonal) === Number(this.idpersonal)) || {}; }
+  get diasVigentes(): number { return this.balances.filter(b => b.estado === true).reduce((sum,b) => sum + Number(b.dias_disponibles || 0), 0); }
+  get diasGastados(): number { return this.balances.reduce((sum,b) => sum + Number(b.dias_usados || 0), 0); }
+  get diasSolicitados(): number { return this.requests.filter(r => r.estado === 'SOLICITADA' && r.tipolicencia === 'VACACION').reduce((sum,r) => sum + Number(r.dias_solicitados || 0), 0); }
+  get proximoAniversario(): string {
+    const value=String(this.empleadoActual.fecinicio || '').slice(0,10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return '';
+    const [year,month,day]=value.split('-').map(Number);
+    const today=new Date(); today.setHours(0,0,0,0);
+    const anniversary=(y:number) => new Date(y,month-1,Math.min(day,new Date(y,month,0).getDate()));
+    let date=anniversary(Math.max(year+1,today.getFullYear()));
+    if (date<=today) date=anniversary(date.getFullYear()+1);
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  }
+  asignarReposicion() {
+    if (!this.canWrite || this.saving || this.loading || !this.idpersonal) return;
+    const {anio,dias}=this.reposicion; const motivo=this.reposicion.motivo.trim();
+    if (!Number.isInteger(anio) || anio<1900 || anio>9999 || dias===null || !Number.isFinite(Number(dias)) || Number(dias)<=0
+        || Math.abs(Number(dias)*100-Math.round(Number(dias)*100))>0.000001 || !motivo || motivo.length>1950) {
+      this.error='Indique año, días de reposición positivos con hasta dos decimales y un motivo.'; return;
+    }
+    if (!confirm(`¿Asignar ${dias} día(s) de reposición al saldo ${anio} del empleado seleccionado?`)) return;
+    const fingerprint=JSON.stringify([this.idpersonal,anio,dias,motivo]);
+    if (this.reposicionIntent?.fingerprint!==fingerprint) {
+      const bytes=window.crypto.getRandomValues(new Uint8Array(16)); bytes[6]=(bytes[6]&15)|64; bytes[8]=(bytes[8]&63)|128;
+      const hex=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+      this.reposicionIntent={fingerprint,clave:`${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`};
+    }
+    this.execute(this.service.asignarReposicion(this.idpersonal,{anio,dias:Number(dias),motivo,clave:this.reposicionIntent.clave}), 'Días de reposición asignados', false,
+      () => { this.reposicionIntent=null; this.reposicion.dias=null; this.reposicion.motivo=''; });
+  }
+
+  movimientoLabel(m: ThLeaveMovement): string {
+    if (m.tipo==='AJUSTE' && m.motivo?.startsWith('ANIVERSARIO:')) return 'Acreditación anual';
+    if (m.tipo==='AJUSTE' && m.motivo?.startsWith('REPOSICION:')) return 'Reposición';
+    return m.tipo;
+  }
   balances: any[] = [];
   requests: any[] = [];
   movements: ThLeaveMovement[] = [];
@@ -658,7 +711,7 @@ export class ThLeaveComponent implements OnInit {
       approve ? 'Solicitud aprobada' : 'Solicitud rechazada');
   }
 
-  private execute(operation: Observable<any>, message: string, resetRequest = false) {
+  private execute(operation: Observable<any>, message: string, resetRequest = false, afterSuccess?: () => void) {
     this.msg = ''; this.error = ''; this.saving = true;
     operation.pipe(finalize(() => this.saving = false)).subscribe({
       next: () => {
@@ -666,6 +719,7 @@ export class ThLeaveComponent implements OnInit {
         this.invalidarCalendario();
         this.ajuste = { idbalance: 0, dias: null, motivo: '' };
         this.ajusteIntent = null;
+        afterSuccess?.();
         if (resetRequest) this.requestModel = {
           idpersonal_personal: { idpersonal: this.idpersonal }, tipolicencia: 'VACACION',
           fechainicio: '', fechafin: '', motivo: ''

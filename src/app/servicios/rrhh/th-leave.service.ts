@@ -119,6 +119,10 @@ export class ThLeaveService {
     return this.http.post(`${baseUrl}/balances/${idbalance}/ajustar`, payload);
   }
 
+  asignarReposicion(idpersonal: number, payload: {anio:number; dias:number; motivo:string; clave:string}) {
+    return this.http.post(`${baseUrl}/balances/persona/${idpersonal}/reposicion`, payload);
+  }
+
   abrirLibro(idbalance: number) {
     return this.http.post(`${baseUrl}/balances/${idbalance}/abrir-libro`, {});
   }
