@@ -45,7 +45,7 @@
 
     <nav class="employee-shortcuts sombra" aria-label="Gestiones del empleado" *ngIf="personalId">
       <button class="btn btn-outline-primary" type="button" [disabled]="activeTab !== 'vacaciones'" (click)="abrirGestion('th-leave')"><i class="bi bi-calendar2-plus" aria-hidden="true"></i> Registrar vacaciones</button>
-      <button class="btn btn-outline-primary" type="button" [disabled]="activeTab !== 'documentos'" (click)="abrirGestion('th-files')"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Añadir documento</button>
+      <button class="btn btn-outline-primary" type="button" [disabled]="activeTab !== 'documentos'" (click)="abrirGestion('th-files')"><i class="bi bi-folder2-open" aria-hidden="true"></i> Ver expediente digital</button>
       <button class="btn btn-outline-primary" type="button" [disabled]="activeTab !== 'evaluacion'" (click)="abrirGestion('th-performance')"><i class="bi bi-clipboard-check" aria-hidden="true"></i> Registrar evaluación</button>
     </nav>
 

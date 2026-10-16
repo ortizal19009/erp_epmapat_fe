@@ -1,6 +1,6 @@
 <main class="dossier-page">
   <header class="page-heading">
-    <div><p class="eyebrow">TALENTO HUMANO <span>/</span> DOCUMENTACIÓN</p><h1>Expediente digital</h1><p class="subtitle">Todos los documentos del empleado, organizados en un solo lugar.</p></div>
+    <div><p class="eyebrow">TALENTO HUMANO <span>/</span> DOCUMENTACIÓN</p><h1><i class="bi bi-folder2-open" aria-hidden="true"></i> Expediente digital</h1><p class="subtitle">Todos los documentos del empleado, organizados en un solo lugar.</p></div>
     <a *ngIf="idpersonal" class="back-link" routerLink="/info-personal" [queryParams]="{idpersonal:idpersonal}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver a la ficha</a>
   </header>
 
@@ -8,9 +8,10 @@
   <div class="notice error" *ngIf="error" role="alert"><i class="bi bi-exclamation-circle"></i>{{ error }}</div>
   <p *ngIf="!permissionsReady && !error" role="status">Verificando acceso al expediente…</p>
 
+  <a *ngIf="!idpersonal && error" class="secondary-button" routerLink="/personal">Volver al listado de personal</a>
+  <ng-container *ngIf="idpersonal">
   <section class="employee-banner">
     <div class="employee-identity"><div class="employee-avatar">{{ initials }}</div><div><span class="section-caption">EXPEDIENTE PERSONAL</span><h2>{{ employeeName }}</h2><p>{{ employee.identificacion || 'Sin identificación' }}<span *ngIf="employee.codigo"> · Código {{ employee.codigo }}</span></p></div></div>
-    <div class="employee-selector"><label for="dossier-employee">Consultar otro empleado</label><select id="dossier-employee" [(ngModel)]="idpersonal" (change)="cambiarPersonal()" [disabled]="!permissionsReady || saving || !!stateSaving || formOpen"><option [ngValue]="0">Seleccione un empleado</option><option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }} {{ p.nombres }} · {{ p.identificacion }}</option></select></div>
   </section>
 
   <section class="summary-grid" aria-label="Resumen del expediente">
@@ -84,4 +85,5 @@
     <dl><dt>Estado</dt><dd>{{ detail.estado || 'ACTIVO' }}</dd><dt>Número</dt><dd>{{ detail.numero_documento || 'No registrado' }}</dd><dt>Emisor</dt><dd>{{ detail.emisor || 'No registrado' }}</dd><dt>Emisión</dt><dd>{{ detail.fecha_emision || 'No registrada' }}</dd><dt>Vencimiento</dt><dd>{{ detail.fecha_vencimiento || 'Sin vencimiento' }}</dd><dt>Versión</dt><dd>{{ detail.version_doc || 1 }}</dd><dt>Registrado</dt><dd>{{ detail.feccrea || 'No registrado' }}</dd><dt>Observaciones</dt><dd class="multiline">{{ detail.descripcion || 'Sin observaciones' }}</dd><dt>Referencia / ubicación</dt><dd class="break-word">{{ detail.ruta_archivo }}</dd><dt *ngIf="detail.hash_archivo">Huella digital del archivo</dt><dd *ngIf="detail.hash_archivo" class="break-word hash">{{ detail.hash_archivo }}</dd></dl>
     <button type="button" class="primary-button" *ngIf="detail.origen==='ARCHIVO'" (click)="descargar(detail)" [disabled]="!!downloading"><i class="bi bi-download"></i> Descargar archivo</button><a class="primary-button" *ngIf="safeLink(detail)" [href]="safeLink(detail)" target="_blank" rel="noopener noreferrer">Abrir enlace <i class="bi bi-box-arrow-up-right"></i></a>
   </aside>
+  </ng-container>
 </main>

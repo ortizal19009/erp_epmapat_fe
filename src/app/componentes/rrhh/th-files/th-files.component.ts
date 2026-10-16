@@ -4,12 +4,11 @@ import { finalize } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 import { ThFilesService } from 'src/app/servicios/rrhh/th-files.service';
-import { personalFromContext } from '../shared/personal-context';
 
 @Component({ selector: 'app-th-files', templateUrl: './th-files.component.html', styleUrls: ['./th-files.component.css'] })
 export class ThFilesComponent implements OnInit {
   idpersonal = 0;
-  personalList: any[] = [];
+  employee: any = {};
   files: any[] = [];
   msg = '';
   error = '';
@@ -56,23 +55,31 @@ export class ThFilesComponent implements OnInit {
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana','/th-files');
+    const requested = this.route.snapshot.queryParamMap.get('idpersonal');
+    const id = Number(requested);
+    if (!requested || !Number.isSafeInteger(id) || id <= 0) {
+      this.error = 'Abra el expediente digital desde la ficha del empleado.';
+      return;
+    }
     this.filesService.permissions().subscribe({
       next: p => {
         this.permissionsReady = true; this.canWrite = p.canWrite;
-        this.personalService.getAllPersonal().subscribe({
-          next: (list: any) => {
-            this.personalList = Array.isArray(list) ? list : [];
-            this.idpersonal = personalFromContext(this.personalList,this.route.snapshot.queryParamMap.get('idpersonal'));
-            if (this.idpersonal) this.cargar();
-            else this.error = 'Seleccione un empleado válido para consultar su expediente.';
+        this.personalService.getPersonalById(id).subscribe({
+          next: (employee: any) => {
+            if (!employee || Number(employee.idpersonal) !== id) {
+              this.error = 'No se encontró el empleado solicitado. Abra su ficha para consultar el expediente.';
+              return;
+            }
+            this.employee = employee;
+            this.idpersonal = id;
+            this.cargar();
           }, error: e => this.error = this.message(e,'No se pudo cargar el personal')
         });
       }, error: e => this.error = this.message(e,'No tiene acceso al expediente digital')
     });
   }
 
-  get employee(): any { return this.personalList.find(p => Number(p.idpersonal) === Number(this.idpersonal)) || {}; }
-  get employeeName(): string { return [this.employee.apellidos,this.employee.nombres].filter(Boolean).join(' ') || 'Seleccione un empleado'; }
+  get employeeName(): string { return [this.employee.apellidos,this.employee.nombres].filter(Boolean).join(' ') || 'Empleado'; }
   get initials(): string { return this.employeeName.split(/\s+/).filter(Boolean).slice(0,2).map(s => s[0]).join('').toUpperCase(); }
   get activeCount(): number { return this.files.filter(f => this.active(f) && this.expiry(f) !== 'VENCIDO').length; }
   get expiringCount(): number { return this.files.filter(f => this.active(f) && this.expiry(f) === 'POR_VENCER').length; }
@@ -101,9 +108,6 @@ export class ThFilesComponent implements OnInit {
   filterChanged(): void { this.page = 1; }
   clearFilters(): void { this.query=''; this.category=''; this.stateFilter=''; this.expiryFilter=''; this.page=1; }
 
-  cambiarPersonal(): void {
-    this.closeForm(); this.detail=null; this.msg=''; this.clearFilters(); this.cargar();
-  }
   cargar(): void {
     const sequence = ++this.sequence; this.files=[]; this.detail=null;
     if (!this.idpersonal || !this.permissionsReady) { this.loading=false; return; }

@@ -17,15 +17,42 @@ describe('Expediente digital por empleado', () => {
     {idfile:2,tipo_doc:'CERTIFICADO',nombre_archivo:'Certificado de capacitación',emisor:'Centro de formación',descripcion:'Certificación de competencias profesionales.',estado:'ACTIVO',version_doc:2,origen:'REFERENCIA',fecha_vencimiento:'2026-10-25',ruta_archivo:'https://ejemplo.test/certificado'},
     {idfile:1,tipo_doc:'TITULO',nombre_archivo:'Título profesional',estado:'ARCHIVADO',version_doc:1,origen:'REFERENCIA'}
   ];
-  const personal = { getAllPersonal: () => of([{idpersonal:1,nombres:'Otro',apellidos:'Empleado'},{idpersonal:2,nombres:'Ana María',apellidos:'Torres García',identificacion:'EMPLEADO DE PRUEBA',codigo:'TH-002'}]) };
+  const employee = {idpersonal:2,nombres:"Ana María",apellidos:"Torres García",identificacion:"EMPLEADO DE PRUEBA",codigo:"TH-002"};
+  const personal = jasmine.createSpyObj("PersonalService", ["getPersonalById", "getAllPersonal"]);
   const route = {snapshot:{queryParamMap:convertToParamMap({idpersonal:'2'})}};
   beforeEach(() => {
+    route.snapshot.queryParamMap=convertToParamMap({idpersonal:"2"});
+    personal.getPersonalById.calls.reset(); personal.getAllPersonal.calls.reset();
+    personal.getPersonalById.and.returnValue(of(employee));
     jasmine.clock().install(); jasmine.clock().mockDate(new Date(2026,9,15,12));
     service=jasmine.createSpyObj('ThFilesService',['permissions','byPersonal','save','upload','download','changeState']);
     service.permissions.and.returnValue(of({userId:8,canWrite:true})); service.byPersonal.and.returnValue(of(data.map(f=>({...f}))));
     component=new ThFilesComponent(personal as any,service,{idusuario:8} as any,route as any); component.ngOnInit();
   });
   afterEach(() => jasmine.clock().uninstall());
+  it('consulta solo el empleado de la ficha sin obtener el listado completo', () => {
+    expect(personal.getPersonalById).toHaveBeenCalledOnceWith(2);
+    expect(personal.getAllPersonal).not.toHaveBeenCalled();
+  });
+  it('no elige otro empleado cuando falta el contexto o es invalido', () => {
+    for (const params of [{}, {idpersonal:'abc'}, {idpersonal:'0'}, {idpersonal:'-1'}]) {
+      route.snapshot.queryParamMap=convertToParamMap(params);
+      personal.getPersonalById.calls.reset(); service.byPersonal.calls.reset();
+      const direct=new ThFilesComponent(personal,service,{} as any,route as any);
+      direct.ngOnInit();
+      expect(direct.idpersonal).toBe(0);
+      expect(direct.error).toContain('ficha');
+      expect(personal.getPersonalById).not.toHaveBeenCalled();
+      expect(service.byPersonal).not.toHaveBeenCalled();
+    }
+  });
+  it('no carga documentos si el empleado solicitado no existe', () => {
+    personal.getPersonalById.and.returnValue(of(null)); service.byPersonal.calls.reset();
+    const missing=new ThFilesComponent(personal,service,{} as any,route as any);
+    missing.ngOnInit();
+    expect(missing.idpersonal).toBe(0);
+    expect(service.byPersonal).not.toHaveBeenCalled();
+  });
   it('abre el expediente solicitado y calcula indicadores reales de vigencia', () => {
     expect(service.byPersonal).toHaveBeenCalledWith(2); expect(component.employeeName).toContain('Torres');
     expect(component.activeCount).toBe(2); expect(component.expiringCount).toBe(1); expect(component.archivedCount).toBe(1);
@@ -33,9 +60,9 @@ describe('Expediente digital por empleado', () => {
     component.query=''; component.category='CONTRATO'; expect(component.filtered[0].idfile).toBe(3);
     component.category=''; component.stateFilter='ARCHIVADO'; expect(component.filtered[0].idfile).toBe(1);
   });
-  it('descarta la respuesta anterior al cambiar de empleado', () => {
+  it('descarta la respuesta anterior al recargar el expediente', () => {
     const pending=new Subject<any>(); service.byPersonal.and.returnValue(pending); component.cargar();
-    service.byPersonal.and.returnValue(of([])); component.idpersonal=1; component.cambiarPersonal();
+    service.byPersonal.and.returnValue(of([])); component.cargar();
     pending.next(data); pending.complete(); expect(component.files).toEqual([]);
   });
   it('sube el archivo con el empleado correcto y evita doble envío', () => {
@@ -72,7 +99,8 @@ describe('Expediente digital por empleado', () => {
     const fixture=TestBed.createComponent(ThFilesComponent); fixture.detectChanges();
     await fixture.whenStable(); fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('.document-card').length).toBe(3);
-    expect(fixture.nativeElement.querySelector('#dossier-employee').selectedOptions[0].textContent).toContain('Torres');
+    expect(fixture.nativeElement.querySelector('#dossier-employee')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.employee-identity').textContent).toContain('Torres');
     const snapshot=(name:string) => {
       const styles=Array.from(document.querySelectorAll('style')).map(s=>s.textContent).filter(s=>s?.includes('.dossier-page')).join('\n');
       const clone=fixture.nativeElement.cloneNode(true) as HTMLElement;
