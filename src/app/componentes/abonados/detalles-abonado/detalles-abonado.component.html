@@ -252,6 +252,8 @@
                     <div class="d-flex align-items-center flex-wrap">
                       <div class="btn-group mr-2">
                         <button type="button" class="btn btn-outline-secondary btn-sm"
+                          (click)="irAPaginaFacturas(0)" [disabled]="(facturasPage === 0 || facturasLoading) || (facturasTotalPages <= 1 || facturasPage <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-outline-secondary btn-sm"
                           (click)="cambiarPaginaFacturas(-1)" [disabled]="facturasPage === 0 || facturasLoading">
                           Anterior
                         </button>
@@ -271,6 +273,9 @@
                           [disabled]="facturasPage + 1 >= facturasTotalPages || facturasLoading">
                           Siguiente
                         </button>
+<button type="button" class="btn btn-outline-secondary btn-sm"
+                          (click)="irAPaginaFacturas(facturasTotalPages - 1)"
+                          [disabled]="(facturasPage + 1 >= facturasTotalPages || facturasLoading) || (facturasTotalPages <= 1 || facturasPage >= facturasTotalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                       </div>
                     </div>
                   </div>
@@ -281,6 +286,8 @@
                     </div>
                     <div class="btn-group">
                       <button type="button" class="btn btn-outline-secondary btn-sm"
+                        (click)="irAPaginaFacturas(0)" [disabled]="(facturasPage === 0 || facturasLoading) || (facturasTotalPages <= 1 || facturasPage <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-outline-secondary btn-sm"
                         (click)="cambiarPaginaFacturas(-1)" [disabled]="facturasPage === 0 || facturasLoading">
                         Anterior
                       </button>
@@ -289,6 +296,9 @@
                         [disabled]="facturasPage + 1 >= facturasTotalPages || facturasLoading">
                         Siguiente
                       </button>
+<button type="button" class="btn btn-outline-secondary btn-sm"
+                        (click)="irAPaginaFacturas(facturasTotalPages - 1)"
+                        [disabled]="(facturasPage + 1 >= facturasTotalPages || facturasLoading) || (facturasTotalPages <= 1 || facturasPage >= facturasTotalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                     </div>
                   </div>
 
@@ -383,6 +393,8 @@
                       <div class="d-flex align-items-center flex-wrap">
                         <div class="btn-group mr-2">
                           <button type="button" class="btn btn-outline-secondary btn-sm"
+                            (click)="irAPaginaLecturas(0)" [disabled]="(lecturasPage === 0) || (lecturasTotalPages <= 1 || lecturasPage <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-outline-secondary btn-sm"
                             (click)="cambiarPaginaLecturas(-1)" [disabled]="lecturasPage === 0">
                             Anterior
                           </button>
@@ -401,6 +413,9 @@
                             [disabled]="lecturasPage + 1 >= lecturasTotalPages">
                             Siguiente
                           </button>
+<button type="button" class="btn btn-outline-secondary btn-sm"
+                            (click)="irAPaginaLecturas(lecturasTotalPages - 1)"
+                            [disabled]="(lecturasPage + 1 >= lecturasTotalPages) || (lecturasTotalPages <= 1 || lecturasPage >= lecturasTotalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                         </div>
                       </div>
                     </div>

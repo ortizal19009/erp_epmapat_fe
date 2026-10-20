@@ -38,9 +38,11 @@
   <div class="d-flex justify-content-between align-items-center mb-2">
     <small class="text-muted">Total: {{ total }}</small>
     <div class="btn-group btn-group-sm">
-      <button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
+      <button class="btn btn-outline-secondary" (click)="page=1;load()" type="button" [disabled]="(page<=1) || (pages <= 1 || page <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
       <button class="btn btn-outline-secondary" disabled>Página {{ page }} / {{ pages }}</button>
       <button class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="page>=pages">Siguiente</button>
+<button class="btn btn-outline-secondary" (click)="page=pages;load()" type="button" [disabled]="(page>=pages) || (pages <= 1 || page >= pages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
     </div>
   </div>
 

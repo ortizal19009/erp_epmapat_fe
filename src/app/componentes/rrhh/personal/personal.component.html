@@ -125,7 +125,7 @@
             <th class="sortable" (click)="ordenar('cargo')">Cargo <i class="bi" [ngClass]="sortIcon('cargo')"></i></th>
             <th class="sortable" (click)="ordenar('tipoContrato')">Contrato <i class="bi" [ngClass]="sortIcon('tipoContrato')"></i></th>
             <th class="sortable" (click)="ordenar('estadoLaboral')">Estado <i class="bi" [ngClass]="sortIcon('estadoLaboral')"></i></th>
-            <th style="width: 120px;">Acciones</th>
+            <th class="rrhh-actions-column">Acciones</th>
           </tr>
         </thead>
         <tbody class="detalle">
@@ -154,13 +154,7 @@
                 {{ estadoLaboral(personal) }}
               </span>
             </td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" data-bs-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false" [attr.aria-label]="'Acciones de ' + nombreCompleto(personal)">
-                  <i class="bi bi-three-dots mr-1" aria-hidden="true"></i>Acciones
-                </button>
-                <div class="dropdown-menu dropdown-menu-right dropdown-menu-end">
+            <td class="rrhh-actions-column"><app-rrhh-actions [label]="'Acciones de ' + nombreCompleto(personal)">
                   <button class="dropdown-item" type="button" (click)="onInfoPersonal(personal)">
                     <i class="bi bi-eye mr-2" aria-hidden="true"></i>Ver detalle
                   </button>
@@ -179,9 +173,7 @@
                   <button class="dropdown-item text-danger" type="button" (click)="onDeletePersonal(personal)">
                     <i class="bi bi-power mr-2" aria-hidden="true"></i>Activar o desactivar
                   </button>
-                </div>
-              </div>
-            </td>
+                </app-rrhh-actions></td>
           </tr>
           <tr *ngIf="!cargando && personalPagina.length === 0">
             <td colspan="8" class="empty-state">
@@ -202,7 +194,8 @@
       </select>
     </div>
     <div class="btn-group btn-group-sm">
-      <button class="btn btn-outline-secondary" type="button" [disabled]="page === 0" (click)="cambiarPagina(page - 1)">
+      <button class="btn btn-outline-secondary" type="button" (click)="cambiarPagina(0)" [disabled]="(page === 0) || (totalPages <= 1 || page <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-outline-secondary" type="button" [disabled]="page === 0" (click)="cambiarPagina(page - 1)">
         <i class="bi bi-chevron-left"></i>
       </button>
       <button
@@ -217,6 +210,7 @@
       <button class="btn btn-outline-secondary" type="button" [disabled]="page >= totalPages - 1" (click)="cambiarPagina(page + 1)">
         <i class="bi bi-chevron-right"></i>
       </button>
+<button class="btn btn-outline-secondary" type="button" (click)="cambiarPagina(totalPages - 1)" [disabled]="(page >= totalPages - 1) || (totalPages <= 1 || page >= totalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
     </div>
   </div>
   </div>

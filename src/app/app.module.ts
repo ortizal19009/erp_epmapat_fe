@@ -290,6 +290,7 @@ import { ModiPersonalComponent } from './componentes/rrhh/personal/modi-personal
 import { InfoPersonalComponent } from './componentes/rrhh/personal/info-personal/info-personal.component';
 import { ThActionsComponent } from './componentes/rrhh/th-actions/th-actions.component';
 import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component';
+import { RrhhActionsComponent } from './componentes/rrhh/shared/rrhh-actions.component';
 import { ThFilesComponent } from './componentes/rrhh/th-files/th-files.component';
 import { ThAuditComponent } from './componentes/rrhh/th-audit/th-audit.component';
 import { ThDashboardComponent } from './componentes/rrhh/th-dashboard/th-dashboard.component';
@@ -687,6 +688,7 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
   ],
 
   imports: [
+    RrhhActionsComponent,
     CommonModule,
     BrowserModule,
     AppRoutingModule,

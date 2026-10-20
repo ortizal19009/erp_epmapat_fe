@@ -274,12 +274,14 @@
         <!-- PAGINACIÓN -->
         <div class="d-flex justify-content-end align-items-center mb-2">
           <div class="btn-group">
-            <button class="btn btn-sm btn-outline-secondary" (click)="prevPage()" [disabled]="page === 0">
+            <button class="btn btn-sm btn-outline-secondary" (click)="page=0;cargarAbonados()" type="button" [disabled]="(page === 0) || (totalPages <= 1 || page <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-sm btn-outline-secondary" (click)="prevPage()" [disabled]="page === 0">
               <i class="bi bi-chevron-left"></i> Anterior
             </button>
             <button class="btn btn-sm btn-outline-secondary" (click)="nextPage()" [disabled]="page + 1 >= totalPages">
               Siguiente <i class="bi bi-chevron-right"></i>
             </button>
+<button class="btn btn-sm btn-outline-secondary" (click)="page=totalPages-1;cargarAbonados()" type="button" [disabled]="(page + 1 >= totalPages) || (totalPages <= 1 || page >= totalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
           </div>
         </div>
 

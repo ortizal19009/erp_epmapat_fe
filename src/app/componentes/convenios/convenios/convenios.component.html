@@ -177,8 +177,11 @@
           <nav aria-label="Paginación convenios">
             <ul class="pagination justify-content-end mb-0">
               <li class="page-item">
+                <button class="btn btn-sm btn-primary" (click)="onGoToPage(0)" type="button" [disabled]="(page === 0) || (totalPages <= 1 || page <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+              </li>
+<li class="page-item">
                 <button class="btn btn-sm btn-primary" (click)="onPreviousPage()" [disabled]="page === 0">
-                  <span aria-hidden="true">&laquo;</span>
+                  <span aria-hidden="true">&lsaquo;</span>
                 </button>
               </li>
               <li class="page-item" *ngFor="let p of pages">
@@ -188,8 +191,11 @@
               </li>
               <li class="page-item">
                 <button class="btn btn-sm btn-primary" (click)="onNextPage()" [disabled]="page + 1 >= totalPages">
-                  <span aria-hidden="true">&raquo;</span>
+                  <span aria-hidden="true">&rsaquo;</span>
                 </button>
+              </li>
+<li class="page-item">
+                <button class="btn btn-sm btn-primary" (click)="onGoToPage(totalPages - 1)" type="button" [disabled]="(page + 1 >= totalPages) || (totalPages <= 1 || page >= totalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
               </li>
             </ul>
           </nav>

@@ -152,7 +152,8 @@
                   </div>
 
                   <div class="pagination-wrap" *ngIf="totalPages > 1">
-                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePage(currentPage - 1)">
+                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePage(1)" [disabled]="totalPages <= 1 || currentPage <= 1" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePage(currentPage - 1)">
                         Anterior
                      </button>
                      <button
@@ -167,6 +168,7 @@
                      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePage(currentPage + 1)">
                         Siguiente
                      </button>
+<button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePage(totalPages)" [disabled]="totalPages <= 1 || currentPage >= totalPages" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                   </div>
                </ng-container>
             </div>

@@ -22,7 +22,7 @@ export class DetallesClienteComponent implements OnInit {
   nocuentas = false;
   _facelectro: any; //Facturas Electrónicas por cliente
   nofacelectro = false;
-  _facturas: any; //Pre Facturas por cliente
+  _facturas: any[] = []; //Pre Facturas por cliente
   nofacturas = false;
   _tramites: any; //Trámites por cliente
   notramites = false;
@@ -30,6 +30,8 @@ export class DetallesClienteComponent implements OnInit {
   totfac: number;
   idfactura: number;
   limit: number = 20;
+  planillasPage=0;planillasTotalPages=0;planillasTotal=0;planillasLoading=false;planillasError='';
+  private planillasConsulta=0;
   idcliente: number;
   ventana = 'clientes';
 
@@ -103,20 +105,22 @@ export class DetallesClienteComponent implements OnInit {
 
   //Planillas por Cliente
   planillasxCliente(idcliente: number) {
-    this.idcliente = idcliente;
-    this.facService.getByIdcliente(idcliente, this.limit).subscribe({
-      next: (datos) => {
-        this._facturas = datos;
-        if (this._facturas.length == 0) {
-          this.nofacturas = true;
-        }
-      },
-      error: (err) => console.error(err.error),
+    this.idcliente=idcliente;
+    this.cargarPlanillas(0);
+  }
+  cargarPlanillas(page:number) {
+    if(!this.idcliente||page<0)return;
+    const consulta=++this.planillasConsulta;
+    this.planillasLoading=true;this.planillasError='';this.nofacturas=false;
+    this.facService.getPlanillasClientePage(this.idcliente,page,this.limit).subscribe({
+      next:(r:any)=>{if(consulta!==this.planillasConsulta)return;this._facturas=r.content??[];this.planillasPage=r.number??page;this.planillasTotalPages=r.totalPages??0;this.planillasTotal=r.totalElements??0;this.nofacturas=this.planillasTotal===0;this.planillasLoading=false;},
+      error:()=>{if(consulta!==this.planillasConsulta)return;this.planillasLoading=false;this.planillasError='No se pudieron cargar las planillas. Intente nuevamente.';}
     });
   }
-  getFactura() {
-    this.planillasxCliente(this.idcliente);
-  }
+  irPlanillas(page:number){if(!this.planillasLoading&&page>=0&&page<this.planillasTotalPages&&page!==this.planillasPage)this.cargarPlanillas(page);}
+  getFactura(){this.cargarPlanillas(0);}
+  get planillasFin(){return Math.min((this.planillasPage+1)*this.limit,this.planillasTotal);}
+  get planillasPaginas(){const inicio=Math.max(0,Math.min(this.planillasPage-2,this.planillasTotalPages-5));return Array.from({length:Math.min(5,this.planillasTotalPages)},(_,i)=>inicio+i);}
 
   //Trámites por Cliente
   tramitesxCliente(idcliente: number) {

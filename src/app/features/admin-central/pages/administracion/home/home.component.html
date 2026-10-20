@@ -649,7 +649,9 @@
             <strong>Página {{ abonadosDetallePage + 1 }} de {{ abonadosDetalleTotalPages }}</strong>
           </div>
           <div class="d-flex align-items-center modal-toolbar-gap">
-            <button type="button" class="btn btn-sm btn-outline-primary btn-modal-nav" (click)="onAbonadosDetallePrev()"
+            <button type="button" class="btn btn-sm btn-outline-primary btn-modal-nav" (click)="abonadosDetallePage=0"
+              [disabled]="(abonadosDetallePage === 0) || (abonadosDetalleTotalPages <= 1 || abonadosDetallePage <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-sm btn-outline-primary btn-modal-nav" (click)="onAbonadosDetallePrev()"
               [disabled]="abonadosDetallePage === 0">
               <i class="bi bi-chevron-left"></i> Anterior
             </button>
@@ -657,6 +659,8 @@
               [disabled]="abonadosDetallePage + 1 >= abonadosDetalleTotalPages">
               Siguiente <i class="bi bi-chevron-right"></i>
             </button>
+<button type="button" class="btn btn-sm btn-outline-primary btn-modal-nav" (click)="abonadosDetallePage=abonadosDetalleTotalPages-1"
+              [disabled]="(abonadosDetallePage + 1 >= abonadosDetalleTotalPages) || (abonadosDetalleTotalPages <= 1 || abonadosDetallePage >= abonadosDetalleTotalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
             <button type="button" class="btn btn-sm btn-outline-secondary btn-modal-close" data-dismiss="modal">Cerrar</button>
           </div>
         </div>

@@ -915,6 +915,8 @@ const routes: Routes = [
     component: ModiUbicacionmComponent,
     canActivate: [AuthGuard],
   },
+  { path: 'nc-endosos-listado', loadChildren: () => import('./componentes/ntacredito/endosos/consulta/nc-endosos-listado.module').then(m=>m.NcEndososListadoModule), canActivate: [AuthGuard], data: { windowPermission: 'ntacredito' } },
+  { path: 'nc-endosos', loadChildren: () => import('./componentes/ntacredito/endosos/nc-endosos.module').then(m=>m.NcEndososModule), canActivate: [AuthGuard], data: { windowPermission: 'ntacredito' } },
   {
     path: 'ntacredito',
     component: NtacreditoComponent,

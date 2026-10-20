@@ -433,6 +433,9 @@
 
             <div class="d-flex justify-content-end align-items-center mt-2">
               <button type="button" class="btn btn-sm btn-outline-secondary mr-1"
+
+                (click)="changeFacturasCobradasPage(1 - facturasCobradasPage)" [disabled]="(facturasCobradasPage === 1) || (facturasCobradasTotalPages <= 1 || facturasCobradasPage <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-sm btn-outline-secondary mr-1"
                 [disabled]="facturasCobradasPage === 1"
                 (click)="changeFacturasCobradasPage(-1)">
                 Anterior
@@ -442,6 +445,9 @@
                 (click)="changeFacturasCobradasPage(1)">
                 Siguiente
               </button>
+<button type="button" class="btn btn-sm btn-outline-secondary"
+
+                (click)="changeFacturasCobradasPage(facturasCobradasTotalPages - facturasCobradasPage)" [disabled]="(facturasCobradasPage >= facturasCobradasTotalPages) || (facturasCobradasTotalPages <= 1 || facturasCobradasPage >= facturasCobradasTotalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
             </div>
           </div>
         </div>

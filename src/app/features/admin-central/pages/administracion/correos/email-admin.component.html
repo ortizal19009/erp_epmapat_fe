@@ -230,6 +230,9 @@
             </small>
             <div>
               <button type="button" class="btn btn-sm btn-outline-secondary mr-2"
+
+                      (click)="goToEmailPage(1)" [disabled]="(emailPage <= 1) || (emailTotalPages <= 1 || emailPage <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-sm btn-outline-secondary mr-2"
                       [disabled]="emailPage <= 1"
                       (click)="goToEmailPage(emailPage - 1)">
                 Anterior
@@ -240,6 +243,9 @@
                       (click)="goToEmailPage(emailPage + 1)">
                 Siguiente
               </button>
+<button type="button" class="btn btn-sm btn-outline-secondary"
+
+                      (click)="goToEmailPage(emailTotalPages)" [disabled]="(emailPage >= emailTotalPages) || (emailTotalPages <= 1 || emailPage >= emailTotalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
             </div>
           </div>
         </div>
@@ -285,6 +291,9 @@
             </small>
             <div>
               <button type="button" class="btn btn-sm btn-outline-secondary mr-2"
+
+                      (click)="goToBlacklistPage(1)" [disabled]="(blacklistPage <= 1) || (blacklistTotalPages <= 1 || blacklistPage <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-sm btn-outline-secondary mr-2"
                       [disabled]="blacklistPage <= 1"
                       (click)="goToBlacklistPage(blacklistPage - 1)">
                 Anterior
@@ -295,6 +304,9 @@
                       (click)="goToBlacklistPage(blacklistPage + 1)">
                 Siguiente
               </button>
+<button type="button" class="btn btn-sm btn-outline-secondary"
+
+                      (click)="goToBlacklistPage(blacklistTotalPages)" [disabled]="(blacklistPage >= blacklistTotalPages) || (blacklistTotalPages <= 1 || blacklistPage >= blacklistTotalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
             </div>
           </div>
         </div>

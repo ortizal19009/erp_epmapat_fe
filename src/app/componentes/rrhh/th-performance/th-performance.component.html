@@ -35,8 +35,10 @@
     </table>
   </div>
   <div class="d-flex align-items-center gap-2" *ngIf="totalPages > 1">
-    <button class="btn btn-outline-secondary btn-sm" (click)="cargar(page - 1)" [disabled]="page === 0 || saving || loading">Anterior</button>
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargar(0)" type="button" [disabled]="(page === 0 || saving || loading) || (totalPages <= 1 || page <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-outline-secondary btn-sm" (click)="cargar(page - 1)" [disabled]="page === 0 || saving || loading">Anterior</button>
     <span>Página {{ page + 1 }} de {{ totalPages }}</span>
     <button class="btn btn-outline-secondary btn-sm" (click)="cargar(page + 1)" [disabled]="page + 1 >= totalPages || saving || loading">Siguiente</button>
+<button class="btn btn-outline-secondary btn-sm" (click)="cargar(totalPages-1)" type="button" [disabled]="(page + 1 >= totalPages || saving || loading) || (totalPages <= 1 || page >= totalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
   </div>
 </div>

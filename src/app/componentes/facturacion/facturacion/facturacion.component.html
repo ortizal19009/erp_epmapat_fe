@@ -161,6 +161,9 @@
           </select>
           <ul class="pagination pagination-sm mb-0">
             <li class="page-item" [class.disabled]="page <= 1">
+              <button class="page-link" type="button" (click)="cambiarPagina(1)" [disabled]="totalPaginas <= 1 || page <= 1" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+            </li>
+<li class="page-item" [class.disabled]="page <= 1">
               <button class="page-link" type="button" (click)="cambiarPagina(page - 1)">Anterior</button>
             </li>
             <li class="page-item disabled">
@@ -168,6 +171,9 @@
             </li>
             <li class="page-item" [class.disabled]="page >= totalPaginas">
               <button class="page-link" type="button" (click)="cambiarPagina(page + 1)">Siguiente</button>
+            </li>
+<li class="page-item" [class.disabled]="page >= totalPaginas">
+              <button class="page-link" type="button" (click)="cambiarPagina(totalPaginas)" [disabled]="totalPaginas <= 1 || page >= totalPaginas" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
             </li>
           </ul>
         </div>

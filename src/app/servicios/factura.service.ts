@@ -60,6 +60,10 @@ export class FacturaService {
   async_getByNrofactura(nrofactura: String): Promise<any> {
     return firstValueFrom(this.http.get<any>(`${baseUrl}/nrofactura?nrofactura=${nrofactura}`));
   }
+  getPlanillasClientePage(idcliente:number,page:number,size:number) {
+    return this.http.get<any>(`${baseUrl}/cliente/${idcliente}/page`,{params:{page,size}});
+  }
+
   //Facturas por Cliente
   getByIdcliente(idcliente: number, long: number) {
     return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}&limit=${long}`);

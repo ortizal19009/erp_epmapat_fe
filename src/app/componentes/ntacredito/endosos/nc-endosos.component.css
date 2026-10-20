@@ -1,0 +1,33 @@
+/* Match the shared theme used by the credit note module. */
+.cabecera {
+  background-color: var(--bgcolor1, #117a8b);
+  color: #fff;
+}
+.btn-cabecera {
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .55);
+}
+.btn-cabecera:hover, .btn-cabecera:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, .18);
+}
+.btn-cabecera:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.card-header { gap: .5rem; }
+label { font-size: .875rem; }
+
+.acciones-cabecera {
+  margin-left: auto;
+  gap: .5rem;
+}
+.minimizar-filtros {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+/* AdminLTE adds a clearfix pseudo-element that otherwise takes a flex slot. */
+.filtros-cabecera::after {
+  display: none;
+}

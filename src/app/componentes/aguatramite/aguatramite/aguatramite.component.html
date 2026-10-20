@@ -119,7 +119,8 @@
                   <option [ngValue]="50">50</option>
                   <option [ngValue]="100">100</option>
                </select>
-               <button type="button" class="btn btn-sm btn-outline-secondary mr-1" [disabled]="currentPage === 0" (click)="cambiarPagina(-1)">
+               <button type="button" class="btn btn-sm btn-outline-secondary mr-1" (click)="irPagina(0)" [disabled]="(currentPage === 0) || (totalPages <= 1 || currentPage <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-sm btn-outline-secondary mr-1" [disabled]="currentPage === 0" (click)="cambiarPagina(-1)">
                   Anterior
                </button>
                <button type="button" class="btn btn-sm mr-1"
@@ -131,6 +132,7 @@
                <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="currentPage + 1 >= totalPages" (click)="cambiarPagina(1)">
                   Siguiente
                </button>
+<button type="button" class="btn btn-sm btn-outline-secondary" (click)="irPagina(totalPages - 1)" [disabled]="(currentPage + 1 >= totalPages) || (totalPages <= 1 || currentPage >= totalPages - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
             </div>
          </div>
       </div>

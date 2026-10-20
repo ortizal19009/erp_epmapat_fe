@@ -54,6 +54,7 @@ export class WritePermissionInterceptor implements HttpInterceptor {
 
   private isTechnicalRequest(url: string): boolean {
     const normalized = url.toLowerCase();
+    if (normalized.includes("/api/nc-endosos")) return true; // Server checks dedicated permissions for every action.
     return normalized.includes('/usuarios/login')
       || normalized.includes('/ventanas')
       || normalized.includes('/usrxmodulos/access');

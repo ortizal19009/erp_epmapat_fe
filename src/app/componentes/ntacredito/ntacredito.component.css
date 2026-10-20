@@ -1,22 +1,35 @@
-.cabecera {
-  background-color: var(--bgcolor1);
-  color: white;
-}
-.nuevoBG1 {
-  background-color: var(--bgcolor1);
-}
-
-.detalle {
-  background-color: var(--bgcolor2);
-}
-.nuevoBG2 {
-  background-color: var(--bgcolor2);
-}
-.card-size{
-  height: 500px;
-}
-.fila:hover {
-  background-color: #117a8b;
-  color: white;
-  cursor: pointer;
-}
+.cabecera, .nuevoBG1 { background: var(--bgcolor1, #117a8b); color: #fff; }
+.nc-cabecera { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.25rem; border-radius: .65rem; }
+.nc-cabecera small { opacity: .85; }
+.nc-icono { display: grid; place-items: center; width: 42px; height: 42px; border-radius: .7rem; background: rgba(255,255,255,.15); font-size: 1.4rem; }
+.nc-menu { color: #fff; border: 1px solid rgba(255,255,255,.5); border-radius: .45rem; min-width: 36px; }
+.nc-menu:hover, .nc-menu:focus-visible { background: rgba(255,255,255,.18); color: #fff; }
+.nc-card { border: 1px solid #e5e9ef; border-radius: .65rem; box-shadow: 0 2px 8px rgba(30,50,70,.04); }
+.nc-card > .card-header { border-radius: .65rem .65rem 0 0; border-bottom: 1px solid #edf0f4; }
+label { font-size: .8rem; color: #536174; font-weight: 600; }
+.form-control { border-color: #dce2e9; border-radius: .4rem; }
+.form-control:focus { border-color: var(--bgcolor1, #117a8b); box-shadow: 0 0 0 .15rem rgba(17,122,139,.12); }
+.nc-metrica { padding: 1rem 1.15rem; height: 100%; background: #fff; border: 1px solid #e5e9ef; border-radius: .65rem; }
+.nc-metrica small, .nc-metrica span { display: block; color: #657386; }
+.nc-metrica strong { display: block; font-size: 1.45rem; font-variant-numeric: tabular-nums; color: #25364a; margin: .3rem 0; }
+.nc-metrica span { font-size: .72rem; }
+.nc-metrica-saldo { border-top: 3px solid var(--bgcolor1, #117a8b); }
+.nc-metrica-saldo strong { color: var(--bgcolor1, #117a8b); }
+.nc-listado-header, .nc-pie { gap: .75rem; }
+.nc-tamanio { width: 75px; }
+.nc-tabla-contenedor { max-height: 62vh; min-height: 220px; }
+.nc-tabla { font-size: .84rem; }
+.nc-tabla thead { position: sticky; top: 0; z-index: 2; }
+.nc-tabla th { padding: .85rem .7rem; white-space: nowrap; border-top: 0; font-weight: 600; }
+.nc-tabla td { padding: .75rem .7rem; vertical-align: middle; border-color: #edf0f4; }
+.nc-tabla td.text-right { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nc-tabla tbody tr:hover { background: #f3f8fa; }
+.nc-cliente { min-width: 190px; max-width: 340px; white-space: normal; font-weight: 500; }
+.badge { border-radius: 20px; padding: .4rem .6rem; font-weight: 500; }
+.badge-success { background: #e7f5ed; color: #246442; }
+.badge-secondary { background: #edf0f4; color: #536174; }
+.nc-acciones { border: 1px solid #e0e5ec; border-radius: .4rem; }
+.nc-vacio { text-align: center; padding: 3rem 1rem !important; color: #69788a; }
+.nc-vacio i { font-size: 1.5rem; }
+.btn:focus-visible, .sortable:focus-visible { outline: 2px solid var(--bgcolor1, #117a8b); outline-offset: 2px; }
+@media (max-width: 575px) { .nc-cabecera { padding: .85rem; } .nc-cabecera h5 { font-size: 1rem; } .nc-icono { display: none; } .nc-metrica strong { font-size: 1.2rem; } .nc-pie { justify-content: center !important; } }

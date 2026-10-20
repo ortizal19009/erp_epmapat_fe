@@ -63,28 +63,32 @@
       <p class="small" role="status" *ngIf="inboxLoading">Cargando bandeja...</p>
       <div class="table-responsive" *ngIf="inbox">
         <table class="table table-sm table-bordered">
-          <thead><tr><th>ID</th><th>Empleado</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Días</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>ID</th><th>Empleado</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Días</th><th class="rrhh-actions-column">Acciones</th></tr></thead>
           <tbody><tr *ngFor="let row of inbox.contenido">
             <td>{{ row.idrequest }}</td><td>{{ row.apellidos }}, {{ row.nombres }} <span class="small">(#{{ row.idpersonal }})</span></td>
             <td>{{ row.tipolicencia }}</td><td><span [ngClass]="estadoClass(row.estado)">{{ row.estado }}</span></td>
             <td>{{ formatFecha(row.fechainicio || '') }}</td><td>{{ formatFecha(row.fechafin || '') }}</td><td>{{ row.dias_solicitados }}</td>
-            <td>
-              <button *ngIf="canWrite && row.estado === 'SOLICITADA'" class="btn btn-sm btn-success mr-1"
+            <td class="rrhh-actions-column"><app-rrhh-actions [label]="'Acciones de la solicitud #' + row.idrequest" [disabled]="saving || loading || inboxLoading">
+              <button type="button" *ngIf="canWrite && row.estado === 'SOLICITADA'" class="dropdown-item text-success"
                 (click)="resolverBandeja(row, true)" [disabled]="saving || loading || inboxLoading">Aprobar</button>
-              <button *ngIf="canWrite && row.estado === 'SOLICITADA'" class="btn btn-sm btn-danger mr-1"
+              <button type="button" *ngIf="canWrite && row.estado === 'SOLICITADA'" class="dropdown-item text-danger"
                 (click)="resolverBandeja(row, false)" [disabled]="saving || loading || inboxLoading">Rechazar</button>
-              <button class="btn btn-sm btn-outline-info mr-1" (click)="verDetalle(row)" [disabled]="saving">Detalle</button>
-              <button class="btn btn-sm btn-outline-secondary" (click)="verEmpleadoBandeja(row)"
+              <button type="button" class="dropdown-item" (click)="verDetalle(row)" [disabled]="saving">Detalle</button>
+              <button type="button" class="dropdown-item" (click)="verEmpleadoBandeja(row)"
                 [disabled]="saving || loading || !row.idpersonal">Ver saldos y solicitudes</button>
-            </td>
+            </app-rrhh-actions></td>
           </tr><tr *ngIf="!inbox.contenido.length"><td colspan="8" class="text-center text-muted">Sin solicitudes para los filtros seleccionados</td></tr></tbody>
         </table>
         <div class="d-flex flex-wrap align-items-center justify-content-end">
           <span class="small mr-2">{{ inbox.total_elementos }} solicitud(es) · Página {{ inbox.total_paginas ? inbox.pagina + 1 : 0 }} / {{ inbox.total_paginas }}</span>
-          <button class="btn btn-sm btn-light mr-2" (click)="cargarBandeja(inbox.pagina - 1)"
+          <button class="btn btn-sm btn-light mr-2" (click)="cargarBandeja(0)"
+            type="button" [disabled]="(saving || inboxLoading || inbox.pagina <= 0) || (inbox.total_paginas <= 1 || inbox.pagina <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-sm btn-light mr-2" (click)="cargarBandeja(inbox.pagina - 1)"
             [disabled]="saving || inboxLoading || inbox.pagina <= 0">Anterior</button>
           <button class="btn btn-sm btn-light" (click)="cargarBandeja(inbox.pagina + 1)"
             [disabled]="saving || inboxLoading || inbox.pagina + 1 >= inbox.total_paginas">Siguiente</button>
+<button class="btn btn-sm btn-light" (click)="cargarBandeja(inbox.total_paginas-1)"
+            type="button" [disabled]="(saving || inboxLoading || inbox.pagina + 1 >= inbox.total_paginas) || (inbox.total_paginas <= 1 || inbox.pagina >= inbox.total_paginas - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
         </div>
       </div>
     </div>
@@ -127,8 +131,10 @@
         </div>
         <div class="d-flex flex-wrap align-items-center justify-content-end mt-2">
           <span class="small mr-2">Página {{ calendar.total_paginas ? calendar.pagina + 1 : 0 }} / {{ calendar.total_paginas }}</span>
-          <button class="btn btn-sm btn-light mr-2" (click)="cargarCalendario(calendar.pagina - 1)" [disabled]="saving || calendarLoading || calendar.pagina <= 0">Anterior</button>
+          <button class="btn btn-sm btn-light mr-2" (click)="cargarCalendario(0)" type="button" [disabled]="(saving || calendarLoading || calendar.pagina <= 0) || (calendar.total_paginas <= 1 || calendar.pagina <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-sm btn-light mr-2" (click)="cargarCalendario(calendar.pagina - 1)" [disabled]="saving || calendarLoading || calendar.pagina <= 0">Anterior</button>
           <button class="btn btn-sm btn-light" (click)="cargarCalendario(calendar.pagina + 1)" [disabled]="saving || calendarLoading || calendar.pagina + 1 >= calendar.total_paginas">Siguiente</button>
+<button class="btn btn-sm btn-light" (click)="cargarCalendario(calendar.total_paginas-1)" type="button" [disabled]="(saving || calendarLoading || calendar.pagina + 1 >= calendar.total_paginas) || (calendar.total_paginas <= 1 || calendar.pagina >= calendar.total_paginas - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
         </div>
       </ng-container>
     </div>
@@ -268,7 +274,7 @@
                   <th>Año</th>
                   <th>Asignados</th>
                   <th>Usados</th>
-                  <th>Disponibles</th><th>Estado</th><th>Acciones</th>
+                  <th>Disponibles</th><th>Estado</th><th class="rrhh-actions-column">Acciones</th>
                 </tr>
               </thead>
               <tbody class="detalle">
@@ -278,12 +284,12 @@
                   <td>{{ b.dias_usados }}</td>
                   <td><strong>{{ b.dias_disponibles }}</strong></td>
                   <td><span class="badge" [ngClass]="b.estado === true ? 'badge-success' : 'badge-secondary'">{{ b.estado === true ? 'Activo' : b.estado === false ? 'Inactivo' : 'Sin estado' }}</span></td>
-                  <td>
-                    <button *ngIf="canWrite" class="btn btn-sm btn-outline-primary" (click)="seleccionarAjuste(b)" [disabled]="saving || loading || b.estado !== true">Ajustar</button>
-                    <button *ngIf="canWrite" class="btn btn-sm btn-outline-secondary" (click)="abrirLibro(b)" [disabled]="saving || loading">Abrir libro</button>
-                    <button *ngIf="canWrite" class="btn btn-sm btn-outline-warning" (click)="cambiarEstadoSaldo(b)" [disabled]="saving || loading">{{ b.estado === true ? 'Inactivar' : 'Activar' }}</button>
-                    <button class="btn btn-sm btn-outline-info" (click)="verHistorialEstadoSaldo(b)" [disabled]="saving || loading">Historial de estado</button>
-                  </td>
+                  <td class="rrhh-actions-column"><app-rrhh-actions [label]="'Acciones del saldo ' + b.anio" [disabled]="saving || loading">
+                    <button type="button" *ngIf="canWrite" class="dropdown-item" (click)="seleccionarAjuste(b)" [disabled]="saving || loading || b.estado !== true">Ajustar</button>
+                    <button type="button" *ngIf="canWrite" class="dropdown-item" (click)="abrirLibro(b)" [disabled]="saving || loading">Abrir libro</button>
+                    <button type="button" *ngIf="canWrite" class="dropdown-item" (click)="cambiarEstadoSaldo(b)" [disabled]="saving || loading">{{ b.estado === true ? 'Inactivar' : 'Activar' }}</button>
+                    <button type="button" class="dropdown-item" (click)="verHistorialEstadoSaldo(b)" [disabled]="saving || loading">Historial de estado</button>
+                  </app-rrhh-actions></td>
                 </tr>
                 <tr *ngIf="!balances?.length">
                   <td colspan="6" class="text-center text-muted">Sin saldos registrados</td>
@@ -321,7 +327,7 @@
                   <th>Fin</th>
                   <th>Aprobador</th>
                   <th>F. Aprob.</th>
-                  <th>Acciones</th>
+                  <th class="rrhh-actions-column">Acciones</th>
                 </tr>
               </thead>
               <tbody class="detalle">
@@ -333,15 +339,15 @@
                   <td>{{ formatFecha(r.fechafin) }}</td>
                   <td>{{ r.aprobador_id || '-' }}</td>
                   <td>{{ formatFecha(r.fecha_aprobacion) }}</td>
-                  <td>
-                    <div class="btn-group btn-group-sm" role="group">
-                      <button class="btn btn-success" (click)="aprobar(r.idrequest)" *ngIf="canWrite" [disabled]="saving || loading || r.estado !== 'SOLICITADA'">Aprobar</button>
-                      <button class="btn btn-danger" (click)="rechazar(r.idrequest)" *ngIf="canWrite" [disabled]="saving || loading || r.estado !== 'SOLICITADA'">Rechazar</button>
-                      <button class="btn btn-outline-secondary" (click)="cancelar(r.idrequest)" *ngIf="canWrite && r.estado === 'SOLICITADA'" [disabled]="saving || loading">Cancelar</button>
-                      <button class="btn btn-outline-warning" (click)="revertir(r.idrequest)" *ngIf="canWrite && r.estado === 'APROBADA'" [disabled]="saving || loading">Revertir</button>
-                      <button class="btn btn-outline-info" (click)="verDetalle(r)">Detalle</button>
-                    </div>
-                  </td>
+                  <td class="rrhh-actions-column"><app-rrhh-actions [label]="'Acciones de la solicitud #' + r.idrequest" [disabled]="saving || loading">
+
+                      <button type="button" class="dropdown-item text-success" (click)="aprobar(r.idrequest)" *ngIf="canWrite" [disabled]="saving || loading || r.estado !== 'SOLICITADA'">Aprobar</button>
+                      <button type="button" class="dropdown-item text-danger" (click)="rechazar(r.idrequest)" *ngIf="canWrite" [disabled]="saving || loading || r.estado !== 'SOLICITADA'">Rechazar</button>
+                      <button type="button" class="dropdown-item" (click)="cancelar(r.idrequest)" *ngIf="canWrite && r.estado === 'SOLICITADA'" [disabled]="saving || loading">Cancelar</button>
+                      <button type="button" class="dropdown-item" (click)="revertir(r.idrequest)" *ngIf="canWrite && r.estado === 'APROBADA'" [disabled]="saving || loading">Revertir</button>
+                      <button type="button" class="dropdown-item" (click)="verDetalle(r)">Detalle</button>
+
+                  </app-rrhh-actions></td>
                 </tr>
                 <tr *ngIf="!requestsFiltradas?.length">
                   <td colspan="8" class="text-center text-muted">Sin solicitudes para el filtro seleccionado</td>
@@ -352,9 +358,11 @@
         </div>
 
         <div class="card-footer py-2 d-flex justify-content-end align-items-center" *ngIf="totalPages > 0">
-          <button class="btn btn-sm btn-light mr-2" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
+          <button class="btn btn-sm btn-light mr-2" (click)="page=1" type="button" [disabled]="(page <= 1) || (totalPages <= 1 || page <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-sm btn-light mr-2" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
           <span class="small mr-2">Página {{ page }} / {{ totalPages }}</span>
           <button class="btn btn-sm btn-light" (click)="nextPage()" [disabled]="page >= totalPages">Siguiente</button>
+<button class="btn btn-sm btn-light" (click)="page=totalPages" type="button" [disabled]="(page >= totalPages) || (totalPages <= 1 || page >= totalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
         </div>
       </div>
     </div>
@@ -546,9 +554,11 @@
       </div>
     </div>
     <div class="card-footer py-2 d-flex justify-content-end align-items-center" *ngIf="movements.length">
-      <button class="btn btn-sm btn-light mr-2" (click)="movementPage = movementPage - 1" [disabled]="movementPage <= 1">Anterior</button>
+      <button class="btn btn-sm btn-light mr-2" (click)="movementPage=1" type="button" [disabled]="(movementPage <= 1) || (movementTotalPages <= 1 || movementPage <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-sm btn-light mr-2" (click)="movementPage = movementPage - 1" [disabled]="movementPage <= 1">Anterior</button>
       <span class="small mr-2">Página {{ movementPage }} / {{ movementTotalPages }}</span>
       <button class="btn btn-sm btn-light" (click)="movementPage = movementPage + 1" [disabled]="movementPage >= movementTotalPages">Siguiente</button>
+<button class="btn btn-sm btn-light" (click)="movementPage=movementTotalPages" type="button" [disabled]="(movementPage >= movementTotalPages) || (movementTotalPages <= 1 || movementPage >= movementTotalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
     </div>
   </div>
 </div>

@@ -113,8 +113,11 @@
                         <nav aria-label="Paginación remisiones" class="mt-2 mt-md-0">
                             <ul class="pagination pagination-sm mb-0">
                                 <li class="page-item">
+                                    <button class="btn btn-outline-primary btn-xs mr-1" (click)="onGoToPage(0)" type="button" [disabled]="totalPages <= 1 || page <= 0" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+                                </li>
+<li class="page-item">
                                     <button class="btn btn-outline-primary btn-xs mr-1" (click)="onPreviousPage()">
-                                        <span aria-hidden="true">&laquo;</span>
+                                        <span aria-hidden="true">&lsaquo;</span>
                                     </button>
                                 </li>
                                 <li class="page-item mr-1" *ngFor="let p of pages">
@@ -125,8 +128,11 @@
                                 </li>
                                 <li class="page-item">
                                     <button class="btn btn-outline-primary btn-xs" (click)="onNextPage()">
-                                        <span aria-hidden="true">&raquo;</span>
+                                        <span aria-hidden="true">&rsaquo;</span>
                                     </button>
+                                </li>
+<li class="page-item">
+                                    <button class="btn btn-outline-primary btn-xs" (click)="onGoToPage(totalPages - 1)" type="button" [disabled]="totalPages <= 1 || page >= totalPages - 1" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                                 </li>
                             </ul>
                         </nav>

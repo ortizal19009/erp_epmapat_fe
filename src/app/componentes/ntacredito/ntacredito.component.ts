@@ -1,14 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import jsPDF from 'jspdf';
+import { NotaReporte, pdfNotas, excelNotas } from './notas-credito-reportes';
 import { firstValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
-import { PdfService } from 'src/app/servicios/pdf.service';
+
 
 type SortColumn = 'cuenta' | 'cliente' | 'planilla' | 'identificacion' | 'valor' | 'devengado' | 'saldo';
 type SortDirection = 'asc' | 'desc';
@@ -16,189 +16,10 @@ type EstadoFiltro = 'todos' | 'con-saldo' | 'agotadas' | 'pagadas-total';
 
 @Component({
   selector: 'app-ntacredito',
-  template: `
-<div class="content mt-1 pt-1 pl-0">
-    <div class="container-fluid">
-        <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-            <div class="col-sm-2">
-                <h5 class="m-0 font-weight-bold description"><i class="fa fa-sticky-note" aria-hidden="true"></i>
-                    Notas de creditos</h5>
-            </div>
-            <div class="col-sm-6">
-                <div class="container-fluid">
-                    <form [formGroup]="f_bntacredito" class="formGroup" (ngSubmit)="onSubmit()">
-                        <div class="row" hidden>
-                            <div class="col-sm-3">
-                                <select name="" id="selecTipoBusqueda" class="form-control form-control-sm"
-                                    formControlName="selecTipoBusqueda">
-                                    <option value="1">Cuenta</option>
-                                    <option value="2">Nombre</option>
-                                    <option value="3">Identificacion</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-5">
-                                <div class="container">
-                                    <input type="text" placeholder="Buscar" class="form-control form-control-sm"
-                                        autofocus id="buscarAbonado" formControlName="buscarAbonado" />
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <button class="btn btn-primary btn-sm">
-                                    <i class="fa fa-search" style="font-size:24pxi"></i> Buscar
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-sm-2">
-                <input type="text" class="form-control mx-0 form-control-sm text-center"
-                    placeholder="Buscar cliente, identificación o cuenta..."
-                    [(ngModel)]="filterTerm" (ngModelChange)="onFilterChange()" />
-            </div>
-            <div class="col-sm-2">
-                <select class="form-control form-control-sm text-center"
-                    [(ngModel)]="estadoFiltro" (ngModelChange)="onFilterChange()">
-                    <option value="todos">Todas</option>
-                    <option value="con-saldo">Con saldo a favor</option>
-                    <option value="agotadas">Usadas totalmente</option>
-                    <option value="pagadas-total">Pagadas totalmente</option>
-                </select>
-            </div>
-            <div class="btn-group ml-auto mt-0">
-                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                    <button class="dropdown-item" [routerLink]="['/add-ntacredito']" type="button">
-                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"><i
-                            class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="container-fluid mt-2">
-    <div class="card mb-0">
-        <div class="card-body table-responsive  center-form card-size">
-            <table class="table table-hover text-nowrap table-striped table-bordered table-sm sombra">
-                <thead class="cabecera">
-                    <tr class="text-center ">
-                        <th class="col-sm-1">N°</th>
-                        <th class="sortable" (click)="toggleSort('cuenta')" style="cursor:pointer; user-select:none;">
-                            Cuenta <i class="bi" *ngIf="getSortIconClean('cuenta')" [ngClass]="getSortIconClean('cuenta')"></i>
-                        </th>
-                        <th class="sortable" (click)="toggleSort('cliente')" style="cursor:pointer; user-select:none;">
-                            Cliente <i class="bi" *ngIf="getSortIconClean('cliente')" [ngClass]="getSortIconClean('cliente')"></i>
-                        </th>
-                        <th class="sortable" (click)="toggleSort('planilla')" style="cursor:pointer; user-select:none;">
-                            Planilla <i class="bi" *ngIf="getSortIconClean('planilla')" [ngClass]="getSortIconClean('planilla')"></i>
-                        </th>
-                        <th class="sortable" (click)="toggleSort('identificacion')" style="cursor:pointer; user-select:none;">
-                            Identificacion <i class="bi" *ngIf="getSortIconClean('identificacion')" [ngClass]="getSortIconClean('identificacion')"></i>
-                        </th>
-                        <th class="sortable" (click)="toggleSort('valor')" style="cursor:pointer; user-select:none;">
-                            Valor <i class="bi" *ngIf="getSortIconClean('valor')" [ngClass]="getSortIconClean('valor')"></i>
-                        </th>
-                        <th class="sortable" (click)="toggleSort('devengado')" style="cursor:pointer; user-select:none;">
-                            Devengado <i class="bi" *ngIf="getSortIconClean('devengado')" [ngClass]="getSortIconClean('devengado')"></i>
-                        </th>
-                        <th class="sortable" (click)="toggleSort('saldo')" style="cursor:pointer; user-select:none;">
-                            Saldo <i class="bi" *ngIf="getSortIconClean('saldo')" [ngClass]="getSortIconClean('saldo')"></i>
-                        </th>
-                        <th>Estado</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody class="detalle">
-                    <tr *ngFor="let ntacredito of notasCreditosVisibles; let i = index ">
-                        <td class="col-sm-1 text-center">{{i+1 + (page * size)}}</td>
-                        <td class="text-center">{{ntacredito.idabonado_abonados.idabonado}}</td>
-                        <td class="description">{{ntacredito.idcliente_clientes.nombre}}</td>
-                        <td class="text-center">{{ntacredito.nrofactura}}</td>
-                        <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes.cedula}}</td>
-                        <td class="text-right">{{ntacredito.valor}}</td>
-                        <td class="text-right">{{ntacredito.devengado}}</td>
-                        <td class="text-right">{{getSaldo(ntacredito).toFixed(2)}}</td>
-                        <td class="text-center">
-                            <span class="badge"
-                                [ngClass]="{
-                                  'badge-success': getEstadoNotaCredito(ntacredito) === 'Con saldo a favor',
-                                  'badge-secondary': getEstadoNotaCredito(ntacredito) !== 'Con saldo a favor'
-                                }">
-                                {{ getEstadoNotaCredito(ntacredito) }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <div class="btn-group py-0">
-                                <button type="button" class="btn btn-warning btn-badged dropdown-toggle py-0"
-                                    data-toggle="dropdown" aria-expanded="false">
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right popLista">
-                                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf"
-                                        (click)="impDocumento(ntacredito.idntacredito)">
-                                        <i class="bi bi-file-minus"></i>&nbsp; Imp Doc</button>
-                                    <button class="dropdown-item" disabled type="button"
-                                        [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
-                                        <i class="bi bi-pencil"></i>&nbsp; Transferir</button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-end">
-                    <li class="page-item">
-                        <button class="btn btn-sm btn-primary" (click)="onPreviousPage()" [disabled]="page === 0"> <span
-                                aria-hidden="true">&laquo;</span>
-                        </button>
-                    </li>
-                    <li class="page-item" *ngFor="let p of pages">
-                        <button class="btn btn-sm btn-outline-primary" (click)="onGoToPage(p)"
-                            [class.active]="p === page">
-                            {{ p + 1 }}
-                        </button>
-                    </li>
-                    <li class="page-item">
-                        <button class="btn btn-sm btn-primary" (click)="onNextPage()"
-                            [disabled]="page >= totalPagesVisibles - 1"> <span
-                                aria-hidden="true">&raquo;</span>
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-
-    <div class="modal fade" id="pdf" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="pdfLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pdfLabel">Vista de reporte</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <iframe id="pdfViewer" width="100%" height="600px"></iframe>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-  `,
+  templateUrl: './ntacredito.component.html',
   styleUrls: ['./ntacredito.component.css'],
 })
-export class NtacreditoComponent implements OnInit {
+export class NtacreditoComponent implements OnInit, OnDestroy {
   f_bntacredito: FormGroup;
   filterTerm = '';
   estadoFiltro: EstadoFiltro = 'todos';
@@ -214,7 +35,12 @@ export class NtacreditoComponent implements OnInit {
   pages: number[] = [];
   maxPagesToShow: number = 5;
   totalElements: number = 0;
+  fechaDesde='';fechaHasta='';campoFiltro='todos';errorListado='';cargandoPagina=false;
+  private filtroTimer:ReturnType<typeof setTimeout>|undefined;
+  private cargaCompleta:Promise<void>|null=null;
   cargandoTodos = false;
+  exportando = false;
+  mensajeReporte = '';
 
   constructor(
     private coloresService: ColoresService,
@@ -262,21 +88,22 @@ export class NtacreditoComponent implements OnInit {
   detallesnotasnc(notacredito: any) {}
 
   getAllNotasCreditos(page: number, size: number) {
+    this.cargandoPagina=true;this.errorListado='';
     this.s_ntacredito.getAllPageable(page, size).subscribe({
       next: (datos: any) => {
-        this._ntacreditos = datos.content ?? [];
+        this.cargandoPagina=false;this._ntacreditos = datos.content ?? [];
         this.size = datos.size ?? size;
         this.page = datos.pageable?.pageNumber ?? page;
         this.totalPages = datos.totalPages ?? 0;
         this.totalElements = datos.totalElements ?? 0;
         this.updatePages();
       },
-      error: (e: any) => console.error(e),
+      error: (e: any) => {this.cargandoPagina=false;this.errorListado='No se pudieron cargar las notas. Intente nuevamente.';console.error(e);},
     });
   }
 
   get filteringActive(): boolean {
-    return !!this.filterTerm?.trim() || this.estadoFiltro !== 'todos';
+    return !!this.filterTerm?.trim() || this.estadoFiltro !== 'todos' || !!this.fechaDesde || !!this.fechaHasta;
   }
 
   get filteredNotasCreditos(): any[] {
@@ -284,7 +111,7 @@ export class NtacreditoComponent implements OnInit {
     const source = this.filteringActive ? this._ntacreditosAll : this._ntacreditos;
 
     return (source ?? []).filter((ntacredito: any) =>
-      this.matchesEstadoFiltro(ntacredito) && this.matchesFilter(ntacredito, term),
+      this.matchesEstadoFiltro(ntacredito) && this.matchesFilter(ntacredito, term) && this.matchesFechas(ntacredito,this.fechaDesde,this.fechaHasta),
     );
   }
 
@@ -313,6 +140,9 @@ export class NtacreditoComponent implements OnInit {
   }
 
   async onFilterChange(): Promise<void> {
+    if(this.filtroTimer)clearTimeout(this.filtroTimer);
+    this.errorListado='';
+    if(this.fechaDesde&&this.fechaHasta&&this.fechaDesde>this.fechaHasta){this.errorListado='La fecha desde no puede ser mayor que hasta.';return;}
     this.page = 0;
 
     if (this.filteringActive) {
@@ -374,7 +204,7 @@ export class NtacreditoComponent implements OnInit {
     const identificacion = String(ntacredito?.idcliente_clientes?.cedula ?? '');
     const valor = Number(ntacredito?.valor ?? 0);
     const devengado = Number(ntacredito?.devengado ?? 0);
-    const saldo = Number((ntacredito?.valor ?? 0) - (ntacredito?.devengado ?? 0));
+    const saldo = this.getSaldo(ntacredito);
 
     switch (column) {
       case 'cuenta':
@@ -397,42 +227,17 @@ export class NtacreditoComponent implements OnInit {
   }
 
   private async cargarTodasLasNotasCreditos(): Promise<void> {
-    if (this.cargandoTodos) {
-      return;
-    }
-
-    this.cargandoTodos = true;
-    this.s_loading.showLoading();
-
-    try {
-      const primeraPagina: any = await firstValueFrom(
-        this.s_ntacredito.getAllPageable(0, this.size),
-      );
-
-      const totalPages = primeraPagina.totalPages ?? 1;
-      const size = primeraPagina.size ?? this.size;
-      const contentInicial = primeraPagina.content ?? [];
-
-      const requests: Promise<any>[] = [];
-      for (let p = 1; p < totalPages; p++) {
-        requests.push(firstValueFrom(this.s_ntacredito.getAllPageable(p, size)));
-      }
-
-      const restantes = await Promise.all(requests);
-      this._ntacreditosAll = [
-        ...contentInicial,
-        ...restantes.flatMap((resp: any) => resp.content ?? []),
-      ];
-
-      this.totalElements = this._ntacreditosAll.length;
-      this.totalPages = Math.max(1, Math.ceil(this.totalElements / this.size));
-    } catch (e) {
-      console.error(e);
-      this._ntacreditosAll = [];
-    } finally {
-      this.cargandoTodos = false;
-      this.s_loading.hideLoading();
-    }
+    if(this.cargaCompleta)return this.cargaCompleta;
+    this.cargaCompleta=(async()=>{
+      this.cargandoTodos=true;
+      try{
+        const notas:any[]=[];let pagina=0,paginas=1;
+        do{const r:any=await firstValueFrom(this.s_ntacredito.getAllPageable(pagina,200));notas.push(...(r.content??[]));paginas=r.totalPages??1;pagina++;}while(pagina<paginas);
+        this._ntacreditosAll=notas;
+      }catch(e){this.errorListado='No se pudieron cargar todas las notas para filtrar. Intente nuevamente.';this._ntacreditosAll=[];console.error(e);}
+      finally{this.cargandoTodos=false;}
+    })();
+    try{await this.cargaCompleta;}finally{this.cargaCompleta=null;}
   }
 
   /* Inicio de configuracion de paginacion */
@@ -492,7 +297,7 @@ export class NtacreditoComponent implements OnInit {
   }
   /* Fin de configuracion de paginacion */
 
-  private matchesFilter(ntacredito: any, term: string): boolean {
+  private matchesFilter(ntacredito: any, term: string, campo=this.campoFiltro): boolean {
     if (!term) {
       return true;
     }
@@ -505,6 +310,9 @@ export class NtacreditoComponent implements OnInit {
     const devengado = String(ntacredito?.devengado ?? '').toLowerCase();
     const saldo = String(this.getSaldo(ntacredito)).toLowerCase();
 
+    const campos:Record<string,string>={cuenta,cliente,identificacion:cedula,planilla};
+    if(campo!=='todos')return (campos[campo]??'').includes(term);
+
     return (
       cuenta.includes(term) ||
       cliente.includes(term) ||
@@ -516,10 +324,20 @@ export class NtacreditoComponent implements OnInit {
     );
   }
 
+  ngOnDestroy(){if(this.filtroTimer)clearTimeout(this.filtroTimer);}
+  programarFiltro(){if(this.filtroTimer)clearTimeout(this.filtroTimer);this.filtroTimer=setTimeout(()=>void this.onFilterChange(),300);}
+  limpiarFiltros(){this.filterTerm='';this.estadoFiltro='todos';this.fechaDesde='';this.fechaHasta='';this.campoFiltro='todos';void this.onFilterChange();}
+  cambiarTamanio(tamanio:number){this.size=tamanio;this.page=0;if(this.filteringActive)this.updatePages();else this.getAllNotasCreditos(0,tamanio);}
+  get cantidadResultados(){return this.filteringActive?this.filteredNotasCreditos.length:this.totalElements;}
+  get finVisible(){return Math.min((this.page+1)*this.size,this.cantidadResultados);}
+  get alcanceResumen(){return this.filteringActive?'Todos los resultados filtrados':'P\u00e1gina actual';}
+  get resumenVista(){const filas=this.filteredNotasCreditos;const suma=(campo:string)=>filas.reduce((n,f)=>n+Math.round(Number(campo==='saldo'?this.getSaldo(f):f[campo]??0)*100),0)/100;return {valor:suma('valor'),devengado:suma('devengado'),saldo:suma('saldo')};}
+  private matchesFechas(n:any,desde:string,hasta:string){const fecha=String(n.feccrea??'').slice(0,10);return (!desde||fecha>=desde)&&(!hasta||(!!fecha&&fecha<=hasta));}
+
   getSaldo(ntacredito: any): number {
     const valor = Number(ntacredito?.valor ?? 0);
     const devengado = Number(ntacredito?.devengado ?? 0);
-    return +(valor - devengado).toFixed(2);
+    return Number(ntacredito?.saldoDisponible ?? +(valor - devengado).toFixed(2));
   }
 
   getEstadoNotaCredito(ntacredito: any): string {
@@ -527,10 +345,10 @@ export class NtacreditoComponent implements OnInit {
     return saldo > 0 ? 'Con saldo a favor' : 'Pagada totalmente';
   }
 
-  private matchesEstadoFiltro(ntacredito: any): boolean {
+  private matchesEstadoFiltro(ntacredito: any, estado: EstadoFiltro = this.estadoFiltro): boolean {
     const saldo = this.getSaldo(ntacredito);
 
-    switch (this.estadoFiltro) {
+    switch (estado) {
       case 'con-saldo':
         return saldo > 0;
       case 'agotadas':
@@ -541,6 +359,36 @@ export class NtacreditoComponent implements OnInit {
       default:
         return true;
     }
+  }
+
+  async exportarNotas(formato:'pdf'|'xlsx',filtrado:boolean):Promise<void> {
+    if(this.exportando)return;
+    this.exportando=true;this.mensajeReporte='';
+    const termino=filtrado?this.filterTerm.trim().toLowerCase():'';
+    const estado:EstadoFiltro=filtrado?this.estadoFiltro:'todos';
+    const campo=filtrado?this.campoFiltro:'todos',desde=filtrado?this.fechaDesde:'',hasta=filtrado?this.fechaHasta:'';
+    if(desde&&hasta&&desde>hasta){this.mensajeReporte='Corrija el rango de fechas antes de exportar.';this.exportando=false;return;}
+    const columna=this.sortColumn,direccion=this.sortDirection;
+    const estados:Record<EstadoFiltro,string>={'todos':'Todas','con-saldo':'Con saldo a favor','agotadas':'Usadas totalmente','pagadas-total':'Pagadas totalmente'};
+    const alcance=filtrado?'Filtros actuales | Estado: '+estados[estado]+' | Campo: '+campo+' | B\u00fasqueda: '+(termino||'Sin texto')+' | Desde: '+(desde||'Sin limite')+' | Hasta: '+(hasta||'Sin limite'):'Listado completo | Todas las notas de cr\u00e9dito';
+    try {
+      // Read fresh pages, independently of the current screen page or filter cache.
+      const todas:any[]=[];let pagina=0;let paginas=1;
+      do {
+        const respuesta:any=await firstValueFrom(this.s_ntacredito.getAllPageable(pagina,200));
+        if(!Array.isArray(respuesta.content))throw new Error('Respuesta de notas inv\u00e1lida');
+        todas.push(...respuesta.content);paginas=respuesta.totalPages??1;pagina++;
+      }while(pagina<paginas);
+      const notas=todas.filter(n=>this.matchesEstadoFiltro(n,estado)&&this.matchesFilter(n,termino,campo)&&this.matchesFechas(n,desde,hasta))
+        .sort((a,b)=>this.compareValues(this.getSortValue(a,columna),this.getSortValue(b,columna))*(direccion==='asc'?1:-1));
+      if(!notas.length){this.mensajeReporte='No hay notas de cr\u00e9dito para el reporte seleccionado.';return;}
+      const dinero=(valor:any)=>{const numero=Number(valor??0);if(!Number.isFinite(numero))throw new Error('Importe inv\u00e1lido en una nota de cr\u00e9dito');return Math.round(numero*100)/100;};
+      const filas:NotaReporte[]=notas.map(n=>({nota:n.idntacredito,cuenta:String(n.idabonado_abonados?.idabonado??''),cliente:String(n.idcliente_clientes?.nombre??''),identificacion:String(n.idcliente_clientes?.cedula??''),planilla:String(n.nrofactura??''),valor:dinero(n.valor),devengado:dinero(n.devengado),endosado:dinero(n.totalEndosado),saldo:dinero(this.getSaldo(n)),estado:this.getEstadoNotaCredito(n)}));
+      const fecha=new Intl.DateTimeFormat('es-EC',{dateStyle:'short',timeStyle:'short',timeZone:'America/Guayaquil'}).format(new Date());
+      const archivo=formato==='pdf'?pdfNotas(filas,alcance,fecha):await excelNotas(filas,alcance,fecha);
+      const url=URL.createObjectURL(archivo),enlace=document.createElement('a');enlace.href=url;enlace.download='notas-credito-'+(filtrado?'filtradas':'completo')+'.'+formato;enlace.click();setTimeout(()=>URL.revokeObjectURL(url),15000);
+    }catch(e){console.error(e);this.mensajeReporte='No se pudo generar el reporte. Intente nuevamente; no se exportaron datos incompletos.';}
+    finally{this.exportando=false;}
   }
 
   async impDocumento(idntacredito: number) {

@@ -67,8 +67,10 @@
   </table>
 
   <div class="d-flex justify-content-end align-items-center" *ngIf="!loading">
-    <button class="btn btn-sm btn-light mr-2" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
+    <button class="btn btn-sm btn-light mr-2" (click)="page=1" type="button" [disabled]="(page<=1) || (totalPages <= 1 || page <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-sm btn-light mr-2" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
     <span class="small mr-2">Página {{page}} / {{totalPages}}</span>
     <button class="btn btn-sm btn-light" (click)="nextPage()" [disabled]="page>=totalPages">Siguiente</button>
+<button class="btn btn-sm btn-light" (click)="page=totalPages" type="button" [disabled]="(page>=totalPages) || (totalPages <= 1 || page >= totalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
   </div>
 </div>

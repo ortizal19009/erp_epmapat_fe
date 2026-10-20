@@ -148,7 +148,8 @@
                   </div>
 
                   <div class="pagination-wrap" *ngIf="totalProductosPages > 1">
-                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changeProductosPage(currentProductosPage - 1)">
+                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changeProductosPage(1)" [disabled]="totalProductosPages <= 1 || currentProductosPage <= 1" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-outline-secondary btn-sm" type="button" (click)="changeProductosPage(currentProductosPage - 1)">
                         Anterior
                      </button>
                      <button
@@ -163,6 +164,7 @@
                      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changeProductosPage(currentProductosPage + 1)">
                         Siguiente
                      </button>
+<button class="btn btn-outline-secondary btn-sm" type="button" (click)="changeProductosPage(totalProductosPages)" [disabled]="totalProductosPages <= 1 || currentProductosPage >= totalProductosPages" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                   </div>
                </ng-container>
             </div>
@@ -299,7 +301,8 @@
                   </div>
 
                   <div class="pagination-wrap" *ngIf="totalPlanillasPages > 1">
-                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePlanillasPage(currentPlanillasPage - 1)">
+                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePlanillasPage(1)" [disabled]="totalPlanillasPages <= 1 || currentPlanillasPage <= 1" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePlanillasPage(currentPlanillasPage - 1)">
                         Anterior
                      </button>
                      <button
@@ -314,6 +317,7 @@
                      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePlanillasPage(currentPlanillasPage + 1)">
                         Siguiente
                      </button>
+<button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePlanillasPage(totalPlanillasPages)" [disabled]="totalPlanillasPages <= 1 || currentPlanillasPage >= totalPlanillasPages" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                   </div>
                </ng-container>
             </div>

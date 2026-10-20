@@ -68,8 +68,8 @@
                                 <i class="bi bi-arrow-repeat"></i> Reasignaciones</a></li>
                     </ul>
                 </div>
-                
-                
+
+
                 <div  class="card-body table-responsive p-0" style="height: 600px;">
                     <div class="tab-content">
                         <div class="tab-pane active" id="anuladas">
@@ -118,7 +118,9 @@
                                             {{anuladasTotalElements}} registros | P&aacute;gina {{anuladasCurrentPage}} de {{anuladasTotalPages}}
                                         </small>
                                         <div class="btn-group btn-group-sm mt-1 mt-sm-0">
-                                            <button type="button" class="btn btn-outline-secondary" [disabled]="anuladasCurrentPage === 1"
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                (click)="irPagina('anuladas', 1)" [disabled]="(anuladasCurrentPage === 1) || (anuladasTotalPages <= 1 || anuladasCurrentPage <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-outline-secondary" [disabled]="anuladasCurrentPage === 1"
                                                 (click)="cambiarPagina('anuladas', -1)">Anterior</button>
                                             <button type="button" class="btn btn-outline-secondary"
                                                 *ngFor="let pagina of paginasVisibles('anuladas')"
@@ -130,6 +132,9 @@
                                             <button type="button" class="btn btn-outline-secondary"
                                                 [disabled]="anuladasCurrentPage === anuladasTotalPages"
                                                 (click)="cambiarPagina('anuladas', 1)">Siguiente</button>
+<button type="button" class="btn btn-outline-secondary"
+
+                                                (click)="irPagina('anuladas', anuladasTotalPages)" [disabled]="(anuladasCurrentPage === anuladasTotalPages) || (anuladasTotalPages <= 1 || anuladasCurrentPage >= anuladasTotalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                                         </div>
                                     </div>
                                 </div>
@@ -186,7 +191,9 @@
                                             {{eliminadasTotalElements}} registros | P&aacute;gina {{eliminadasCurrentPage}} de {{eliminadasTotalPages}}
                                         </small>
                                         <div class="btn-group btn-group-sm mt-1 mt-sm-0">
-                                            <button type="button" class="btn btn-outline-secondary" [disabled]="eliminadasCurrentPage === 1"
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                (click)="irPagina('eliminadas', 1)" [disabled]="(eliminadasCurrentPage === 1) || (eliminadasTotalPages <= 1 || eliminadasCurrentPage <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-outline-secondary" [disabled]="eliminadasCurrentPage === 1"
                                                 (click)="cambiarPagina('eliminadas', -1)">Anterior</button>
                                             <button type="button" class="btn btn-outline-secondary"
                                                 *ngFor="let pagina of paginasVisibles('eliminadas')"
@@ -198,6 +205,9 @@
                                             <button type="button" class="btn btn-outline-secondary"
                                                 [disabled]="eliminadasCurrentPage === eliminadasTotalPages"
                                                 (click)="cambiarPagina('eliminadas', 1)">Siguiente</button>
+<button type="button" class="btn btn-outline-secondary"
+
+                                                (click)="irPagina('eliminadas', eliminadasTotalPages)" [disabled]="(eliminadasCurrentPage === eliminadasTotalPages) || (eliminadasTotalPages <= 1 || eliminadasCurrentPage >= eliminadasTotalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                                         </div>
                                     </div>
                                 </div>
@@ -287,7 +297,9 @@
                                             {{reasignacionesTotalElements}} registros | P&aacute;gina {{reasignacionesCurrentPage}} de {{reasignacionesTotalPages}}
                                         </small>
                                         <div class="btn-group btn-group-sm mt-1 mt-sm-0">
-                                            <button type="button" class="btn btn-outline-secondary" [disabled]="reasignacionesCurrentPage === 1"
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                (click)="irPagina('reasignaciones', 1)" [disabled]="(reasignacionesCurrentPage === 1) || (reasignacionesTotalPages <= 1 || reasignacionesCurrentPage <= 1)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+<button type="button" class="btn btn-outline-secondary" [disabled]="reasignacionesCurrentPage === 1"
                                                 (click)="cambiarPagina('reasignaciones', -1)">Anterior</button>
                                             <button type="button" class="btn btn-outline-secondary"
                                                 *ngFor="let pagina of paginasVisibles('reasignaciones')"
@@ -299,6 +311,9 @@
                                             <button type="button" class="btn btn-outline-secondary"
                                                 [disabled]="reasignacionesCurrentPage === reasignacionesTotalPages"
                                                 (click)="cambiarPagina('reasignaciones', 1)">Siguiente</button>
+<button type="button" class="btn btn-outline-secondary"
+
+                                                (click)="irPagina('reasignaciones', reasignacionesTotalPages)" [disabled]="(reasignacionesCurrentPage === reasignacionesTotalPages) || (reasignacionesTotalPages <= 1 || reasignacionesCurrentPage >= reasignacionesTotalPages)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                                         </div>
                                     </div>
                                 </div>

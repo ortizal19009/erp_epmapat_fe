@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.rrhh-spec.json",
+  "include": [
+    "src/app/componentes/rrhh/shared/rrhh-actions.component.spec.ts",
+    "src/app/componentes/rrhh/th-leave/th-leave.component.spec.ts",
+    "src/app/componentes/rrhh/shared/personal-user-state.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

@@ -1333,7 +1333,7 @@ export class AddRecaudaComponent implements OnInit {
       next: (datos: any) => {
         const lista = Array.isArray(datos) ? datos : [];
         const primero = lista[0];
-        const saldo = Number(primero?.saldo ?? 0);
+        const saldo = lista.reduce((suma: number, nota: any) => suma + Math.max(0, Number(nota?.saldo ?? 0)), 0);
         this.tieneNotaCredito = lista.length > 0 && saldo > 0;
         this.saldoNotaCredito = this.tieneNotaCredito ? saldo : 0;
         this.mensajeNotaCredito = this.tieneNotaCredito

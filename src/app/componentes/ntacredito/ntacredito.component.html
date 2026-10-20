@@ -1,109 +1,119 @@
-<div class="content mt-1 pt-1 pl-0">
-    <div class="container-fluid">
-        <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-            <div class="col-sm-2">
-                <h5 class="m-0 font-weight-bold description"><i class="fa fa-sticky-note" aria-hidden="true"></i>
-                    Notas de créditos</h5>
-            </div>
-            <div class="col-sm-6">
-                <div class="container-fluid">
-                    <form [formGroup]="f_bntacredito" class="formGroup" (ngSubmit)="onSubmit()">
-                        <div class="row" hidden>
-                            <div class="col-sm-3">
-                                <select name="" id="selecTipoBusqueda" class="form-control form-control-sm"
-                                    formControlName="selecTipoBusqueda">
-                                    <option value="1">Cuenta</option>
-                                    <option value="2">Nombre</option>
-                                    <option value="3">Identificación</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-5">
-                                <div class="container">
-                                    <input type="text" placeholder="Buscar" class="form-control form-control-sm"
-                                        autofocus id="buscarAbonado" formControlName="buscarAbonado" />
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <button class="btn btn-primary btn-sm">
-                                    <i class="fa fa-search" style="font-size:24pxi"></i> Buscar
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-sm-2">
-                <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
-                    [(ngModel)]="filterTerm" (ngModelChange)="onFilterChange()" />
-            </div>
-            <div class="btn-group ml-auto mt-0">
-                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-                </button>
+<div class="container-fluid py-3 notas-credito">
+ <header class="cabecera nc-cabecera shadow-sm mb-3">
+ <div class="d-flex align-items-center"><span class="nc-icono mr-3"><i class="bi bi-sticky" aria-hidden="true"></i></span><div><h5 class="mb-1 font-weight-bold">Notas de cr&#233;dito</h5><small>Consulta, saldos disponibles y endosos</small></div></div>
+ <div class="dropdown ml-auto"><button type="button" class="btn nc-menu" data-toggle="dropdown" aria-expanded="false" aria-label="Acciones de notas de cr&#233;dito" title="Acciones"><i class="bi bi-three-dots" aria-hidden="true"></i></button>
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                     <button class="dropdown-item" [routerLink]="['/add-ntacredito']" type="button">
                         <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"><i
-                            class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
+                    <button class="dropdown-item" type="button" routerLink="/nc-endosos-listado"><i class="bi bi-list-ul"></i>&nbsp; Consultar endosos</button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" type="button" [disabled]="exportando" (click)="exportarNotas('pdf',false)"><i class="bi bi-file-earmark-pdf"></i>&nbsp; PDF completo</button>
+                    <button class="dropdown-item" type="button" [disabled]="exportando" (click)="exportarNotas('pdf',true)"><i class="bi bi-funnel"></i>&nbsp; PDF con filtros actuales</button>
+                    <button class="dropdown-item" type="button" [disabled]="exportando" (click)="exportarNotas('xlsx',false)"><i class="bi bi-file-earmark-excel"></i>&nbsp; Excel completo</button>
+                    <button class="dropdown-item" type="button" [disabled]="exportando" (click)="exportarNotas('xlsx',true)"><i class="bi bi-funnel"></i>&nbsp; Excel con filtros actuales</button>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="container-fluid mt-2">
-    <div class="card mb-0">
-        <div class="card-body table-responsive  center-form card-size">
-            <table class="table table-hover text-nowrap table-striped table-bordered table-sm sombra">
+</div></header>
+ <section class="card nc-card mb-3">
+ <div class="card-header bg-white d-flex align-items-center"><h6 class="mb-0 font-weight-bold"><i class="bi bi-funnel mr-2" aria-hidden="true"></i>Buscar y filtrar</h6><button type="button" class="btn btn-link btn-sm ml-auto" (click)="limpiarFiltros()" [disabled]="!filteringActive">Limpiar filtros</button></div>
+ <div class="card-body"><div class="row">
+ <div class="col-lg-3 col-sm-6 form-group"><label for="nc-campo">Buscar por</label><select id="nc-campo" class="form-control" [(ngModel)]="campoFiltro" (ngModelChange)="onFilterChange()"><option value="todos">Todos los campos</option><option value="cuenta">Cuenta</option><option value="cliente">Nombre o apellido</option><option value="identificacion">Identificaci&#243;n</option><option value="planilla">Planilla / factura</option></select></div>
+ <div class="col-lg-5 col-sm-6 form-group"><label for="nc-busqueda">Dato de b&#250;squeda</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text bg-white"><i class="bi bi-search" aria-hidden="true"></i></span></div><input id="nc-busqueda" class="form-control" [(ngModel)]="filterTerm" (ngModelChange)="programarFiltro()" placeholder="Escriba una cuenta, nombre, identificaci&#243;n o planilla" autocomplete="off"></div></div>
+ <div class="col-lg-4 col-sm-6 form-group"><label for="nc-estado">Disponibilidad</label><select id="nc-estado" class="form-control" [(ngModel)]="estadoFiltro" (ngModelChange)="onFilterChange()"><option value="todos">Todas las notas</option><option value="con-saldo">Con saldo disponible</option><option value="pagadas-total">Sin saldo disponible</option></select></div>
+ <div class="col-lg-3 col-sm-6 form-group mb-sm-0"><label for="nc-desde">Fecha de creaci&#243;n desde</label><input id="nc-desde" type="date" class="form-control" [(ngModel)]="fechaDesde" (ngModelChange)="onFilterChange()"></div>
+ <div class="col-lg-3 col-sm-6 form-group mb-sm-0"><label for="nc-hasta">Hasta</label><input id="nc-hasta" type="date" class="form-control" [(ngModel)]="fechaHasta" (ngModelChange)="onFilterChange()"></div>
+ <div class="col-lg-6 d-flex align-items-end mt-3 mt-lg-0"><small class="text-muted">Los filtros buscan en todas las notas, no solo en la p&#225;gina visible.</small></div>
+ </div></div></section>
+ <div *ngIf="errorListado" class="alert alert-danger" role="alert">{{errorListado}} <button type="button" class="btn btn-sm btn-outline-danger ml-2" (click)="onFilterChange()">Reintentar</button></div>
+ <div *ngIf="mensajeReporte" class="alert alert-info" role="status">{{mensajeReporte}}</div>
+ <div *ngIf="exportando||cargandoTodos||cargandoPagina" class="alert alert-info" role="status"><i class="fa fa-spinner fa-spin mr-2" aria-hidden="true"></i>{{exportando?'Generando reporte de todas las p&#225;ginas...':'Cargando notas de cr&#233;dito...'}}</div>
+ <div class="row nc-resumen mb-3">
+ <div class="col-sm-6 col-xl-3 mb-2 mb-xl-0"><div class="nc-metrica"><small>Notas encontradas</small><strong>{{cantidadResultados|number}}</strong><span>{{filteringActive?'Con los filtros actuales':'En todo el listado'}}</span></div></div>
+ <div class="col-sm-6 col-xl-3 mb-2 mb-xl-0"><div class="nc-metrica"><small>Valor original</small><strong>{{resumenVista.valor|currency:'USD':'symbol':'1.2-2'}}</strong><span>{{alcanceResumen}}</span></div></div>
+ <div class="col-sm-6 col-xl-3 mb-2 mb-xl-0"><div class="nc-metrica"><small>Devengado</small><strong>{{resumenVista.devengado|currency:'USD':'symbol':'1.2-2'}}</strong><span>{{alcanceResumen}}</span></div></div>
+ <div class="col-sm-6 col-xl-3"><div class="nc-metrica nc-metrica-saldo"><small>Saldo disponible</small><strong>{{resumenVista.saldo|currency:'USD':'symbol':'1.2-2'}}</strong><span>{{alcanceResumen}}</span></div></div>
+ </div>
+ <div class="card nc-card mb-0"><div class="card-header bg-white d-flex align-items-center flex-wrap nc-listado-header"><h6 class="m-0 font-weight-bold">Listado de notas</h6><div class="ml-auto d-flex align-items-center"><label class="mb-0 mr-2" for="nc-tamanio">Filas por p&#225;gina</label><select id="nc-tamanio" class="form-control form-control-sm nc-tamanio" [ngModel]="size" (ngModelChange)="cambiarTamanio($event)"><option [ngValue]="10">10</option><option [ngValue]="25">25</option><option [ngValue]="50">50</option><option [ngValue]="100">100</option></select></div></div>
+        <div class="card-body p-0 table-responsive nc-tabla-contenedor">
+            <table aria-label="Notas de credito" class="table table-hover table-sm mb-0 nc-tabla">
                 <thead class="cabecera">
                     <tr class="text-center ">
-                        <th class="col-sm-1">N°</th>
-                        <th>Cuenta</th>
-                        <th>Cliente</th>
-                        <th>Planilla</th>
-                        <th>Identificación</th>
-                        <th>Valor</th>
-                        <th>Devengado</th>
-                        <th>Saldo</th>
-                        <th></th>
+                        <th class="col-sm-1">N&#176;</th>
+                        <th class="sortable" (click)="toggleSort('cuenta')" style="cursor:pointer; user-select:none;">
+                            Cuenta <i class="bi" *ngIf="getSortIconClean('cuenta')" [ngClass]="getSortIconClean('cuenta')"></i>
+                        </th>
+                        <th class="sortable" (click)="toggleSort('cliente')" style="cursor:pointer; user-select:none;">
+                            Cliente <i class="bi" *ngIf="getSortIconClean('cliente')" [ngClass]="getSortIconClean('cliente')"></i>
+                        </th>
+                        <th class="sortable" (click)="toggleSort('planilla')" style="cursor:pointer; user-select:none;">
+                            Planilla <i class="bi" *ngIf="getSortIconClean('planilla')" [ngClass]="getSortIconClean('planilla')"></i>
+                        </th>
+                        <th class="sortable" (click)="toggleSort('identificacion')" style="cursor:pointer; user-select:none;">
+                            Identificacion <i class="bi" *ngIf="getSortIconClean('identificacion')" [ngClass]="getSortIconClean('identificacion')"></i>
+                        </th>
+                        <th class="sortable" (click)="toggleSort('valor')" style="cursor:pointer; user-select:none;">
+                            Valor <i class="bi" *ngIf="getSortIconClean('valor')" [ngClass]="getSortIconClean('valor')"></i>
+                        </th>
+                        <th class="sortable" (click)="toggleSort('devengado')" style="cursor:pointer; user-select:none;">
+                            Devengado <i class="bi" *ngIf="getSortIconClean('devengado')" [ngClass]="getSortIconClean('devengado')"></i>
+                        </th>
+                        <th class="sortable" (click)="toggleSort('saldo')" style="cursor:pointer; user-select:none;">
+                            Saldo <i class="bi" *ngIf="getSortIconClean('saldo')" [ngClass]="getSortIconClean('saldo')"></i>
+                        </th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="detalle">
+                <tbody>
                     <tr *ngFor="let ntacredito of notasCreditosVisibles; let i = index ">
                         <td class="col-sm-1 text-center">{{i+1 + (page * size)}}</td>
-                        <td class="text-center">{{ntacredito.idabonado_abonados.idabonado}}</td>
-                        <td class="description">{{ntacredito.idcliente_clientes.nombre}}</td>
+                        <td class="text-center">{{ntacredito.idabonado_abonados?.idabonado}}</td>
+                        <td class="nc-cliente">{{ntacredito.idcliente_clientes?.nombre}}</td>
                         <td class="text-center">{{ntacredito.nrofactura}}</td>
-                        <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes.cedula}}</td>
-                        <td class="text-right">{{ntacredito.valor}}</td>
-                        <td class="text-right">{{ntacredito.devengado}}</td>
-                        <td class="text-right">{{(ntacredito.valor - ntacredito.devengado).toFixed(2)}}</td>
+                        <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes?.cedula}}</td>
+                        <td class="text-right">{{ntacredito.valor|number:'1.2-2'}}</td>
+                        <td class="text-right">{{(ntacredito.devengado||0)|number:'1.2-2'}}</td>
+                        <td class="text-right">{{getSaldo(ntacredito).toFixed(2)}}</td>
+                        <td class="text-center">
+                            <span class="badge"
+                                [ngClass]="{
+                                  'badge-success': getEstadoNotaCredito(ntacredito) === 'Con saldo a favor',
+                                  'badge-secondary': getEstadoNotaCredito(ntacredito) !== 'Con saldo a favor'
+                                }">
+                                {{ getEstadoNotaCredito(ntacredito) }}
+                            </span>
+                        </td>
                         <td class="text-center">
                             <div class="btn-group py-0">
-                                <button type="button" class="btn btn-warning btn-badged dropdown-toggle py-0"
-                                    data-toggle="dropdown" aria-expanded="false">
+                                <button type="button" class="btn btn-light btn-sm nc-acciones"
+                                    data-toggle="dropdown" aria-expanded="false" aria-label="Acciones de la nota"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right popLista">
                                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf"
                                         (click)="impDocumento(ntacredito.idntacredito)">
                                         <i class="bi bi-file-minus"></i>&nbsp; Imp Doc</button>
-                                    <button class="dropdown-item" disabled type="button"
-                                        [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
-                                        <i class="bi bi-pencil"></i>&nbsp; Transferir</button>
+                                    <button class="dropdown-item" type="button"
+                                        [disabled]="!(getSaldo(ntacredito)>0)"
+                                        [attr.aria-disabled]="!(getSaldo(ntacredito)>0)"
+                                        [title]="getSaldo(ntacredito)>0 ? 'Endosar saldo disponible' : 'Nota sin saldo disponible para endosar'"
+                                        [routerLink]="getSaldo(ntacredito)>0 ? ['/nc-endosos'] : null" [queryParams]="{nota: ntacredito.idntacredito}">
+                                        <i class="bi bi-pencil"></i>&nbsp; Endosar saldo</button>
                                 </div>
                             </div>
                         </td>
                     </tr>
+                    <tr *ngIf="!notasCreditosVisibles.length&&!cargandoTodos&&!cargandoPagina"><td colspan="10" class="nc-vacio"><i class="bi bi-search d-block mb-2" aria-hidden="true"></i>No se encontraron notas de cr&#233;dito.<small class="d-block mt-1">Pruebe otra b&#250;squeda o limpie los filtros.</small></td></tr>
                 </tbody>
             </table>
         </div>
-        <div class="card-footer">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-end">
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap nc-pie"><small class="text-muted">{{cantidadResultados ? page*size+1 : 0}}&#8211;{{finVisible}} de {{cantidadResultados}} notas</small>
+            <nav aria-label="Paginacion de notas">
+                <ul class="pagination justify-content-end mb-0">
                     <li class="page-item">
+                        <button class="btn btn-sm btn-primary" (click)="onGoToPage(0)" type="button" [disabled]="(page === 0) || (totalPagesVisibles <= 1 || page <= 0)" aria-label="Primera p&#225;gina" title="Primera p&#225;gina"><span aria-hidden="true">&laquo;</span></button>
+                    </li>
+<li class="page-item">
                         <button class="btn btn-sm btn-primary" (click)="onPreviousPage()" [disabled]="page === 0"> <span
-                                aria-hidden="true">&laquo;</span>
+                                aria-hidden="true">&lsaquo;</span>
                         </button>
                     </li>
                     <li class="page-item" *ngFor="let p of pages">
@@ -115,15 +125,18 @@
                     <li class="page-item">
                         <button class="btn btn-sm btn-primary" (click)="onNextPage()"
                             [disabled]="page >= totalPagesVisibles - 1"> <span
-                                aria-hidden="true">&raquo;</span>
+                                aria-hidden="true">&rsaquo;</span>
                         </button>
+                    </li>
+<li class="page-item">
+                        <button class="btn btn-sm btn-primary" (click)="onGoToPage(totalPagesVisibles - 1)"
+                            type="button" [disabled]="(page >= totalPagesVisibles - 1) || (totalPagesVisibles <= 1 || page >= totalPagesVisibles - 1)" aria-label="&#218;ltima p&#225;gina" title="&#218;ltima p&#225;gina"><span aria-hidden="true">&raquo;</span></button>
                     </li>
                 </ul>
             </nav>
         </div>
-    </div>
 
-    <!-- Modal vista imprimir -->
+ </div>
     <div class="modal fade" id="pdf" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="pdfLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
@@ -143,3 +156,5 @@
             </div>
         </div>
     </div>
+
+</div>

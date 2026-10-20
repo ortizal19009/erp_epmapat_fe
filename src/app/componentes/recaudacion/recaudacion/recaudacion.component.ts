@@ -1222,7 +1222,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       next: (datos: any) => {
         this._nc = datos;
         if (datos.length > 0) {
-          this.formCobrar.patchValue({ saldo: datos[0].saldo });
+          this.formCobrar.patchValue({ saldo: datos.reduce((suma: number, nota: any) => suma + Math.max(0, Number(nota?.saldo ?? 0)), 0) });
         } else {
           this.formCobrar.patchValue({ saldo: '' });
         }
