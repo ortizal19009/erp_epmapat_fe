@@ -121,6 +121,14 @@
                   <i class="bi bi-three-dots-vertical"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right popLista">
+                  <button class="dropdown-item" type="button" [disabled]="accionEnCursoId !== null"
+                    (click)="validarSri(retencion)">
+                    <i class="bi bi-check2-circle mr-2"></i> Validar XML
+                  </button>
+                  <button class="dropdown-item" type="button" [disabled]="accionEnCursoId !== null"
+                    (click)="consultarAutorizacionSri(retencion)">
+                    <i class="bi bi-search mr-2"></i> Consultar autorizacion SRI
+                  </button>
                   <button class="dropdown-item" type="button" [disabled]="accionEnCursoId === retencion.idrete"
                     (click)="procesarSri(retencion)">
                     <i class="bi bi-send mr-2"></i> Enviar a SRI

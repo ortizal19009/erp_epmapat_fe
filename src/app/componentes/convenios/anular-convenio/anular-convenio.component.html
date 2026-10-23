@@ -282,8 +282,8 @@
                         <thead class="text-center">
                           <tr>
                             <th class="sticky" style="width:40px;">Sel.</th>
-                            <th class="sticky" style="width:140px;">Nro</th>
-                            <th class="sticky" style="width:120px;">Emisión</th>
+                            <th class="sticky" style="width:140px;">ID factura</th>
+                            <th class="sticky" style="width:120px;">Número de factura</th>
                             <th class="sticky" style="width:140px;">Módulo</th>
                             <th class="sticky" style="width:120px;">Total</th>
                             <th class="sticky" style="width:120px;">Estado</th>
@@ -301,16 +301,16 @@
                                 [disabled]="!esPagadaNueva(f)"
                               />
                             </td>
-                            <td class="text-center">{{ f.nrofactura || f.idfactura }}</td>
-                            <td class="text-center">{{ f.feccrea || '-' }}</td>
+                            <td class="text-center">{{ f.idfactura }}</td>
+                            <td class="text-center">{{ f.nrofactura || '-' }}</td>
                             <td class="text-center">{{ f.idmodulo?.descripcion || f.idmodulo || '-' }}</td>
                             <td class="text-right text-danger font-weight-bold">
                               {{ (f.totaltarifa || 0) | number:'1.2-2' }}
                             </td>
                             <td class="text-center">
                               <span class="badge erp-chip"
-                                [ngClass]="(f.pagado === 1) ? 'badge-success' : 'badge-warning'">
-                                {{ (f.pagado === 1) ? 'Pagada' : 'Pendiente' }}
+                                [ngClass]="esPagadaNueva(f) ? 'badge-success' : 'badge-warning'">
+                                {{ esPagadaNueva(f) ? 'Pagada' : 'No pagada' }}
                               </span>
                             </td>
                           </tr>
@@ -323,7 +323,7 @@
                       <tfoot>
                         <tr>
                           <td colspan="4" class="text-right font-weight-bold">Total Nota de Crédito:</td>
-                          <td class="text-right font-weight-bold">{{ totalValorNotaCredito | number:'1.2-2' }}</td>
+                          <td class="text-right font-weight-bold">{{ totalNotaCreditoSeleccionada | number:'1.2-2' }}</td>
                           <td></td>
                         </tr>
                       </tfoot>

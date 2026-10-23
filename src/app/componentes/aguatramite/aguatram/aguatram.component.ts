@@ -437,6 +437,7 @@ export class AguatramComponent implements OnInit {
    async guardarAguaTramite(abonado: Abonados, codmedidor: any): Promise<Aguatramite> {
       const fechaRegistro = this.normalizarFechaLocal(this.date);
       this.date = fechaRegistro;
+      this.aguatramite.idabonado = abonado.idabonado;
       this.aguatramite.codmedidor = codmedidor;
       this.aguatramite.comentario = '';
       this.aguatramite.estado = 3;
@@ -467,32 +468,24 @@ export class AguatramComponent implements OnInit {
    }
 
    confCambioPropietario() {
-      if (this._facturas.length === 0) {
-         this.procesandoTramite = true;
-         this.actualizarPropietario();
-      } else {
-         this.modalConfirmacion?.show();
-      }
+      this.procesandoTramite = true;
+      this.actualizarPropietario();
    }
 
    confCambioResponsablePago() {
-      if (this._facturas.length === 0) {
-         this.procesandoTramite = true;
-         this.actualizarResponsablePago();
-      } else {
-         this.modalConfirmacion?.show();
-      }
+      this.procesandoTramite = true;
+      this.actualizarResponsablePago();
    }
 
    async actualizarPropietario() {
       this.s_loading.showLoading();
       try {
+         await firstValueFrom(this.s_aguatramite.validarTitularidad(this.abonado.idabonado));
          this.abonado.idcliente_clientes = this.selectClient;
          this.abonado.idresponsable = this.selectClient;
          this.observaciones = this.f_camPropietario.value.observaciones;
          this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
          this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
-         if (this.swActualizar) await this.actualizarFacturas();
 
          const tramite = await this.guardarAguaTramite(this.abonado, null);
          await this.actualizarAbonado(this.abonado);
@@ -512,11 +505,11 @@ export class AguatramComponent implements OnInit {
    async actualizarResponsablePago() {
       this.s_loading.showLoading();
       try {
+         await firstValueFrom(this.s_aguatramite.validarTitularidad(this.abonado.idabonado));
          this.abonado.idresponsable = this.selectClient;
          this.observaciones = this.f_camPropietario.value.observaciones;
          this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
          this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
-         if (this.swActualizar) await this.actualizarFacturas();
 
          const tramite = await this.guardarAguaTramite(this.abonado, null);
          await this.actualizarAbonado(this.abonado);
@@ -599,7 +592,7 @@ export class AguatramComponent implements OnInit {
       });
       if (this.cambioPropietario || this.cambioResponsablePago) {
          const facturas: any = await this.s_facturas.getAllFacturasByCuenta(abonado.idabonado);
-         this.swal('warning', `Cuenta con ${facturas.length} facturas pendientes`);
+         if (facturas.length > 0) this.swal('warning', `Cuenta con ${facturas.length} facturas pendientes. Solo se permite la factura de consumo de la emisi?n abierta; las anteriores y los convenios bloquean el cambio.`);
          this._facturas = facturas;
       }
    }
@@ -635,6 +628,12 @@ export class AguatramComponent implements OnInit {
          this.f_camPropietario.get('cliente')?.setErrors({ required: true });
          this.f_camPropietario.get('cliente')?.markAsTouched();
          this.swal('warning', 'Selecciona el nuevo cliente');
+         return;
+      }
+      try {
+         await firstValueFrom(this.s_aguatramite.validarTitularidad(this.abonado.idabonado));
+      } catch (error: any) {
+         this.swal('warning', error?.error?.message || 'No se pudo validar la deuda de la cuenta. Intenta nuevamente.');
          return;
       }
       const destino = this.selectClient?.email || this.abonado?.idcliente_clientes?.email;
@@ -679,6 +678,10 @@ export class AguatramComponent implements OnInit {
 
    private reportarErrorTramite(error: any): void {
       console.error('No se pudo completar el trámite de agua', error);
+      if (error?.error?.message) {
+         this.swal('warning', error.error.message);
+         return;
+      }
       this.swal('error', 'No se completó el trámite. No se ha regresado al listado para que puedas revisar los datos.');
    }
 

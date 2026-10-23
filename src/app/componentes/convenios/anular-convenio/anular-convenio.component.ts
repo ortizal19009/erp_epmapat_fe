@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, firstValueFrom } from 'rxjs';
+import { forkJoin, firstValueFrom, of, map, switchMap } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { Convenios } from 'src/app/modelos/convenios.model';
@@ -106,9 +106,30 @@ export class AnularConvenioComponent implements OnInit {
       convenio: this.s_convenio.getById(idconvenio),
       cuotas: this.s_cuota.getByIdconvenio(idconvenio),
       facxconvenio: this.s_facxconvenios.getFacByConvenio(idconvenio),
-    }).subscribe({
+    }).pipe(
+      switchMap((res: any) => {
+        const cuotas = Array.isArray(res.cuotas) ? res.cuotas : [];
+        const ids = [...new Set<number>(cuotas
+          .map((cuota: any) => this.getIdFactura(cuota?.idfactura))
+          .filter((id: number | null): id is number => id !== null))];
+        // Las relaciones de cuotas pueden traer solo el ID o datos parciales.
+        // Consultar las facturas garantiza el estado de cobro y el importe actuales.
+        return (ids.length
+          ? forkJoin(ids.map((id) => this.facturaService.getById(id)))
+          : of([])
+        ).pipe(map((facturas) => {
+          const porId = new Map(facturas.map((factura) => [Number(factura.idfactura), factura]));
+          return {
+            ...res,
+            cuotas: cuotas.map((cuota: any) => ({
+              ...cuota,
+              idfactura: porId.get(this.getIdFactura(cuota?.idfactura)!) ?? cuota.idfactura,
+            })),
+          };
+        }));
+      })
+    ).subscribe({
       next: (res: any) => {
-      console.log(res)
         this._convenio = res.convenio;
         this._cuotas = Array.isArray(res.cuotas) ? res.cuotas : [];
         this._facxconvenio = Array.isArray(res.facxconvenio)
@@ -117,9 +138,7 @@ export class AnularConvenioComponent implements OnInit {
 
         // ✅ separar facturas
         this.separarFacturas();
-        this.separarFacturas();
         this.calcularReglasBotones();
-        this.separarFacturas();
         this.recalcularVencidas();
 
         this.loading = false;
@@ -152,35 +171,18 @@ export class AnularConvenioComponent implements OnInit {
    * Ajusta los campos según tu API.
    */
   private getIdFactura(x: any): number | null {
-    if (!x) return null;
-
-    // Caso: idfactura es número
-    if (typeof x === 'number') return x;
-
-    // Caso: idfactura es objeto { idfactura: 123 }
-    if (typeof x === 'object') {
-      if (typeof x.idfactura === 'number') return x.idfactura;
-
-      // Caso raro: { id: 123 }
-      if (typeof x.id === 'number') return x.id;
-
-      // Caso: { idfactura_facturas: { idfactura: 123 } }
-      if (
-        x.idfactura_facturas &&
-        typeof x.idfactura_facturas.idfactura === 'number'
-      ) {
-        return x.idfactura_facturas.idfactura;
-      }
-    }
-
-    return null;
+    const rawId = typeof x === 'object' && x !== null
+      ? x.idfactura ?? x.id ?? x.idfactura_facturas?.idfactura
+      : x;
+    const id = Number(rawId);
+    return Number.isFinite(id) && id > 0 ? id : null;
   }
 
   public esPagadaNueva(f: any): boolean {
     if (!f) return false;
 
     const pagado = f.pagado;
-    const pagadoStr = String(pagado).toLocaleLowerCase();
+    const pagadoStr = String(pagado).trim().toLowerCase();
     const isPagado =
       pagado === 1 ||
       pagado === '1' ||
@@ -346,7 +348,10 @@ export class AnularConvenioComponent implements OnInit {
 
     nc.estado = 1;
     nc.observacion = observacion;
-    nc.valor = Number(factura.valorNc) || Number(factura.totaltarifa) || 0;
+    nc.valor = Number(factura.valorNc ?? factura.totaltarifa ?? 0);
+    if (!Number.isFinite(nc.valor) || nc.valor <= 0) {
+      throw new Error(`La factura ${factura.idfactura} no tiene un valor válido para la nota de crédito.`);
+    }
     nc.devengado = 0;
     nc.nrofactura = factura.nrofactura || factura.idfactura || '';
 
@@ -404,7 +409,7 @@ export class AnularConvenioComponent implements OnInit {
     this.modalError = null;
 
     try {
-      const promises = seleccionadas.map((factura: any) => {
+      const notas = seleccionadas.map((factura: any) => {
         const nc = this.crearNtacreditoDesdeFactura(
           factura,
           iddocumento_documentos,
@@ -417,10 +422,10 @@ export class AnularConvenioComponent implements OnInit {
         }
 
         console.log('Generando nota de crédito', nc);
-        return firstValueFrom(this.s_ntacredito.saveNtacredito(nc));
+        return nc;
       });
 
-      await Promise.all(promises);
+      await Promise.all(notas.map((nc) => firstValueFrom(this.s_ntacredito.saveNtacredito(nc))));
 
       // Actualizar campos de las facturas según regla de convenios
       await this.actualizarFacturasConvenio();
@@ -429,7 +434,7 @@ export class AnularConvenioComponent implements OnInit {
       await firstValueFrom(
         this.s_convenio.updateEstado(
           this._convenio.idconvenio,
-          0,
+          2,
           this._convenio.idresponsable || this._convenio.usucrea || 0,
           `Anulación de convenio ${this._convenio.nroconvenio || this._convenio.idconvenio}`,
           'ANULACION_CONVENIO'
@@ -461,6 +466,12 @@ export class AnularConvenioComponent implements OnInit {
 
   get selectedPagadasCount(): number {
     return (this.facNuevas || []).filter((f) => this.esPagadaNueva(f) && f.selected).length;
+  }
+
+  get totalNotaCreditoSeleccionada(): number {
+    return (this.facNuevas || [])
+      .filter((f) => this.esPagadaNueva(f) && f.selected)
+      .reduce((sum, f) => sum + Number(f.totaltarifa ?? 0), 0);
   }
 
   get totalValorNotaCredito(): number {

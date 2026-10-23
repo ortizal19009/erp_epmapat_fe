@@ -83,7 +83,7 @@
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
                                        (click)="toggleCuotaSort('fcobro')">F.Cobro <i class="bi" *ngIf="getCuotaSortIcon('fcobro')" [ngClass]="getCuotaSortIcon('fcobro')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('valor')">Valor <i class="bi" *ngIf="getCuotaSortIcon('valor')" [ngClass]="getCuotaSortIcon('valor')"></i></th>
+                                       (click)="toggleCuotaSort('valor')">Valor (capital) <i class="bi" *ngIf="getCuotaSortIcon('valor')" [ngClass]="getCuotaSortIcon('valor')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
                                        (click)="toggleCuotaSort('interes')">Interes <i class="bi" *ngIf="getCuotaSortIcon('interes')" [ngClass]="getCuotaSortIcon('interes')"></i></th>
                                     <th></th>
@@ -100,7 +100,7 @@
                                     <td>{{ factura.feccrea ? (factura.feccrea | date:'dd/MM/yyyy') : '-' }}</td>
                                     <td>{{ factura.nrofactura || '-' }}</td>
                                     <td>{{ factura.fechacobro ? (factura.fechacobro | date:'dd/MM/yyyy') : '-' }}</td>
-                                    <td class="text-right">{{ (factura.totaltarifa ?? 0) | number: '1.2-2'}}</td>
+                                    <td class="text-right">{{ cuota.capital | number: '1.2-2'}}</td>
                                     <td class="text-right">{{cuota.interesacobrar | number: '1.2-2'}}
                                     </td>
                                     <td>
@@ -125,11 +125,11 @@
                                     <td class="text-right font-weight-bold">{{ total1 | number: '1.2-2'}}</td>
                                     <td class="text-right font-weight-bold">{{ totalInteres | number: '1.2-2'}}</td>
                                     <td *ngIf="dif1" class="text-center"><span class="badge badge-danger"
-                                          data-toggle="tooltip" title="Diferencia">{{ convenio.totalconvenio - total1 |
+                                          data-toggle="tooltip" title="Diferencia">{{ diferenciaCuotas |
                                           number:
                                           '1.2-2' }}</span>
                                     </td>
-                                    <td></td>
+                                    <td *ngIf="!dif1"></td>
                                  </tr>
                               </tbody>
                            </table>
@@ -266,7 +266,7 @@
                </div>
             </div>
             <div class='modal-footer' id='idButtons'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' (click)="imprimirPdf(convenio)"
+               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' (click)="imprimirPdf(convenio)" [disabled]="cuotasLoading || !_cuotas?.length"
                   id='btnSi'>
                   <i class="fa fa-check-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;&nbsp;Si&nbsp;&nbsp;&nbsp;
                </button>

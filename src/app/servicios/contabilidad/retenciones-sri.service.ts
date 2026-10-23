@@ -4,7 +4,7 @@ import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface RetencionProcesadaResponse {
-  ok: boolean;
+  ok?: boolean;
   estado: string;
   requestId?: string;
   claveAcceso?: string;
@@ -29,31 +29,30 @@ export interface RetencionProcesadaResponse {
   providedIn: 'root',
 })
 export class RetencionesSriService {
-  private readonly sriBaseUrl = this.normalizeSriBaseUrl(
-    (environment as any).SINGSEND_API_URL || environment.API_URL
-  );
-  private readonly sriApiV1Url = `${this.sriBaseUrl}/api/v1`;
-  private readonly erpBaseUrl = `${environment.API_URL.replace(/\/$/, '')}/api/sri/retenciones`;
+  private readonly retencionesApiUrl = environment.RETENCIONES_SRI_API_URL.replace(/\/+$/, '');
+  // El ERP genera el XML desde los registros contables y ofrece PDF, correo y SSE.
+  private readonly documentosErpUrl = `${environment.API_URL.replace(/\/+$/, '')}/api/sri/retenciones`;
 
   constructor(private http: HttpClient) { }
 
-  private normalizeSriBaseUrl(rawUrl: string): string {
-    const cleanUrl = (rawUrl || '').replace(/\/$/, '');
-    if (!cleanUrl) {
-      return 'http://192.168.0.33:9096';
-    }
-
-    return cleanUrl
-      .replace('localhost:8080', 'localhost:9096')
-      .replace('localhost:9090', 'localhost:9096')
-      .replace('192.168.0.33:8080', '192.168.0.33:9096')
-      .replace('192.168.0.33:9090', '192.168.0.33:9096');
+  obtenerAutorizacion(claveAcceso: string): Observable<{
+    autorizado: boolean; mensaje: string; numeroAutorizacion: string; requestId?: string;
+  }> {
+    return this.http.get<{
+      autorizado: boolean; mensaje: string; numeroAutorizacion: string; requestId?: string;
+    }>(`${this.retencionesApiUrl}/${encodeURIComponent(claveAcceso)}/autorizacion`);
   }
 
-  private obtenerAutorizacion(claveAcceso: string): Observable<any> {
-    return this.http.get(
-      `${this.sriApiV1Url}/retenciones/${encodeURIComponent(claveAcceso)}/autorizacion`
-    );
+  validarXml(xml: string): Observable<{
+    valid: boolean; errors: string[]; warnings: string[];
+    claveAcceso: string; ambiente: string; requestId?: string;
+  }> {
+    return this.http.post<{
+      valid: boolean; errors: string[]; warnings: string[];
+      claveAcceso: string; ambiente: string; requestId?: string;
+    }>(`${this.retencionesApiUrl}/validar`, xml, {
+      headers: { 'Content-Type': 'application/xml', Accept: 'application/json' },
+    });
   }
 
   private extraerPdfBase64(payload: any): string {
@@ -121,7 +120,7 @@ export class RetencionesSriService {
   }
 
   streamRetenciones(): EventSource {
-    return new EventSource(`${this.erpBaseUrl}/stream`);
+    return new EventSource(`${this.documentosErpUrl}/stream`);
   }
 
   generarPdf(claveAcceso: string): Observable<Blob> {
@@ -137,7 +136,7 @@ export class RetencionesSriService {
   }
 
   generarPdfPorId(idretencion: number): Observable<Blob> {
-    return this.http.get(`${this.erpBaseUrl}/pdf?idretencion=${encodeURIComponent(String(idretencion))}`, {
+    return this.http.get(`${this.documentosErpUrl}/pdf?idretencion=${encodeURIComponent(String(idretencion))}`, {
       responseType: 'blob',
     });
   }
@@ -155,7 +154,7 @@ export class RetencionesSriService {
   }
 
   descargarXmlSinFirmarPorId(idretencion: number): Observable<string> {
-    return this.http.get(`${this.erpBaseUrl}/xml?idretencion=${encodeURIComponent(String(idretencion))}`, {
+    return this.http.get(`${this.documentosErpUrl}/xml?idretencion=${encodeURIComponent(String(idretencion))}`, {
       responseType: 'text',
     });
   }
@@ -201,41 +200,12 @@ export class RetencionesSriService {
     if (mensaje && mensaje.trim()) {
       params.set('mensaje', mensaje.trim());
     }
-    return this.http.post(`${this.erpBaseUrl}/procesar?${params.toString()}`, {});
+    return this.http.post(`${this.documentosErpUrl}/procesar?${params.toString()}`, {});
   }
 
-  procesarXml(
-    xml: string | Blob,
-    options?: {
-      ambiente?: number;
-      modo?: string;
-      emailDestino?: string;
-      attempts?: number;
-      sleepMillis?: number;
-    }
-  ): Observable<RetencionProcesadaResponse> {
-    const params = new URLSearchParams();
-    if (options?.modo?.trim()) {
-      params.set('modo', options.modo.trim());
-    }
-    if (typeof options?.ambiente === 'number') {
-      params.set('ambiente', String(options.ambiente));
-    }
-    if (options?.emailDestino?.trim()) {
-      params.set('emailDestino', options.emailDestino.trim());
-    }
-    if (typeof options?.attempts === 'number') {
-      params.set('attempts', String(options.attempts));
-    }
-    if (typeof options?.sleepMillis === 'number') {
-      params.set('sleepMillis', String(options.sleepMillis));
-    }
-
-    const query = params.toString();
-    const url = `${this.sriApiV1Url}/retenciones${query ? `?${query}` : ''}`;
-    // El controlador recibe @RequestBody String y consume application/xml.
-    return this.http.post<RetencionProcesadaResponse>(url, xml, {
-      headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+  procesarXml(xml: string | Blob): Observable<RetencionProcesadaResponse> {
+    return this.http.post<RetencionProcesadaResponse>(`${this.retencionesApiUrl}`, xml, {
+      headers: { 'Content-Type': 'application/xml', Accept: 'application/json' },
     });
   }
 
@@ -256,6 +226,6 @@ export class RetencionesSriService {
     if (mensaje && mensaje.trim()) {
       params.set('mensaje', mensaje.trim());
     }
-    return this.http.post(`${this.erpBaseUrl}/email?${params.toString()}`, {});
+    return this.http.post(`${this.documentosErpUrl}/email?${params.toString()}`, {});
   }
 }

@@ -60,6 +60,10 @@ export class AguatramiteService {
       return this.http.get<Aguatramite>(`${baseUrl}/${idaguatramite}`);
    }
 
+   validarTitularidad(idabonado: number): Observable<void> {
+      return this.http.get<void>(`${baseUrl}/validar-titularidad/${idabonado}`);
+   }
+
    saveAguaTramite(aguatramite: Aguatramite): Observable<Object> {
       return this.http.post(`${baseUrl}`, aguatramite);
    }

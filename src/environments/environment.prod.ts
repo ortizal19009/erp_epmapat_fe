@@ -1,4 +1,5 @@
 export const environment = {
+  RETENCIONES_SRI_API_URL: 'http://192.168.0.33:9096/api/v1/retenciones',
   production: true,
   //API_URL: 'http://192.168.0.71:9090'
   //API_URL: 'http://192.168.0.88:8888/erp_epmapat-v0.1'

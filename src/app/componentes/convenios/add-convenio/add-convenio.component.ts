@@ -726,8 +726,15 @@ export class AddConvenioComponent implements OnInit {
       referencia: this.newconvenio.referencia,
       totalconvenio: this.newconvenio.totalconvenio,
     };
-    const cuotas = this.cronogramaPagos.map((item: any) => ({
+    const cuotas = this.cronogramaPagos.map((item: any, i: number) => ({
       nrocuota: item.nrocuota,
+      interesMora: 0,
+      rubros: this.rubros.map((rubro: any, j: number) => ({
+        idrubro_rubros: { idrubro: rubro.idrubro },
+        cantidad: 1,
+        valorunitario: this.distribucionRubros[i][j],
+        estado: 1,
+      })),
       idfactura: {
         totaltarifa: item.valor,
         feccrea: item.fecha,

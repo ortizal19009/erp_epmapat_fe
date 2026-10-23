@@ -24,6 +24,7 @@ export class InfoConvenioComponent implements OnInit {
   total1: number; //Total de las Facturas de las Cuotas
   total2: number; //Total de las Facturas del convenio
   dif1: boolean;
+  diferenciaCuotas = 0;
   dif2: boolean;
   elimdisabled: boolean = true;
   v_idfactura: number;
@@ -110,25 +111,35 @@ export class InfoConvenioComponent implements OnInit {
     this.cuotasLoading = true;
     this.cuotaService.getByIdconvenio(idconvenio).subscribe({
       next: async (datos: any) => {
-        this.totalInteres = 0;
-        const cuotas = Array.isArray(datos) ? datos : [];
-        this._cuotas = await Promise.all(
-          cuotas.map(async (item: any) => {
-            const cuota = { ...item };
-            cuota.idfactura = await this.resolveFacturaCompleta(item?.idfactura);
-            const factura = cuota.idfactura || {};
-            const facturaId = Number(factura?.idfactura ?? 0);
-            if (facturaId > 0 && Number(factura?.pagado) === 0) {
-              cuota.interesacobrar = await this.s_intereses.getInteresFacturaAsync(facturaId);
-            } else {
-              cuota.interesacobrar = Number(factura?.interescobrado ?? 0);
-            }
-            this.totalInteres += Number(cuota.interesacobrar ?? 0);
-            return cuota;
-          })
-        );
-        this.totalCuotas();
-        this.cuotasLoading = false;
+        try {
+          this.totalInteres = 0;
+          const cuotas = Array.isArray(datos) ? datos : [];
+          this._cuotas = await Promise.all(
+            cuotas.map(async (item: any) => {
+              const cuota = { ...item };
+              cuota.idfactura = await this.resolveFacturaCompleta(item?.idfactura);
+              const factura = cuota.idfactura || {};
+              const facturaId = Number(factura?.idfactura ?? 0);
+              cuota.rubros = await this.rxfService.getDetalleByIdfacturaAsync(facturaId);
+              const pagada = Number(factura.pagado) === 1 || factura.pagado === true || !!factura.fechacobro;
+              cuota.interesMora = !pagada && facturaId > 0
+                ? await this.s_intereses.getInteresFacturaAsync(facturaId)
+                : 0;
+              const montos = this.s_report.calcularMontosCuota(cuota);
+              cuota.capital = montos.capital;
+              cuota.interesacobrar = montos.interes;
+              return cuota;
+            })
+          );
+          this.totalCuotas();
+        } catch (error) {
+          console.error('No se pudieron cargar los rubros e intereses del convenio', error);
+          this._cuotas = [];
+          this.total1 = 0;
+          this.totalInteres = 0;
+        } finally {
+          this.cuotasLoading = false;
+        }
       },
       error: (err) => {
         console.error(err.error);
@@ -237,7 +248,7 @@ export class InfoConvenioComponent implements OnInit {
       case 'fcobro':
         return String(item?.idfactura?.fechacobro ?? '');
       case 'valor':
-        return Number(item?.idfactura?.totaltarifa ?? 0);
+        return Number(item?.capital ?? 0);
       case 'interes':
         return Number(item?.interesacobrar ?? 0);
       default:
@@ -261,12 +272,22 @@ export class InfoConvenioComponent implements OnInit {
   }
 
   totalCuotas() {
-    this.total1 = 0;
-    (this._cuotas ?? []).forEach((item: any) => {
-      this.total1 += Number(item?.idfactura?.totaltarifa ?? 0);
-    });
-    this.total1 = Number(this.total1.toFixed(2));
-    this.dif1 = Number(this.convenio.totalconvenio?.toFixed?.(2) ?? 0) - this.total1 !== 0;
+    let capital = 0;
+    let interes = 0;
+    let pactado = 0;
+    for (const cuota of this._cuotas ?? []) {
+      capital += Math.round(Number(cuota.capital ?? 0) * 100);
+      interes += Math.round(Number(cuota.interesacobrar ?? 0) * 100);
+      // Comparar el convenio con su deuda original, sin agregar la mora posterior.
+      const original = this.s_report.calcularMontosCuota({
+        ...cuota, interesMora: 0, idfactura: { pagado: 0 },
+      });
+      pactado += Math.round(original.total * 100);
+    }
+    this.total1 = capital / 100;
+    this.totalInteres = interes / 100;
+    this.diferenciaCuotas = (Math.round(Number(this.convenio.totalconvenio ?? 0) * 100) - pactado) / 100;
+    this.dif1 = this.diferenciaCuotas !== 0;
   }
 
   nombreClienteOld(idfactura: number) {
@@ -369,6 +390,7 @@ export class InfoConvenioComponent implements OnInit {
     //this.suma0 = suma0;
   }
   imprimirPdf(convenio: any) {
+    if (this.cuotasLoading || !this._cuotas?.length) return;
     this.s_report.impContratoConvenio(convenio, this._cuotas);
   }
 

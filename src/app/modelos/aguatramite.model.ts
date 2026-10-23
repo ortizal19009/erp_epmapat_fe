@@ -6,6 +6,7 @@ let authService: AutorizaService
 
 export class Aguatramite {
    idaguatramite: number;
+   idabonado?: number;
    codmedidor: String;
    comentario: String;
    estado: number = 1;

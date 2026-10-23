@@ -42,6 +42,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
    txtenviar: string = 'Aceptar';
    accionEnCursoId: number | null = null;
    estadosSri: any[] = [];
+   private resultadosSri = new Map<number, any>();
    estadosDisponibles = [
       { value: '', label: 'Todos' },
       { value: 'PENDIENTE', label: 'Pendiente' },
@@ -358,6 +359,8 @@ export class RetencionesComponent implements OnInit, OnDestroy {
    }
 
    estadoSri(retencion: any): string {
+      const reciente = this.resultadosSri.get(this.getIdRetencion(retencion));
+      if (reciente?.estado) return this.normalizarEstadoSri(reciente.estado);
       const registro = this.getEstadoSriRegistro(retencion);
       if (registro?.estado) {
          return this.normalizarEstadoSri(registro.estado);
@@ -503,7 +506,55 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       }
    }
 
+   async validarSri(retencion: any) {
+      const id = this.getIdRetencion(retencion);
+      if (!id || this.accionEnCursoId !== null) return;
+      this.accionEnCursoId = id;
+      try {
+         const xml = await firstValueFrom(this.sriRetencionesService.descargarXmlSinFirmarPorId(id));
+         const resultado = await firstValueFrom(this.sriRetencionesService.validarXml(xml));
+         const mensajes = [...(resultado.errors ?? []), ...(resultado.warnings ?? [])];
+         await Swal.fire({
+            icon: resultado.valid ? 'success' : 'warning',
+            title: resultado.valid ? 'XML valido' : 'XML con errores',
+            text: mensajes.length ? mensajes.join('\n') : 'La validacion del XML finalizo correctamente.',
+         });
+         if (resultado.claveAcceso) retencion.claveacceso = resultado.claveAcceso;
+      } catch (error) {
+         this.authService.swal('error', this.getSriErrorDetail(error, 'No se pudo validar el XML'));
+      } finally {
+         this.accionEnCursoId = null;
+      }
+   }
+
+   async consultarAutorizacionSri(retencion: any) {
+      const id = this.getIdRetencion(retencion);
+      if (!id || this.accionEnCursoId !== null) return;
+      this.accionEnCursoId = id;
+      try {
+         let clave = this.getClaveAccesoRetencion(retencion);
+         if (!clave) {
+            const xml = await firstValueFrom(this.sriRetencionesService.descargarXmlSinFirmarPorId(id));
+            const documento = new DOMParser().parseFromString(xml, 'application/xml');
+            clave = documento.querySelector('infoTributaria > claveAcceso')?.textContent?.trim() ?? '';
+         }
+         if (!/^\d{49}$/.test(clave)) throw new Error('La retencion no tiene una clave de acceso valida de 49 digitos.');
+         const resultado = await firstValueFrom(this.sriRetencionesService.obtenerAutorizacion(clave));
+         this.aplicarResultadoSriRetencion(retencion, {
+            ...resultado, claveAcceso: clave,
+            estado: resultado.autorizado ? 'AUTORIZADO' : 'PENDIENTE_AUTORIZACION',
+         });
+         this.authService.swal(resultado.autorizado ? 'success' : 'info',
+            resultado.mensaje || (resultado.autorizado ? 'Retencion autorizada' : 'Pendiente de autorizacion'));
+      } catch (error) {
+         this.authService.swal('error', this.getSriErrorDetail(error, 'No se pudo consultar la autorizacion'));
+      } finally {
+         this.accionEnCursoId = null;
+      }
+   }
+
    async procesarSri(retencion: any) {
+      if (this.accionEnCursoId !== null) return;
       const idretencion = this.getIdRetencion(retencion);
       if (!idretencion) {
          this.authService.swal('warning', 'No se pudo identificar la retención a procesar');
@@ -512,14 +563,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       this.accionEnCursoId = idretencion;
       try {
          const xmlSinFirmar = await firstValueFrom(this.sriRetencionesService.descargarXmlSinFirmarPorId(idretencion));
-         const destinatario = this.getCorreoRetencion(retencion).trim();
-         const resultado = await firstValueFrom(
-            this.sriRetencionesService.procesarXml(xmlSinFirmar, {
-               emailDestino: destinatario,
-               attempts: 30,
-               sleepMillis: 4000
-            })
-         );
+         const resultado = await firstValueFrom(this.sriRetencionesService.procesarXml(xmlSinFirmar));
          this.aplicarResultadoSriRetencion(retencion, resultado);
          const estadoResultado = this.normalizarEstadoSri(resultado?.estado);
          if (estadoResultado === 'PENDIENTE_AUTORIZACION' || estadoResultado === 'PENDIENTE' || estadoResultado === 'SIN_AUTORIZACION_EN_SRI') {
@@ -779,7 +823,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       if (texto.includes('PENDIENTE')) {
          return 'PENDIENTE';
       }
-      if (texto.includes('AUTORIZADA')) {
+      if (texto === 'AUTORIZADO' || texto === 'AUTORIZADA') {
          return 'AUTORIZADA';
       }
       if (texto.includes('GENERADA')) {
@@ -798,6 +842,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       if (!retencion || !resultado) {
          return;
       }
+      this.resultadosSri.set(this.getIdRetencion(retencion), resultado);
       if (resultado?.estado) {
          retencion.estado = resultado.estado;
       }

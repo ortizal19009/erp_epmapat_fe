@@ -78,7 +78,10 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   fecFacturaActual: any = null;
   factura: Facturas = new Facturas();
 
-  _convenios: any;
+  _convenios: any[] = [];
+  conveniosLoading = false;
+  conveniosError: string | null = null;
+  private conveniosRequest = 0;
   swconvenio: boolean = false;
   opt = '0';
 
@@ -705,18 +708,56 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     const normalizedStart = Math.max(0, end - 5);
     return Array.from({ length: end - normalizedStart }, (_, index) => normalizedStart + index);
   }
-  getConveniosPago(idabonado: number) {
-    this.s_convenios.getByReferencia(idabonado.toString()).subscribe({
-      next: (dConvenios: any) => {
-        this._convenios = dConvenios;
-        if (this._convenios.length > 0) {
-          this.swconvenio = true;
-        } else {
-          this.swconvenio = false;
-        }
-      },
-      error: (e) => console.error(e),
-    });
+  async getConveniosPago(idabonado: number): Promise<void> {
+    const request = ++this.conveniosRequest;
+    this.conveniosLoading = true;
+    this.conveniosError = null;
+    this._convenios = [];
+    this.swconvenio = false;
+    try {
+      const convenios: any[] = [];
+      let page = 0;
+      let totalPages = 1;
+      while (page < totalPages) {
+        const resultado = await firstValueFrom(this.s_convenios.buscarConvenios({
+          cuenta: idabonado, page, size: 100,
+        }));
+        if (request !== this.conveniosRequest) return;
+        convenios.push(...(resultado.content ?? []));
+        totalPages = resultado.totalPages;
+        page++;
+      }
+      this._convenios = convenios.sort((a, b) => Number(b.idconvenio) - Number(a.idconvenio));
+      this.swconvenio = convenios.length > 0;
+    } catch (error) {
+      if (request !== this.conveniosRequest) return;
+      console.error('Error al cargar convenios del abonado', error);
+      this.conveniosError = 'No se pudieron cargar los convenios. Intente nuevamente.';
+    } finally {
+      if (request === this.conveniosRequest) this.conveniosLoading = false;
+    }
+  }
+
+  getConvenioEstadoLabel(estado: number | null): string {
+    if (estado == null) return 'Sin estado';
+    switch (Number(estado)) {
+      case 0: return 'Eliminado';
+      case 1: return 'Activo';
+      case 2: return 'Anulado';
+      case 3: return 'Pagado';
+      default: return 'Sin estado';
+    }
+  }
+
+  getConvenioEstadoClass(estado: number | null): string {
+    if (estado == null) return 'badge-secondary';
+    switch (Number(estado)) {
+      case 0: return 'badge-danger';
+      case 1: return 'badge-success';
+      case 2: return 'badge-dark';
+      case 3: return 'badge-primary';
+      default: return 'badge-secondary';
+    }
   }
 
   async getRubroxfac(idfactura: number) {

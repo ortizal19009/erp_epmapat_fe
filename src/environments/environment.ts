@@ -17,6 +17,7 @@
 }; */
 
 export const environment = {
+  RETENCIONES_SRI_API_URL: 'http://192.168.0.33:9096/api/v1/retenciones',
   production: false,
   API_URL: 'http://localhost:9080',
   GD_API_URL: 'http://localhost:9080',
