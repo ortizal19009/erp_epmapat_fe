@@ -112,6 +112,7 @@ export class WritePermissionInterceptor implements HttpInterceptor {
       'admin/catalogo-ventanas': 'admin-access-control',
       'admin/correos': 'admin-correos',
       'admin/mobile-apk': 'admin-mobile-apk',
+      'admin/auditoria-peticiones': 'admin-request-audit',
       'info-aguatramite': 'aguatramite',
     };
 

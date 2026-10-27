@@ -966,6 +966,12 @@
                 <p class="text-warning">Versiones APK Mobile</p>
               </a>
             </li>
+            <li class="nav-item" *ngIf="authService.idusuario == 1 || canWindowPermission('admin-request-audit', 5)">
+              <a routerLink="/admin/auditoria-peticiones" class="nav-link">
+                <i class="bi bi-list-check nav-icon"></i>
+                <p class="text-warning">Auditoría de peticiones</p>
+              </a>
+            </li>
 
           </ul>
         </li>

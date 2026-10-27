@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface RetencionProcesadaResponse {
@@ -16,6 +16,7 @@ export interface RetencionProcesadaResponse {
   pdfBase64?: string;
   email?: string;
   emailEncolado?: boolean;
+  emailEnviado?: boolean;
   emailQueueId?: string | null;
   detalle?: string;
   errores?: string[];
@@ -55,84 +56,8 @@ export class RetencionesSriService {
     });
   }
 
-  private extraerPdfBase64(payload: any): string {
-    if (typeof payload?.pdfBase64 === 'string' && payload.pdfBase64.trim()) {
-      return payload.pdfBase64.trim();
-    }
-
-    const attachments = payload?.attachments || payload?.adjuntos || [];
-    const pdfAttachment = attachments.find((item: any) => {
-      const type = String(item?.contentType || item?.mimeType || '').toLowerCase();
-      const name = String(item?.fileName || item?.filename || '').toLowerCase();
-      return type.includes('pdf') || name.endsWith('.pdf');
-    });
-
-    return String(
-      pdfAttachment?.base64Data ||
-      pdfAttachment?.dataBase64 ||
-      pdfAttachment?.contentBase64 ||
-      ''
-    ).trim();
-  }
-
-  private extraerXmlAutorizado(payload: any): string {
-    if (typeof payload?.xmlAutorizado === 'string' && payload.xmlAutorizado.trim()) {
-      return payload.xmlAutorizado.trim();
-    }
-
-    if (typeof payload?.xmlAutorizadoBase64 === 'string' && payload.xmlAutorizadoBase64.trim()) {
-      return atob(payload.xmlAutorizadoBase64.trim());
-    }
-
-    const comprobante =
-      payload?.autorizacion?.autorizaciones?.autorizacion?.[0]?.comprobante ||
-      payload?.autorizaciones?.[0]?.comprobante ||
-      '';
-
-    if (typeof comprobante === 'string' && comprobante.trim()) {
-      return comprobante.trim();
-    }
-
-    const attachments = payload?.attachments || payload?.adjuntos || [];
-    const xmlAttachment = attachments.find((item: any) => {
-      const type = String(item?.contentType || item?.mimeType || '').toLowerCase();
-      const name = String(item?.fileName || item?.filename || '').toLowerCase();
-      return type.includes('xml') || name.endsWith('.xml');
-    });
-
-    const xmlBase64 = String(
-      xmlAttachment?.base64Data ||
-      xmlAttachment?.dataBase64 ||
-      xmlAttachment?.contentBase64 ||
-      ''
-    ).trim();
-
-    return xmlBase64 ? atob(xmlBase64) : '';
-  }
-
-  private base64ToBlob(base64: string, mimeType: string): Blob {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return new Blob([bytes], { type: mimeType });
-  }
-
   streamRetenciones(): EventSource {
     return new EventSource(`${this.documentosErpUrl}/stream`);
-  }
-
-  generarPdf(claveAcceso: string): Observable<Blob> {
-    return this.obtenerAutorizacion(claveAcceso).pipe(
-      map((payload) => {
-        const pdfBase64 = this.extraerPdfBase64(payload);
-        if (!pdfBase64) {
-          throw new Error('La API no devolvio el PDF autorizado de la retencion.');
-        }
-        return this.base64ToBlob(pdfBase64, 'application/pdf');
-      })
-    );
   }
 
   generarPdfPorId(idretencion: number): Observable<Blob> {
@@ -141,14 +66,31 @@ export class RetencionesSriService {
     });
   }
 
-  descargarXml(claveAcceso: string): Observable<string> {
-    return this.obtenerAutorizacion(claveAcceso).pipe(
-      map((payload) => {
-        const xml = this.extraerXmlAutorizado(payload);
-        if (!xml) {
-          throw new Error('La API no devolvio el XML autorizado de la retencion.');
-        }
-        return xml;
+  consultarPorId(idretencion: number): Observable<RetencionProcesadaResponse> {
+    return this.http.post<RetencionProcesadaResponse>(`${this.documentosErpUrl}/consultar`, {}, {
+      params: { idretencion: String(idretencion) },
+    });
+  }
+
+  descargarXmlAutorizado(claveAcceso: string): Observable<string> {
+    const clave = String(claveAcceso || '').trim();
+    if (!/^\d{49}$/.test(clave)) {
+      return throwError(() => new Error('La retencion no tiene una clave de acceso valida de 49 digitos.'));
+    }
+    const autorizacionUrl = this.retencionesApiUrl.replace(/\/retenciones$/, '/autorizacion');
+    return this.http.get<{
+      xmlAutorizado?: string; estado?: string; mensaje?: string;
+      detalleUltimaConsulta?: string; requestId?: string;
+    }>(`${autorizacionUrl}/${encodeURIComponent(clave)}/xml`, {
+      headers: { Accept: 'application/json' },
+    }).pipe(
+      map(respuesta => {
+        const xml = respuesta?.xmlAutorizado;
+        if (typeof xml === 'string' && xml.trim()) return xml;
+        const detalle = [respuesta?.mensaje, respuesta?.detalleUltimaConsulta]
+          .filter(Boolean).join(' ');
+        throw new Error(`Clave consultada: ${clave}. ` + (detalle || 'El XML autorizado aun no esta disponible en el SRI.')
+          + (respuesta?.requestId ? ` Referencia: ${respuesta.requestId}` : ''));
       })
     );
   }
@@ -157,30 +99,6 @@ export class RetencionesSriService {
     return this.http.get(`${this.documentosErpUrl}/xml?idretencion=${encodeURIComponent(String(idretencion))}`, {
       responseType: 'text',
     });
-  }
-
-  procesar(
-    claveAcceso: string,
-    destinatario?: string,
-    asunto?: string,
-    mensaje?: string,
-    wait: boolean = false,
-    attempts: number = 10,
-    sleepMillis: number = 3000
-  ): Observable<any> {
-    return this.obtenerAutorizacion(claveAcceso);
-  }
-
-  reenviarCorreo(
-    claveAcceso: string,
-    destinatario?: string,
-    asunto?: string,
-    mensaje?: string,
-    wait: boolean = false,
-    attempts: number = 10,
-    sleepMillis: number = 3000
-  ): Observable<any> {
-    return this.obtenerAutorizacion(claveAcceso);
   }
 
   procesarPorId(

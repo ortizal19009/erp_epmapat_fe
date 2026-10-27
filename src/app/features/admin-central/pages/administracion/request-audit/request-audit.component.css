@@ -1,0 +1,9 @@
+.cabecera { background-color: var(--bgcolor1, #500450); color: white; }
+.detalle { background-color: var(--bgcolor2, #fac8fa); }
+.audit-filters > div { margin-bottom: .75rem; }
+.audit-filters label { font-size: .875rem; margin-bottom: .25rem; }
+.table thead { background-color: var(--bgcolor1, #500450); color: white; }
+.table td, .table th { vertical-align: middle; }
+.table tbody tr { background-color: rgba(255,255,255,.65); }
+.table tbody tr:hover { background-color: rgba(255,255,255,.9); }
+.table-responsive { border-radius: .25rem; }

@@ -1200,6 +1200,12 @@ const routes: Routes = [
     data: { windowPermission: 'admin-mobile-apk', minPermission: 5 },
   },
 
+  {
+    path: 'admin/auditoria-peticiones',
+    loadComponent: () => import('./features/admin-central/pages/administracion/request-audit/request-audit.component').then(m => m.RequestAuditComponent),
+    canActivate: [AuthGuard, AdminOnlyGuard],
+    data: { windowPermission: 'admin-request-audit', minPermission: 5 },
+  },
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent, canActivate: [AuthGuard] },
   { path: 'cv-abonados', component: CvAbonadosComponent, canActivate: [AuthGuard] },

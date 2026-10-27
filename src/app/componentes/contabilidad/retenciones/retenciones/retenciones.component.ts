@@ -5,7 +5,6 @@ import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { CorreosEnviadosService } from 'src/app/servicios/administracion/correos-enviados.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { AirxreteService } from 'src/app/servicios/contabilidad/airxrete.service';
 import { FecReteimpuService } from 'src/app/servicios/contabilidad/fec-reteimpu.service';
@@ -71,7 +70,6 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       private fec_reteimpuService: FecReteimpuService,
       private airxreteService: AirxreteService,
       private sriRetencionesService: RetencionesSriService,
-      private correosEnviadosService: CorreosEnviadosService,
       private zone: NgZone
    ) { }
 
@@ -226,40 +224,15 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       this.swenviando = true;
       this.txtenviar = 'Enviando';
       this.swbotones = false;
-      await this.datosDefinirAsync();
-      for (let i = 0; i < this._retenciones.length; i++) {
-         if (this._retenciones[i].escoge == 1) {
-            const fec_retencion = {} as Fec_retencion;
-            fec_retencion.idretencion = this._retenciones[i].idrete;
-            this.claveAcceso(i);
-            fec_retencion.claveacceso = this.claveacceso;
-            fec_retencion.secuencial = padStart(this._retenciones[i].secretencion1, 9);
-            fec_retencion.estado = 'I';
-            fec_retencion.establecimiento = '001';
-            fec_retencion.puntoemision = '001';
-            fec_retencion.direccionestablecimiento = this.empresa.direccion;
-            fec_retencion.fechaemision = this._retenciones[i].fechaemiret1;
-            fec_retencion.tipoidentificacionsujetoretenid = this._retenciones[i].idbene.tpidben;
-            fec_retencion.razonsocialsujetoretenido = this._retenciones[i].idbene.nomben;
-            fec_retencion.identificacionsujetoretenido = this._retenciones[i].idbene.rucben;
-            fec_retencion.periodofiscal = `${this._retenciones[i].fechaemiret1.slice(5, 7)}/${this._retenciones[i].fechaemiret1.slice(0, 4)}`;
-            fec_retencion.telefonosujetoretenido = this._retenciones[i].idbene.tlfben;
-            fec_retencion.emailsujetoretenido = this._retenciones[i].idbene.mailben;
-            this.fec_reteService.saveAsync(fec_retencion);
-            await this.AIR(this._retenciones[i]);
-            if (this._retenciones[i].valorretbienes != 0) {
-               await this.IVA(this._retenciones[i], '1', this._retenciones[i].valorretbienes);
-            }
-            if (this._retenciones[i].valorretservicios != 0) {
-               await this.IVA(this._retenciones[i], '2', this._retenciones[i].valorretservicios);
-            }
-            if (this._retenciones[i].valretserv100 != 0) {
-               await this.IVA(this._retenciones[i], '3', this._retenciones[i].valretserv100);
-            }
+      try {
+         for (const retencion of this._retenciones || []) {
+            if (retencion.escoge == 1) await this.procesarSri(retencion);
          }
+      } finally {
+         this.swenviando = false;
+         this.txtenviar = 'Continuar';
+         this.swbotones = true;
       }
-      this.swenviando = false;
-      this.txtenviar = 'Continuar';
    }
 
    async AIR(retencion: any) {
@@ -439,8 +412,11 @@ export class RetencionesComponent implements OnInit, OnDestroy {
 
    getClaveAccesoRetencion(retencion: any): string {
       const registro = this.getEstadoSriRegistro(retencion);
-      const clave = registro?.claveacceso ?? retencion?.claveacceso ?? this.calcularClaveAccesoLocal(retencion);
-      return String(clave || '').trim();
+      const reciente = this.resultadosSri.get(this.getIdRetencion(retencion));
+      const claves = [reciente?.claveAcceso, retencion?.claveacceso, registro?.claveacceso,
+         retencion?.numautoriza_e, retencion?.numautoriza];
+      return claves.map(clave => String(clave || '').trim()).find(clave => /^\d{49}$/.test(clave)) || '';
+
    }
 
    private calcularClaveAccesoLocal(retencion: any): string {
@@ -470,7 +446,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
    async descargarPdf(retencion: any) {
       const idretencion = this.getIdRetencion(retencion);
       const claveAcceso = this.getClaveAccesoRetencion(retencion);
-      if (!idretencion && !claveAcceso) {
+      if (!idretencion) {
          this.authService.swal('warning', 'No se pudo identificar la retención a descargar');
          return;
       }
@@ -480,12 +456,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       }
       this.accionEnCursoId = idretencion;
       try {
-         let blob: Blob;
-         if (idretencion > 0) {
-            blob = await firstValueFrom(this.sriRetencionesService.generarPdfPorId(idretencion));
-         } else {
-            blob = await firstValueFrom(this.sriRetencionesService.generarPdf(claveAcceso));
-         }
+         const blob = await firstValueFrom(this.sriRetencionesService.generarPdfPorId(idretencion));
          const blobUrl = window.URL.createObjectURL(blob);
          const opened = window.open(blobUrl, '_blank');
          if (!opened) {
@@ -532,20 +503,12 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       if (!id || this.accionEnCursoId !== null) return;
       this.accionEnCursoId = id;
       try {
-         let clave = this.getClaveAccesoRetencion(retencion);
-         if (!clave) {
-            const xml = await firstValueFrom(this.sriRetencionesService.descargarXmlSinFirmarPorId(id));
-            const documento = new DOMParser().parseFromString(xml, 'application/xml');
-            clave = documento.querySelector('infoTributaria > claveAcceso')?.textContent?.trim() ?? '';
-         }
-         if (!/^\d{49}$/.test(clave)) throw new Error('La retencion no tiene una clave de acceso valida de 49 digitos.');
-         const resultado = await firstValueFrom(this.sriRetencionesService.obtenerAutorizacion(clave));
-         this.aplicarResultadoSriRetencion(retencion, {
-            ...resultado, claveAcceso: clave,
-            estado: resultado.autorizado ? 'AUTORIZADO' : 'PENDIENTE_AUTORIZACION',
-         });
-         this.authService.swal(resultado.autorizado ? 'success' : 'info',
-            resultado.mensaje || (resultado.autorizado ? 'Retencion autorizada' : 'Pendiente de autorizacion'));
+         const resultado = await firstValueFrom(this.sriRetencionesService.consultarPorId(id));
+         this.aplicarResultadoSriRetencion(retencion, resultado);
+         const autorizada = this.normalizarEstadoSri(resultado.estado) === 'AUTORIZADA';
+         this.authService.swal(autorizada ? 'success' : 'info',
+            resultado.detalle || (autorizada ? 'Retencion autorizada y sincronizada con el ERP' : resultado.estado));
+         await this.cargarEstadosSri();
       } catch (error) {
          this.authService.swal('error', this.getSriErrorDetail(error, 'No se pudo consultar la autorizacion'));
       } finally {
@@ -562,8 +525,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       }
       this.accionEnCursoId = idretencion;
       try {
-         const xmlSinFirmar = await firstValueFrom(this.sriRetencionesService.descargarXmlSinFirmarPorId(idretencion));
-         const resultado = await firstValueFrom(this.sriRetencionesService.procesarXml(xmlSinFirmar));
+         const resultado = await firstValueFrom(this.sriRetencionesService.procesarPorId(idretencion));
          this.aplicarResultadoSriRetencion(retencion, resultado);
          const estadoResultado = this.normalizarEstadoSri(resultado?.estado);
          if (estadoResultado === 'PENDIENTE_AUTORIZACION' || estadoResultado === 'PENDIENTE' || estadoResultado === 'SIN_AUTORIZACION_EN_SRI') {
@@ -578,8 +540,12 @@ export class RetencionesComponent implements OnInit, OnDestroy {
             );
          } else if (estadoResultado === 'YA_AUTORIZADA' || estadoResultado === 'CLAVE_DUPLICADA') {
             this.authService.swal('info', resultado?.detalle || 'La retención ya fue enviada o la clave de acceso está duplicada.');
+         } else if (estadoResultado === 'NO_AUTORIZADO') {
+            this.authService.swal('error', resultado?.detalle || 'El SRI no autorizo la retencion');
+         } else if (resultado?.emailEnviado === false) {
+            this.authService.swal('warning', resultado?.detalle || 'Retencion autorizada; pendiente de enviar correo');
          } else {
-            this.authService.swal('success', `Retención autorizada${resultado?.emailEncolado && resultado?.email ? ` y correo encolado a ${resultado.email}` : ''}`);
+            this.authService.swal('success', `Retención autorizada${resultado?.emailEnviado && resultado?.email ? ` y correo enviado a ${resultado.email}` : ''}`);
          }
          await this.cargarEstadosSri();
       } catch (error: any) {
@@ -635,7 +601,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       }
       this.accionEnCursoId = this.getIdRetencion(retencion);
       try {
-         const xml = await firstValueFrom(this.sriRetencionesService.descargarXml(claveAcceso));
+         const xml = await firstValueFrom(this.sriRetencionesService.descargarXmlAutorizado(claveAcceso));
          const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
          const url = window.URL.createObjectURL(blob);
          const link = document.createElement('a');
@@ -647,7 +613,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          await this.cargarEstadosSri();
       } catch (error: any) {
          console.error(error);
-         this.authService.swal('error', 'No se pudo descargar el XML autorizado');
+         this.authService.swal('warning', this.getSriErrorDetail(error, 'No se pudo descargar el XML autorizado'));
       } finally {
          this.accionEnCursoId = null;
       }
@@ -680,7 +646,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
       this.accionEnCursoId = this.getIdRetencion(retencion);
       try {
          const asunto = `Retención ${this.getSecuencialArchivo(retencion)}`;
-         const mensaje = 'Adjuntamos su comprobante de retención en formato PDF.';
+         const mensaje = 'Adjuntamos su comprobante de retención en formatos RIDE PDF y XML autorizado.';
          const resultado = await firstValueFrom(
             this.sriRetencionesService.reenviarCorreoPorId(idretencion, correo, asunto, mensaje)
          );
@@ -704,21 +670,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
             return;
          }
          this.authService.swal('success', `Correo enviado a ${correo}`);
-         try {
-            await firstValueFrom(this.correosEnviadosService.registrarEnvio({
-               modulo: 'RETENCIONES',
-               documentoid: this.getIdRetencion(retencion),
-               documento: 'RETENCION',
-               destinatarios: correo,
-               asunto,
-               remitente: 'msvc-sri',
-               archivoadjunto: `retencion_${this.getSecuencialArchivo(retencion)}.pdf, retencion_${this.getSecuencialArchivo(retencion)}.xml`,
-               estado: 'ENVIADO',
-               detalle: `Reenvio de retencion registrado. emailQueueId=${resultado?.emailQueueId || ''}`
-            }));
-         } catch (registroError) {
-            console.warn('No se pudo registrar el correo en el control de mails', registroError);
-         }
+         this.aplicarResultadoSriRetencion(retencion, resultado);
          this.retencionCorreoModal = null;
          this.correosModal = '';
          await this.cargarEstadosSri();
@@ -907,9 +859,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
 
       const retencion = (this._retenciones || []).find((item: any) => this.getIdRetencion(item) === idretencion);
       if (retencion) {
-         if (payload?.estado) {
-            retencion.estado = payload.estado;
-         }
+         this.aplicarResultadoSriRetencion(retencion, payload);
          if (payload?.claveAcceso) {
             retencion.claveacceso = payload.claveAcceso;
          }
