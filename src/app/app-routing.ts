@@ -1204,7 +1204,7 @@ const routes: Routes = [
     path: 'admin/auditoria-peticiones',
     loadComponent: () => import('./features/admin-central/pages/administracion/request-audit/request-audit.component').then(m => m.RequestAuditComponent),
     canActivate: [AuthGuard, AdminOnlyGuard],
-    data: { windowPermission: 'admin-request-audit', minPermission: 5 },
+    data: { windowPermission: 'admin-request-audit', minPermission: 5, adminUserOnly: true },
   },
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent, canActivate: [AuthGuard] },

@@ -13,6 +13,12 @@ export class AdminOnlyGuard implements CanActivate {
   ) {}
 
   async canActivate(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Promise<boolean> {
+    if (route.data?.['adminUserOnly'] === true) {
+      if (this.resolveUserId() === 1) return true;
+      this.router.navigate(['/home']);
+      return false;
+    }
+
     if (this.authService.idusuario === 1) {
       return true;
     }
