@@ -1,9 +1,13 @@
 .cabecera { background-color: var(--bgcolor1, #500450); color: white; }
 .detalle { background-color: var(--bgcolor2, #fac8fa); }
 .audit-filters > div { margin-bottom: .75rem; }
-.audit-filters label { font-size: .875rem; margin-bottom: .25rem; }
+.audit-filters .col-form-label-sm { margin-bottom: .125rem; padding-top: 0; padding-bottom: .125rem; }
 .table thead { background-color: var(--bgcolor1, #500450); color: white; }
 .table td, .table th { vertical-align: middle; }
 .table tbody tr { background-color: rgba(255,255,255,.65); }
 .table tbody tr:hover { background-color: rgba(255,255,255,.9); }
 .table-responsive { border-radius: .25rem; }
+
+.audit-filter-card { background-color: rgba(255,255,255,.7); }
+.audit-filter-card .card-header { background-color: rgba(0,0,0,.03); }
+.audit-filter-card [hidden] { display: none !important; }

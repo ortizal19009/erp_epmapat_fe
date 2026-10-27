@@ -11,6 +11,7 @@ interface Audit { id: number; fecha: string; metodo: string; ruta: string; estad
 @Component({ selector: 'app-request-audit', standalone: true, imports: [CommonModule, FormsModule], templateUrl: './request-audit.component.html', styleUrls: ['./request-audit.component.css'] })
 export class RequestAuditComponent implements OnInit, OnDestroy {
  rows: Audit[] = []; page = 0; totalPages = 0; total = 0; loading = false; error = ''; auto = false;
+ filtrosMinimizados = true;
  metodo = ''; ruta = ''; estado = ''; usuarioId = ''; ip = '';
  desde = this.today(); hasta = this.desde;
  usuarios: Usuarios[] = []; usuariosError = '';
