@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/componentes/clientes/imp-cliente/imp-cliente.component.spec.ts",
+    "src/app/servicios/clientes-reporte.service.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

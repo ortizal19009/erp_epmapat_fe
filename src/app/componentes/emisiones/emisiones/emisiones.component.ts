@@ -1272,8 +1272,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
         : '<div>Todas las rutas de la emisión están completas.</div>';
 
       const result = await Swal.fire({
-        icon: rutasPendientes.length ? 'warning' : 'success',
-        title: rutasPendientes.length
+        icon: rutasPendientes.length || resp?.aperturaCompleta === false ? 'warning' : 'success',
+        title: rutasPendientes.length || resp.aperturaCompleta === false
           ? 'Apertura incompleta'
           : 'Apertura validada',
         html:
@@ -1285,6 +1285,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
           `<p><strong>Lecturas esperadas:</strong> ${resp.totalLecturasEsperadas}</p>` +
           `<p><strong>Lecturas existentes:</strong> ${resp.lecturasExistentes}</p>` +
           `<p><strong>Lecturas pendientes:</strong> ${resp.lecturasPendientes}</p>` +
+          `<p><strong>Cuentas sin ruta:</strong> ${(resp.cuentasSinRuta ?? []).join(', ') || 'Ninguna'}</p>` +
           `<hr>` +
           detalleRutas +
           `</div>`,
@@ -1387,12 +1388,13 @@ export class EmisionesComponent implements OnInit, OnDestroy {
 
       this.s_loading.hideLoading();
       await Swal.fire({
-        icon: resp.lecturasPendientes > 0 ? 'warning' : 'success',
-        title: resp.lecturasPendientes > 0 ? 'Revalidación parcial' : 'Apertura completada',
+        icon: resp.lecturasPendientes > 0 || resp.aperturaCompleta === false ? 'warning' : 'success',
+        title: resp.lecturasPendientes > 0 || resp.aperturaCompleta === false ? 'Revalidación parcial' : 'Apertura completada',
         text:
           `Rutas completas: ${resp.rutasCompletas}/${resp.totalRutasEsperadas}. ` +
           `Lecturas creadas: ${resp.lecturasCreadas}. ` +
-          `Lecturas pendientes: ${resp.lecturasPendientes}.`,
+          `Lecturas pendientes: ${resp.lecturasPendientes}. ` +
+          (resp.cuentasSinRuta?.length ? `Cuentas sin ruta: ${resp.cuentasSinRuta.join(', ')}. Asigne una ruta antes de completar la apertura.` : ''),
       });
       this.info({
         idemision: this.idemision,
@@ -4344,6 +4346,9 @@ interface EmisionGeneracionRutaDetalle {
 }
 
 interface EmisionGeneracionResponse {
+  aperturaCompleta?: boolean;
+  cuentasPendientes?: number[];
+  cuentasSinRuta?: number[];
   idemision: number;
   emision: string;
   totalRutasEsperadas: number;

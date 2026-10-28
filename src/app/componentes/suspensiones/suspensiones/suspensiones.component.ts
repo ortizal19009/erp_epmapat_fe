@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { SuspensionesReporteService } from 'src/app/servicios/suspensiones-reporte.service';
+import { Ng2SearchPipe } from 'ng2-search-filter';
+import { Observable, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
@@ -13,12 +16,17 @@ import { SuspensionesService } from 'src/app/servicios/suspensiones.service';
 @Component({
   selector: 'app-suspensiones',
   templateUrl: './suspensiones.component.html',
-  styleUrls: ['./suspensiones.component.css'],
+  styleUrls: ['./suspensiones.component.css', '../../../compartida/gestion-cuentas.css'],
 })
-export class SuspensionesComponent implements OnInit {
+export class SuspensionesComponent implements OnInit, OnDestroy {
   formSuspensiones: FormGroup;
   titulo: string = 'Suspensiones';
-  filterTerm: string;
+  filterTerm = '';
+  cargandoListado = false;
+  errorListado = '';
+  exportandoReporte = false;
+  rangoReporte = '';
+  private listadoSubscription?: Subscription;
   suspensiones: any[] = [];
   today: string = this.formatDateForInput(new Date());
   startOfYear: string = this.formatDateForInput(new Date(new Date().getFullYear(), 0, 1));
@@ -35,7 +43,8 @@ export class SuspensionesComponent implements OnInit {
     private s_lecturas: LecturasService,
     private s_facturas: FacturaService,
     private s_rubroxfac: RubroxfacService,
-    private authService: AutorizaService
+    private authService: AutorizaService,
+    private reportes: SuspensionesReporteService = new SuspensionesReporteService()
   ) {}
 
   ngOnInit(): void {
@@ -71,14 +80,46 @@ export class SuspensionesComponent implements OnInit {
     if (detalle) detalle.classList.add('nuevoBG2');
   }
 
-  listarSuspensiones() {
-    this.suspeService.getListaSuspensiones().subscribe({
-      next: (datos) => {
+  async descargarReporte(formato: 'pdf' | 'xlsx') {
+    if (this.cargandoListado || this.exportandoReporte) return;
+    const registros = new Ng2SearchPipe().transform(this.suspensiones, this.filterTerm);
+    if (!registros.length) { this.errorListado = 'No hay registros para exportar.'; return; }
+    this.exportandoReporte = true; this.errorListado = '';
+    try {
+      await this.reportes.descargar(this.titulo, registros,
+        this.rangoReporte + (this.filterTerm ? ' | Busqueda: ' + this.filterTerm : ''), formato);
+    } catch { this.errorListado = 'No se pudo generar el reporte. Intente nuevamente.'; }
+    finally { this.exportandoReporte = false; }
+  }
+
+  ngOnDestroy() { this.listadoSubscription?.unsubscribe(); }
+
+  get totalCuentasVinculadas(): number {
+    return this.suspensiones.reduce((total, registro) => total + (registro.cuentasAfectadas?.length ?? registro.total ?? 0), 0);
+  }
+
+  abrirCuenta(cuenta: number) {
+    sessionStorage.setItem('idabonadoToFactura', String(cuenta));
+    this.router.navigate(['detalles-abonado']);
+  }
+
+  private cargarListado(consulta: Observable<any>, rango = 'Ultimos registros') {
+    this.listadoSubscription?.unsubscribe();
+    this.cargandoListado = true;
+    this.errorListado = '';
+    this.listadoSubscription = consulta.subscribe({
+      next: datos => {
         this.suspensiones = Array.isArray(datos) ? datos : [];
+        this.rangoReporte = rango;
+        this.cargandoListado = false;
         this.applyCurrentSort();
       },
-      error: (e) => console.error(e),
+      error: () => { this.cargandoListado = false; this.errorListado = 'No se pudo cargar el listado. Intente nuevamente.'; }
     });
+  }
+
+  listarSuspensiones() {
+    this.cargarListado(this.suspeService.getListaSuspensiones());
   }
 
   onSubmit() {}
@@ -92,6 +133,7 @@ export class SuspensionesComponent implements OnInit {
   }
 
   info(suspension: any) {
+    sessionStorage.setItem('retornoSuspensionesInfo', 'suspensiones');
     sessionStorage.setItem(
       'idsuspensionToInfo',
       suspension.idsuspension.toString()
@@ -100,32 +142,12 @@ export class SuspensionesComponent implements OnInit {
   }
 
   buscarxFecha() {
-    if (
-      this.formSuspensiones.value.desde !== null &&
-      this.formSuspensiones.value.hasta !== null
-    ) {
-      this.suspeService
-        .getByFecha(
-          this.formSuspensiones.value.desde,
-          this.formSuspensiones.value.hasta
-        )
-        .subscribe({
-          next: (datos) => {
-            this.suspensiones = Array.isArray(datos) ? datos : [];
-            this.applyCurrentSort();
-          },
-          error: (e) => console.error(e),
-        });
-    } else {
-      let i_desde = document.getElementById('desde') as HTMLInputElement;
-      let i_hasta = document.getElementById('hasta') as HTMLInputElement;
-      i_desde.style.border = '#F54500 1px solid';
-      i_hasta.style.border = '#F54500 1px solid';
-      setTimeout(() => {
-        i_desde.style.border = '';
-        i_hasta.style.border = '';
-      }, 2000);
+    const { desde, hasta } = this.formSuspensiones.value;
+    if (!desde || !hasta || desde > hasta) {
+      this.errorListado = 'Seleccione un rango de fechas valido (desde no puede ser posterior a hasta).';
+      return;
     }
+    this.cargarListado(this.suspeService.getByFecha(desde, hasta), `Desde ${desde} hasta ${hasta}`);
   }
   habilitarMedidor() {
     this.router.navigate(['habilitar-medidores']);

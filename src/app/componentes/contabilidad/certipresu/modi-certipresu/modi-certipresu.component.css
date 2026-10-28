@@ -6,3 +6,10 @@
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
+
+.resumen-partidas { font-size: .8rem; border-radius: 6px; overflow: hidden; }
+.resumen-partidas .card-header, .resumen-partidas .card-footer { background: #f8fafc; padding: .6rem .8rem; }
+.resumen-partidas-tabla { max-height: 240px; overflow: auto; }
+.resumen-partidas thead th { position: sticky; top: 0; z-index: 1; font-size: .75rem; }
+.resumen-partidas td { vertical-align: middle; }
+.resumen-partidas tfoot { background: #f8fafc; }

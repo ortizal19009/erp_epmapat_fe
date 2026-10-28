@@ -1,7 +1,8 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
+import * as L from 'leaflet';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -19,10 +20,194 @@ import { UsrxrutaServiceService } from 'src/app/servicios/usrxruta-service.servi
   templateUrl: './rutas.component.html',
   styleUrls: ['./rutas.component.css'],
 })
-export class RutasComponent implements OnInit {
-  filtro: string;
+export class RutasComponent implements OnInit, OnDestroy {
+  filtro = '';
+  filtroEstado: 'todas' | 'activas' | 'inactivas' | 'sinEstado' = 'todas';
+
+  get rutasPorEstado(): any[] {
+    return (this._rutas ?? []).filter((ruta: any) =>
+      this.filtroEstado === 'todas' ||
+      (this.filtroEstado === 'activas' && ruta.estado === true) ||
+      (this.filtroEstado === 'inactivas' && ruta.estado === false) ||
+      (this.filtroEstado === 'sinEstado' && ruta.estado == null)
+    );
+  }
+
+  cambiarEstado() {
+    if (this.rutaSeleccionada && !this.rutasPorEstado.some(r => r.idruta === this.rutaSeleccionada.idruta)) {
+      clearTimeout(this.busquedaTimer);
+      this.detalleSubscription?.unsubscribe();
+      this.destruirMapa();
+      this.rutaSeleccionada = null;
+    }
+  }
+
+  cargandoRutas = false;
+  errorRutas = '';
+  tabDetalle: 'abonados' | 'mapa' = 'abonados';
+  cargandoDetalle = false;
+  errorDetalle = '';
+  paginaAbonados = 0;
+  tamanoPagina = 20;
+  filtroAbonados = '';
+  private busquedaTimer?: ReturnType<typeof setTimeout>;
+  private mapaResize?: ResizeObserver;
+
+  buscarAbonados() {
+    clearTimeout(this.busquedaTimer);
+    this.detalleSubscription?.unsubscribe();
+    this.cargandoDetalle = true;
+    this.busquedaTimer = setTimeout(() => this.cargarAbonados(0), 350);
+  }
+
+  cambiarTamanoPagina() {
+    clearTimeout(this.busquedaTimer);
+    this.cargarAbonados(0);
+  }
+
+  totalPaginas = 0;
+  totalAbonados = 0;
+  private detalleSubscription?: Subscription;
+  cuentasMapa: any[] = [];
+  cuentasSinCoordenadas = 0;
+  private mapa?: L.Map;
+  private mapasCache = new Map<number, any[]>();
+
+  @ViewChild('mapaCuentas') set mapaCuentas(elemento: ElementRef<HTMLDivElement> | undefined) {
+    this.destruirMapa();
+    if (!elemento) return;
+    const puntosValidos = this.cuentasMapa.map(c => this.parseCoordenadas(c.geolocalizacion)).filter((c): c is L.LatLngTuple => c !== null);
+    const mapa = L.map(elemento.nativeElement, { zoomAnimation: false, markerZoomAnimation: false })
+      .setView(puntosValidos[0] ?? [0.811, -77.718], 16);
+    this.mapa = mapa;
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap', maxZoom: 19
+    }).addTo(mapa);
+    const puntos: L.LatLngTuple[] = [];
+    for (const cuenta of this.cuentasMapa) {
+      const coords = this.parseCoordenadas(cuenta.geolocalizacion);
+      if (!coords) continue;
+      puntos.push(coords);
+      const popup = document.createElement('div');
+      const titulo = document.createElement('strong');
+      titulo.textContent = `Cuenta ${cuenta.idabonado}`;
+      popup.append(titulo, document.createElement('br'),
+        document.createTextNode(cuenta.nombre || 'Sin nombre'), document.createElement('br'),
+        document.createTextNode(cuenta.direccion || 'Sin direccion'));
+      const icono = L.divIcon({
+        className: 'cuenta-marcador',
+        html: '<span style="display:block;width:18px;height:18px;background:#007bff;border:3px solid white;border-radius:50%;box-shadow:0 1px 5px #333"></span>',
+        iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -10]
+      });
+      L.marker(coords, { icon: icono, title: `Cuenta ${cuenta.idabonado}`, keyboard: true })
+        .bindTooltip(`Cuenta ${cuenta.idabonado}`).bindPopup(popup).addTo(mapa);
+    }
+    const ajustarMapa = () => {
+      if (this.mapa !== mapa || !elemento.nativeElement.clientWidth) return;
+      mapa.invalidateSize({ animate: false });
+      if (puntos.length) mapa.fitBounds(L.latLngBounds(puntos), { padding: [25, 25], maxZoom: 18, animate: false });
+    };
+    this.mapaResize = new ResizeObserver(ajustarMapa);
+    this.mapaResize.observe(elemento.nativeElement);
+    requestAnimationFrame(ajustarMapa);
+  }
+
+  private destruirMapa() {
+    this.mapaResize?.disconnect();
+    this.mapaResize = undefined;
+    this.mapa?.remove();
+    this.mapa = undefined;
+  }
+
+  parseCoordenadas(valor: any): L.LatLngTuple | null {
+    try {
+      const coords = typeof valor === 'string' ? JSON.parse(valor) : valor;
+      if (!Array.isArray(coords) || coords.length !== 2) return null;
+      if (coords.some(v => v === null || typeof v === 'boolean' || String(v).trim() === '')) return null;
+      const lat = Number(coords[0]), lng = Number(coords[1]);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180 || (lat === 0 && lng === 0)) return null;
+      return [lat, lng];
+    } catch { return null; }
+  }
+  private paginasCache = new Map<string, any>();
+
+  ngOnDestroy(): void {
+    clearTimeout(this.busquedaTimer);
+    this.detalleSubscription?.unsubscribe();
+    this.destruirMapa();
+    this.cerrarVistaPreviaPdf();
+  }
+
+  seleccionarRuta(ruta: any) {
+    if (this.rutaSeleccionada?.idruta === ruta.idruta) return;
+    clearTimeout(this.busquedaTimer);
+    this.filtroAbonados = "";
+    this.detalleSubscription?.unsubscribe();
+    this.destruirMapa();
+    this.rutaSeleccionada = ruta;
+    this._abonados = [];
+    this.cuentasMapa = [];
+    this.cuentasSinCoordenadas = 0;
+    this.tabDetalle = 'abonados';
+    this.totalAbonados = 0;
+    this.totalPaginas = 0;
+    this.cargarAbonados(0);
+  }
+
+  cambiarTab(tab: 'abonados' | 'mapa') {
+    if (this.tabDetalle === tab) return;
+    clearTimeout(this.busquedaTimer);
+    this.tabDetalle = tab;
+    this.detalleSubscription?.unsubscribe();
+    this.destruirMapa();
+    this.errorDetalle = '';
+    if (tab === 'abonados') this.cargarAbonados(this.paginaAbonados);
+    else this.cargarMapa();
+  }
+
+  cargarAbonados(pagina: number) {
+    const id = this.rutaSeleccionada.idruta;
+    const key = `${id}:${pagina}:${this.tamanoPagina}:${this.filtroAbonados.trim()}`;
+    this.detalleSubscription?.unsubscribe();
+    this.paginaAbonados = pagina;
+    this.errorDetalle = '';
+    const aplicar = (datos: any) => {
+      this._abonados = datos.content ?? [];
+      this.totalAbonados = datos.totalElements ?? 0;
+      this.totalPaginas = datos.totalPages ?? 0;
+      this.cargandoDetalle = false;
+    };
+    if (this.paginasCache.has(key)) { aplicar(this.paginasCache.get(key)); return; }
+    this.cargandoDetalle = true;
+    this.detalleSubscription = this.s_abonado.getAbonadosByRutaPageable(id, pagina, this.tamanoPagina, this.filtroAbonados).subscribe({
+      next: datos => { this.paginasCache.set(key, datos); aplicar(datos); },
+      error: () => { this.cargandoDetalle = false; this.errorDetalle = 'No se pudieron cargar los abonados.'; }
+    });
+  }
+
+  cargarMapa() {
+    const id = this.rutaSeleccionada.idruta;
+    this.detalleSubscription?.unsubscribe();
+    this.errorDetalle = '';
+    const aplicar = (cuentas: any[]) => {
+      this.cuentasMapa = cuentas;
+      this.cuentasSinCoordenadas = cuentas.filter(c => !this.parseCoordenadas(c.geolocalizacion)).length;
+      this.cargandoDetalle = false;
+    };
+    if (this.mapasCache.has(id)) { aplicar(this.mapasCache.get(id)!); return; }
+    this.cargandoDetalle = true;
+    this.detalleSubscription = this.rutService.getCuentasMapa(id).subscribe({
+      next: cuentas => { this.mapasCache.set(id, cuentas); aplicar(cuentas); },
+      error: () => { this.cargandoDetalle = false; this.errorDetalle = 'No se pudieron cargar las cuentas del mapa.'; }
+    });
+  }
+
+  reintentarDetalle() {
+    if (this.tabDetalle === 'abonados') this.cargarAbonados(this.paginaAbonados);
+    else this.cargarMapa();
+  }
+
   _rutas: any;
-  _deudasRuta: any;
   _abonados: any;
   ruta: any;
   rutaSeleccionada: any = null;
@@ -89,33 +274,82 @@ export class RutasComponent implements OnInit {
   }
 
   public listaRutas() {
-    this.rutService.getListaRutas().subscribe({
-      next: (rutas) => (this._rutas = rutas),
-      error: (err) => console.error(err.error),
+    this.cargandoRutas = true;
+    this.errorRutas = '';
+    this.rutService.getListaRutas(true).subscribe({
+      next: rutas => { this._rutas = rutas; this.cargandoRutas = false; },
+      error: () => { this.errorRutas = 'No se pudieron cargar las rutas.'; this.cargandoRutas = false; }
     });
   }
 
   onCellClick(event: any, ruta: Rutas) {
-    this.rutaSeleccionada = ruta;
-    const tagName = event.target.tagName;
-    if (tagName === 'TD') {
-      //  sessionStorage.setItem('codparToAuxgasto', presupue.codpar.toString());
-      //  sessionStorage.setItem('nomparToAuxiliar', presupue.nompar.toString());
-      //  sessionStorage.setItem('iniciaToAuxiliar', presupue.inicia.toString());
-      //  this.router.navigate(['aux-gasto']);
+    this.seleccionarRuta(ruta);
+  }
+
+  abrirDetalleCuenta(idabonado: number) {
+    if (!idabonado || idabonado <= 0) return;
+    sessionStorage.setItem('idabonadoToFactura', String(idabonado));
+    this.router.navigate(['detalles-abonado']);
+  }
+
+  confirmarEliminarRuta(ruta: Rutas) {
+    if (window.confirm(`Eliminar la ruta ${ruta.codigo} - ${ruta.descripcion}?`)) {
+      this.eliminarRuta(ruta.idruta);
     }
   }
 
   eliminarRuta(idruta: number) {
     this.rutService.deleteRuta(idruta).subscribe({
-      next: (datos) => this.listaRutas(),
+      next: () => {
+        if (this.rutaSeleccionada?.idruta === idruta) {
+          clearTimeout(this.busquedaTimer);
+          this.detalleSubscription?.unsubscribe();
+          this.destruirMapa();
+          this.rutaSeleccionada = null;
+        }
+        this.paginasCache.clear();
+        this.mapasCache.clear();
+        this.listaRutas();
+      },
       error: (err) => console.error(err.error),
     });
   }
 
+  menuRuta: any = null;
+  menuRutaTop = 0;
+  menuRutaLeft = 0;
+
+  alternarMenuRuta(event: MouseEvent, ruta: any) {
+    event.stopPropagation();
+    if (this.menuRuta?.idruta === ruta.idruta) { this.cerrarMenuRuta(); return; }
+    const boton = event.currentTarget as HTMLElement;
+    const rect = boton.getBoundingClientRect();
+    const ancho = Math.min(230, window.innerWidth - 16);
+    const alto = 150;
+    this.menuRutaLeft = Math.max(8, Math.min(rect.right - ancho, window.innerWidth - ancho - 8));
+    this.menuRutaTop = rect.bottom + alto < window.innerHeight
+      ? rect.bottom + 4 : Math.max(8, rect.top - alto);
+    this.menuRuta = ruta;
+  }
+
+  @HostListener('document:click')
+  @HostListener('document:keydown.escape')
+  @HostListener('window:resize')
+  @HostListener('window:scroll')
+  cerrarMenuRuta() { this.menuRuta = null; }
+
+  ejecutarAccionRuta(accion: 'editar' | 'info' | 'eliminar') {
+    const ruta = this.menuRuta;
+    this.cerrarMenuRuta();
+    if (!ruta) return;
+    if (accion === 'editar') this.modificarRuta(ruta);
+    else if (accion === 'info') this.seleccionarRuta(ruta);
+    else this.confirmarEliminarRuta(ruta);
+  }
+
   modificarRuta(ruta: Rutas) {
     localStorage.setItem('idruta', ruta.idruta.toString());
-    this.router.navigate(['modificar-rutas']);
+    this.router.navigate(['editar-ruta', ruta.idruta]);
   }
 
   mostrarDatos(ruta: Rutas) {
@@ -129,28 +363,6 @@ export class RutasComponent implements OnInit {
     sessionStorage.setItem('idrutaToInfo', idruta.toString());
     this.router.navigate(['info-ruta']);
   }
-  async getDeudasOfRuta(idruta: number) {
-    this.loading.showLoading();
-    this._deudasRuta = [];
-    try {
-      const datos = await this.rutService.getDeudaOfCuentasByIdrutas(idruta);
-      this._deudasRuta = this.normalizarDeudasRuta(datos);
-    } catch (error) {
-      console.error(error);
-      this._deudasRuta = [];
-    } finally {
-      this.loading.hideLoading();
-    }
-  }
-  getAbonadosByRuta(idruta: number) {
-    this.loading.showLoading();
-    this.s_abonado.getByIdrutaAsync(idruta).then((abonados: any) => {
-      console.log(abonados);
-      this._abonados = abonados;
-      this.loading.hideLoading();
-    });
-  }
-
   async generarReporteRuta() {
     if (!this.rutaSeleccionada?.idruta) {
       return;
@@ -182,16 +394,6 @@ export class RutasComponent implements OnInit {
     } finally {
       this.exportandoReporte = false;
     }
-  }
-
-  private normalizarDeudasRuta(datos: any): any[] {
-    return (Array.isArray(datos) ? datos : []).map((item: any) => ({
-      ...item,
-      subtotal: Number(item?.subtotal ?? 0),
-      total_interes: Number(item?.total_interes ?? 0),
-      total_final: Number(item?.total_final ?? 0),
-      total_facturas: Number(item?.total_facturas ?? 0),
-    }));
   }
 
   descargarPdfPreview() {

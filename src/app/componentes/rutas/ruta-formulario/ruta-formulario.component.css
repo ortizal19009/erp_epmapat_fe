@@ -1,0 +1,3 @@
+.seleccion-cuentas { max-height: 160px; overflow: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+.seleccion-cuentas .btn { font-size: .75rem; }
+fieldset { min-width: 0; border: 0; padding: 0; margin: 0; }

@@ -18,3 +18,24 @@
   color: white;
   cursor: pointer;
 }
+
+.rutas-lista { max-height: 72vh; overflow-y: auto; }
+.rutas-lista thead { position: sticky; top: 0; z-index: 1; }
+.ruta-panel { position: sticky; top: 1rem; }
+.ruta-datos { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: .5rem 1rem; align-items: center; }
+.ruta-tabla { max-height: 52vh; overflow-y: auto; }
+.fila.table-info { background: #d1ecf1; color: #0c5460; box-shadow: inset 3px 0 #117a8b; }
+.fila:focus-visible { outline: 2px solid #117a8b; outline-offset: -2px; }
+@media (max-width: 991px) { .ruta-panel { position: static; } .rutas-lista { max-height: 40vh; } }
+
+.mapa-cuentas { height: 460px; width: 100%; border-radius: 6px; z-index: 0; }
+
+.ruta-datos > div { white-space: nowrap; }
+.ruta-tabla td, .ruta-tabla th { vertical-align: middle; }
+.ruta-tabla .btn-sm { padding: .125rem .35rem; font-size: inherit; }
+@media (max-width: 575px) {
+  .ruta-datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.ruta-menu-acciones { position: fixed; z-index: 2000; width: min(230px, calc(100vw - 16px)); margin: 0; box-shadow: 0 4px 16px rgba(0,0,0,.18); }
+.ruta-menu-acciones .dropdown-item { font-size: .8rem; padding: .45rem 1rem; }

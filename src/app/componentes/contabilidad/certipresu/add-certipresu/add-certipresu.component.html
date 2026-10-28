@@ -12,6 +12,9 @@
    <div class="container-fluid">
       <div class="row justify-content-center">
          <div class="card card-body col-sm-6 detalle sombra">
+            <div *ngIf="cargandoPeriodo" class="small text-muted mb-2" role="status">Consultando per&iacute;odo presupuestario...</div>
+            <div *ngIf="errorPeriodo" class="alert alert-warning small py-2" role="alert">{{ errorPeriodo }} <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargarPeriodo()">Reintentar</button></div>
+            <small *ngIf="periodoPresupuestario" class="text-muted d-block mb-2">Per&iacute;odo presupuestario vigente: <strong>{{ periodoPresupuestario }}</strong></small>
             <form [formGroup]="formCertipresu">
                <div class="row">
 
@@ -56,7 +59,7 @@
                         </div>
                         <div *ngIf="f['fecha'].errors['añoinvalido']"
                            class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
-                           <strong>Ups!</strong> El Período (año) es incorrecto
+                           <strong>Ups!</strong> La fecha debe pertenecer al per&iacute;odo presupuestario {{ periodoPresupuestario }}.
                         </div>
                      </div>
                   </div>
@@ -147,7 +150,7 @@
 
                <div class="mt-3 text-center">
                   <button type="submit" class="btn btn-success btn-sm mx-1" (click)="onSubmit()"
-                     [disabled]="!formCertipresu.valid">
+                     [disabled]="!formCertipresu.valid || cargandoPeriodo || !periodoPresupuestario">
                      <i class="fa fa-check-circle"></i> Aceptar</button>
                   <button type="button" class="btn btn-outline-success mx-1 btn-sm" (click)="regresar()"><i
                         class="fa fa-times-circle"></i> Cancelar

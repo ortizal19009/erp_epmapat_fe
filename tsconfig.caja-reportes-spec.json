@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/servicios/caja-reporte-excel.spec.ts",
+    "src/app/componentes/caja/info-caja/imp-info-cajas/imp-info-cajas.component.spec.ts",
+    "src/app/componentes/caja/imp-cajas/imp-cajas.component.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

@@ -1,190 +1,114 @@
-<!-- CABECERA -->
-<!-- CABECERA (1 SOLO RENGLÓN) -->
-<div class="content mt-1 pt-1 pl-0">
-  <div class="container-fluid">
-    <div class="row m-0 px-2 py-2 align-items-center cabecera border sombra flex-nowrap">
-
-      <!-- TÍTULO -->
-      <div class="col-auto pr-2">
-        <h6 class="m-0 font-weight-bold text-truncate" style="max-width: 320px;">
-          {{ titulo }}
-        </h6>
+<div class="content px-2 pt-2">
+  <div class="gestion-hero cabecera">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <h4 class="mb-1 font-weight-bold"><i class="bi bi-cash-stack mr-2" aria-hidden="true"></i>Mora Medidores</h4>
+        <small>Consulta de valores pendientes y selecci&oacute;n de cuentas por ruta.</small>
       </div>
-
-      <!-- FILTRO TEXTO -->
-      <div class="col-auto pr-2">
-        <div class="input-group input-group-sm" style="width: 260px;">
-          <div class="input-group-prepend">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-          </div>
-          <input type="text"
-                 class="form-control text-center"
-                 placeholder="Cuenta/cliente/cédula..."
-                 [(ngModel)]="filterTerm"
-                 (ngModelChange)="applyFilters()" />
-        </div>
-      </div>
-
-      <!-- DEUDAS MIN -->
-      <div class="col-auto pr-2">
-        <div class="input-group input-group-sm" style="width: 160px;">
-          <div class="input-group-prepend">
-            <span class="input-group-text">Deudas</span>
-          </div>
-          <input type="number"
-                 class="form-control text-center"
-                 placeholder="Min"
-                 [(ngModel)]="deudasMin"
-                 (ngModelChange)="applyFilters()"
-                 min="0" />
-        </div>
-      </div>
-
-      <!-- DEUDAS MAX + LIMPIAR -->
-      <div class="col-auto pr-2">
-        <div class="input-group input-group-sm" style="width: 180px;">
-          <input type="number"
-                 class="form-control text-center"
-                 placeholder="Max"
-                 [(ngModel)]="deudasMax"
-                 (ngModelChange)="applyFilters()"
-                 min="0" />
-          <div class="input-group-append">
-            <button class="btn btn-outline-light"
-                    type="button"
-                    (click)="clearFilters()"
-                    [disabled]="!filterTerm && deudasMin==null && deudasMax==null"
-                    title="Limpiar filtros">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- CONTADOR (se empuja al centro/derecha sin romper línea) -->
-      <div class="col text-right pr-2">
-        <small class="text-white-50 d-block text-truncate">
-          Mostrando: <b class="text-white">{{ datosCuentasFiltradas.length }}</b>
-          de <b class="text-white">{{ datosCuentas.length }}</b>
-        </small>
-      </div>
-
-      <!-- IMPRIMIR -->
-      <div class="col-auto pr-2">
-        <button class="btn btn-sm btn-success"
-                [disabled]="selectedCount === 0"
-                (click)="procesarSeleccionados()"
-                data-toggle="modal"
-                data-target="#impSeleccionados">
-          <i class="bi bi-printer"></i>
-          <span class="d-none d-lg-inline">Imprimir</span>
-          ({{ selectedCount }})
+      <div class="col-md-5 text-right">
+        <button type="button" class="btn btn-light btn-sm mr-1" [disabled]="selectedCount === 0 || cargandoCuentas" (click)="procesarSeleccionados()" data-toggle="modal" data-target="#impSeleccionados">
+          <i class="bi bi-printer mr-1" aria-hidden="true"></i>Imprimir seleccionados ({{ selectedCount }})
         </button>
+        <button type="button" class="btn btn-outline-light btn-sm" [routerLink]="['/suspensiones']" title="Volver a Suspensiones"><i class="bi bi-arrow-left mr-1" aria-hidden="true"></i>Volver</button>
       </div>
-
-      <!-- REGRESAR -->
-      <div class="col-auto text-right">
-        <button class="bg-transparent border-0 p-0" [routerLink]="['/suspensiones']" title="Regresar">
-          <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-        </button>
-      </div>
-
+    </div>
+    <div class="gestion-resumen">
+      <span><i class="bi bi-signpost-2 mr-1" aria-hidden="true"></i>{{ _ruta ? _ruta.codigo + ' - ' + _ruta.descripcion : 'Seleccione una ruta' }}</span>
+      <span><strong>{{ datosCuentas.length }}</strong> cuentas consultadas</span>
+      <span><strong>{{ datosCuentasFiltradas.length }}</strong> coincidencias</span>
+      <span><strong>{{ selectedCount }}</strong> seleccionadas</span>
     </div>
   </div>
-</div>
 
-<!-- TABLA -->
-<div class="container-fluid mt-3">
-  <div class="card sombra">
-    <div class="card-body table-responsive">
+  <div class="gestion-filtros">
+    <div class="row align-items-end">
+      <div class="col-lg-3 mb-2">
+        <label for="rutaMoraMedidores" class="col-form-label col-form-label-sm py-0 mb-1">Ruta</label>
+        <div class="input-group input-group-sm">
+          <select id="rutaMoraMedidores" class="form-control form-control-sm" [ngModel]="idrutaSeleccionada" (ngModelChange)="seleccionarRuta($event)" [disabled]="cargandoRutas">
+            <option [ngValue]="null">Seleccione una ruta</option>
+            <option *ngFor="let ruta of rutas" [ngValue]="ruta.idruta">{{ ruta.codigo }} - {{ ruta.descripcion }}{{ ruta.estado === false ? ' (Inactiva)' : '' }}</option>
+          </select>
+          <div class="input-group-append"><button type="button" class="btn btn-outline-secondary" (click)="listarRutas()" [disabled]="cargandoRutas" title="Actualizar rutas" aria-label="Actualizar rutas"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i></button></div>
+        </div>
+      </div>
+      <div class="col-lg-4 mb-2">
+        <label for="buscarMora" class="col-form-label col-form-label-sm py-0 mb-1">Buscar cuenta</label>
+        <input id="buscarMora" type="search" class="form-control form-control-sm" placeholder="Cuenta, cliente o identificaci&oacute;n" [(ngModel)]="filterTerm" (ngModelChange)="applyFilters()" [disabled]="!idrutaSeleccionada || cargandoCuentas">
+      </div>
+      <div class="col-5 col-lg-2 mb-2">
+        <label for="moraMinima" class="col-form-label col-form-label-sm py-0 mb-1">Facturas m&iacute;n.</label>
+        <input id="moraMinima" type="number" min="0" class="form-control form-control-sm" placeholder="Desde" [(ngModel)]="deudasMin" (ngModelChange)="applyFilters()" [disabled]="!idrutaSeleccionada || cargandoCuentas">
+      </div>
+      <div class="col-5 col-lg-2 mb-2">
+        <label for="moraMaxima" class="col-form-label col-form-label-sm py-0 mb-1">Facturas m&aacute;x.</label>
+        <input id="moraMaxima" type="number" min="0" class="form-control form-control-sm" placeholder="Hasta" [(ngModel)]="deudasMax" (ngModelChange)="applyFilters()" [disabled]="!idrutaSeleccionada || cargandoCuentas">
+      </div>
+      <div class="col-2 col-lg-1 mb-2 d-flex justify-content-end">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clearFilters()" [disabled]="!filterTerm && deudasMin == null && deudasMax == null" title="Limpiar filtros" aria-label="Limpiar filtros"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <small class="text-muted">El rango filtra la cantidad de facturas pendientes de cada cuenta.</small>
+  </div>
 
-      <table id="datos-ruta" class="table table-sm table-hover table-striped table-bordered">
-        <thead class="text-center">
+  <div *ngIf="errorRutas" class="alert alert-warning small py-2" role="alert">{{ errorRutas }}</div>
+  <div *ngIf="errorCuentas" class="alert alert-danger small py-2" role="alert">{{ errorCuentas }} <button type="button" class="btn btn-sm btn-outline-danger ml-2" (click)="getDatosCuenta(idrutaSeleccionada!)">Reintentar</button></div>
+
+  <div class="card gestion-card mb-3">
+    <div class="card-header d-flex flex-wrap align-items-center">
+      <strong><i class="bi bi-list-ul mr-1" aria-hidden="true"></i>Cuentas con valores pendientes</strong>
+      <span class="badge badge-light ml-auto">{{ datosCuentasFiltradas.length }} / {{ datosCuentas.length }}</span>
+    </div>
+    <div class="gestion-tabla table-responsive">
+      <table id="datos-ruta" class="table table-hover table-sm modern-table mb-0">
+        <thead>
           <tr>
-            <th style="width:40px">
-              <input type="checkbox" [checked]="isAllFilteredSelected" (change)="toggleSelectAllFiltered($event)" />
-            </th>
-            <th style="width:60px">#</th>
-
-            <th style="cursor:pointer" (click)="sortData('cuenta')">
-              Cuenta
-              <i class="bi" [ngClass]="getSortIcon('cuenta')" *ngIf="currentSortColumn==='cuenta'"></i>
-            </th>
-
+            <th class="text-center mora-seleccion"><input type="checkbox" [checked]="isAllFilteredSelected" (change)="toggleSelectAllFiltered($event)" [disabled]="!datosCuentasFiltradas.length || cargandoCuentas" aria-label="Seleccionar todas las cuentas filtradas"></th>
+            <th class="text-center">#</th>
+            <th><button type="button" class="mora-orden" (click)="sortData('cuenta')">Cuenta <i class="bi" [ngClass]="getSortIcon('cuenta')" aria-hidden="true"></i></button></th>
             <th>Cliente</th>
-            <th>Identificación</th>
-
-            <th style="cursor:pointer" (click)="sortData('num_facturas')">
-              Deudas
-              <i class="bi" [ngClass]="getSortIcon('num_facturas')" *ngIf="currentSortColumn==='num_facturas'"></i>
-            </th>
-
-            <th>Subtotal</th>
-            <th>Interés</th>
-
-            <th style="cursor:pointer" (click)="sortData('total')">
-              Total
-              <i class="bi" [ngClass]="getSortIcon('total')" *ngIf="currentSortColumn==='total'"></i>
-            </th>
-
+            <th>Identificaci&oacute;n</th>
+            <th class="text-center"><button type="button" class="mora-orden" (click)="sortData('num_facturas')">Facturas pendientes <i class="bi" [ngClass]="getSortIcon('num_facturas')" aria-hidden="true"></i></button></th>
+            <th class="text-right">Subtotal USD</th>
+            <th class="text-right">Inter&eacute;s USD</th>
+            <th class="text-right"><button type="button" class="mora-orden" (click)="sortData('total')">Total USD <i class="bi" [ngClass]="getSortIcon('total')" aria-hidden="true"></i></button></th>
           </tr>
         </thead>
-
         <tbody>
-          <tr *ngFor="let abonado of datosCuentasFiltradas; let i = index">
-            <!-- SELECT -->
-            <td class="text-center align-middle">
-              <input type="checkbox" [(ngModel)]="rowUI[abonado.cuenta].selected"
-                (ngModelChange)="onRowSelectedChange(abonado)" />
-            </td>
-
-            <td class="text-center">{{ i + 1 }}</td>
-            <td class="text-center">{{ abonado.cuenta }}</td>
-            <td>{{ abonado.nombre }}</td>
-            <td class="text-center">{{ abonado.cedula }}</td>
-            <td class="text-center">{{ abonado.num_facturas }}</td>
-            <td class="text-right">{{ abonado.subtotal?.toFixed(2) }}</td>
-            <td class="text-right">{{ abonado.intereses?.toFixed(2) }}</td>
-            <td class="text-right font-weight-bold">{{ abonado.total?.toFixed(2) }}</td>
-          </tr>
+          <tr *ngIf="cargandoCuentas"><td colspan="9" class="gestion-vacio" role="status"><span class="spinner-border spinner-border-sm mr-2"></span>Cargando valores pendientes...</td></tr>
+          <ng-container *ngIf="!cargandoCuentas">
+            <tr *ngFor="let abonado of datosCuentasFiltradas; let i = index" [class.mora-fila-seleccionada]="rowUI[abonado.cuenta].selected">
+              <td class="text-center"><input type="checkbox" [(ngModel)]="rowUI[abonado.cuenta].selected" (ngModelChange)="onRowSelectedChange(abonado)" [attr.aria-label]="'Seleccionar cuenta ' + abonado.cuenta"></td>
+              <td class="text-center text-muted">{{ i + 1 }}</td>
+              <td class="font-weight-bold text-nowrap">{{ abonado.cuenta }}</td>
+              <td class="mora-cliente">{{ abonado.nombre }}</td>
+              <td class="text-nowrap">{{ abonado.cedula }}</td>
+              <td class="text-center"><span class="badge badge-light border">{{ abonado.num_facturas }}</span></td>
+              <td class="text-right text-nowrap">{{ abonado.subtotal | number:'1.2-2' }}</td>
+              <td class="text-right text-nowrap">{{ abonado.intereses | number:'1.2-2' }}</td>
+              <td class="text-right text-nowrap font-weight-bold mora-valor">{{ abonado.total | number:'1.2-2' }}</td>
+            </tr>
+            <tr *ngIf="!datosCuentasFiltradas.length"><td colspan="9" class="gestion-vacio"><i class="bi d-block h4 mb-2" [ngClass]="idrutaSeleccionada ? 'bi-inbox' : 'bi-signpost-2'" aria-hidden="true"></i>{{ idrutaSeleccionada ? 'No hay cuentas que coincidan con los filtros de esta ruta.' : 'Seleccione una ruta para consultar las cuentas con valores pendientes.' }}</td></tr>
+          </ng-container>
         </tbody>
       </table>
-
-      <!-- RESUMEN -->
-      <div class="mt-2 d-flex justify-content-between align-items-center flex-wrap">
-        <div class="text-muted">
-          Seleccionados: <b>{{ selectedCount }}</b>
-        </div>
-
-        <button class="btn btn-sm btn-outline-secondary" (click)="clearSelection()" [disabled]="selectedCount === 0">
-          Limpiar selección
-        </button>
-      </div>
-
+    </div>
+    <div class="card-footer bg-white d-flex flex-wrap align-items-center justify-content-between small">
+      <span class="text-muted"><strong>{{ selectedCount }}</strong> cuenta(s) seleccionada(s) para imprimir</span>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clearSelection()" [disabled]="selectedCount === 0"><i class="bi bi-x-circle mr-1" aria-hidden="true"></i>Limpiar selecci&oacute;n</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: PDF de seleccionados -->
-<div class="modal fade" id="impSeleccionados" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog modal-xl">
+<div class="modal fade" id="impSeleccionados" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="tituloImpresionMora" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Impresión - Seleccionados</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+      <div class="modal-header cabecera">
+        <h5 class="modal-title" id="tituloImpresionMora"><i class="bi bi-printer mr-2" aria-hidden="true"></i>Impresi&oacute;n de cuentas seleccionadas</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
       </div>
-
-      <div class="modal-body">
-        <iframe id="pdfSeleccionadosViewer" src="" width="100%" height="600px"></iframe>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-sm btn-success" data-dismiss="modal">Cerrar</button>
-      </div>
-
+      <div class="modal-body p-2"><iframe id="pdfSeleccionadosViewer" src="" title="Vista previa del reporte de mora" width="100%" height="600" class="mora-pdf"></iframe></div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Cerrar</button></div>
     </div>
   </div>
 </div>

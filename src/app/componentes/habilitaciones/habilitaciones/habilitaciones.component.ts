@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { SuspensionesReporteService } from 'src/app/servicios/suspensiones-reporte.service';
+import { Ng2SearchPipe } from 'ng2-search-filter';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
@@ -18,15 +20,20 @@ import { SuspensionesService } from 'src/app/servicios/suspensiones.service';
 @Component({
   selector: 'app-habilitaciones',
   templateUrl: './habilitaciones.component.html',
-  styleUrls: ['./habilitaciones.component.css'],
+  styleUrls: ['./habilitaciones.component.css', '../../../compartida/gestion-cuentas.css'],
 })
-export class HabilitacionesComponent implements OnInit {
+export class HabilitacionesComponent implements OnInit, OnDestroy {
   titulo: string = 'Habilitaciones';
   f_buscarxFechas: FormGroup;
   f_habilitacion: FormGroup;
   today: string = this.formatDateForInput(new Date());
   startOfYear: string = this.formatDateForInput(new Date(new Date().getFullYear(), 0, 1));
-  filterTerm: string;
+  filterTerm = '';
+  cargandoListado = false;
+  errorListado = '';
+  exportandoReporte = false;
+  rangoReporte = '';
+  private listadoSubscription?: Subscription;
   suspensiones: any[] = [];
   abonado: Abonados = new Abonados();
   cliente: Clientes = new Clientes();
@@ -58,7 +65,8 @@ export class HabilitacionesComponent implements OnInit {
     private s_documentos: DocumentosService,
     private facturaService: FacturaService,
     private coloresService: ColoresService,
-    private authService: AutorizaService
+    private authService: AutorizaService,
+    private reportes: SuspensionesReporteService = new SuspensionesReporteService()
   ) {}
 
   ngOnInit(): void {
@@ -104,41 +112,55 @@ export class HabilitacionesComponent implements OnInit {
     if (detalle) detalle.classList.add('nuevoBG2');
   }
 
-  listarSuspensiones() {
-    this.suspeService.getListaHabilitaciones().subscribe({
-      next: (datos) => {
+  async descargarReporte(formato: 'pdf' | 'xlsx') {
+    if (this.cargandoListado || this.exportandoReporte) return;
+    const registros = new Ng2SearchPipe().transform(this.suspensiones, this.filterTerm);
+    if (!registros.length) { this.errorListado = 'No hay registros para exportar.'; return; }
+    this.exportandoReporte = true; this.errorListado = '';
+    try {
+      await this.reportes.descargar(this.titulo, registros,
+        this.rangoReporte + (this.filterTerm ? ' | Busqueda: ' + this.filterTerm : ''), formato);
+    } catch { this.errorListado = 'No se pudo generar el reporte. Intente nuevamente.'; }
+    finally { this.exportandoReporte = false; }
+  }
+
+  ngOnDestroy() { this.listadoSubscription?.unsubscribe(); }
+
+  get totalCuentasVinculadas(): number {
+    return this.suspensiones.reduce((total, registro) => total + (registro.cuentasAfectadas?.length ?? registro.total ?? 0), 0);
+  }
+
+  abrirCuenta(cuenta: number) {
+    sessionStorage.setItem('idabonadoToFactura', String(cuenta));
+    this.router.navigate(['detalles-abonado']);
+  }
+
+  private cargarListado(consulta: Observable<any>, rango = 'Ultimos registros') {
+    this.listadoSubscription?.unsubscribe();
+    this.cargandoListado = true;
+    this.errorListado = '';
+    this.listadoSubscription = consulta.subscribe({
+      next: datos => {
         this.suspensiones = Array.isArray(datos) ? datos : [];
+        this.rangoReporte = rango;
+        this.cargandoListado = false;
+
       },
-      error: (e) => console.error(e),
+      error: () => { this.cargandoListado = false; this.errorListado = 'No se pudo cargar el listado. Intente nuevamente.'; }
     });
   }
 
+  listarSuspensiones() {
+    this.cargarListado(this.suspeService.getListaHabilitaciones());
+  }
+
   buscarxFecha() {
-    if (
-      this.f_buscarxFechas.value.desde !== null &&
-      this.f_buscarxFechas.value.hasta !== null
-    ) {
-      this.suspeService
-        .getListaHabilitacionesByFecha(
-          this.f_buscarxFechas.value.desde,
-          this.f_buscarxFechas.value.hasta
-        )
-        .subscribe({
-          next: (datos) => {
-            this.suspensiones = Array.isArray(datos) ? datos : [];
-          },
-          error: (e) => console.error(e),
-        });
-    } else {
-      let i_desde = document.getElementById('desde') as HTMLInputElement;
-      let i_hasta = document.getElementById('hasta') as HTMLInputElement;
-      i_desde.style.border = '#F54500 1px solid';
-      i_hasta.style.border = '#F54500 1px solid';
-      setTimeout(() => {
-        i_desde.style.border = '';
-        i_hasta.style.border = '';
-      }, 2000);
+    const { desde, hasta } = this.f_buscarxFechas.value;
+    if (!desde || !hasta || desde > hasta) {
+      this.errorListado = 'Seleccione un rango de fechas valido (desde no puede ser posterior a hasta).';
+      return;
     }
+    this.cargarListado(this.suspeService.getListaHabilitacionesByFecha(desde, hasta), `Desde ${desde} hasta ${hasta}`);
   }
 
   listarDocumentos() {
@@ -368,6 +390,12 @@ export class HabilitacionesComponent implements OnInit {
       (_estado: { valor: number }) => _estado.valor == estado
     );
     return es?.estado;
+  }
+
+  info(registro: any) {
+    sessionStorage.setItem('idsuspensionToInfo', String(registro.idsuspension));
+    sessionStorage.setItem('retornoSuspensionesInfo', 'habilitaciones');
+    this.router.navigate(['info-suspension']);
   }
 
   getTipoLabel(tipo: number): string {

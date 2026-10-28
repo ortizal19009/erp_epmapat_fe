@@ -254,8 +254,8 @@ export class ControlEmisionesComponent implements OnInit {
         : '<div>Todas las rutas de la emisión están completas.</div>';
 
       const result = await Swal.fire({
-        icon: rutasPendientes.length ? 'warning' : 'success',
-        title: rutasPendientes.length ? 'Apertura incompleta' : 'Apertura validada',
+        icon: rutasPendientes.length || resp?.aperturaCompleta === false ? 'warning' : 'success',
+        title: rutasPendientes.length || resp?.aperturaCompleta === false ? 'Apertura incompleta' : 'Apertura validada',
         html:
           `<div class="text-left">` +
           `<p><strong>Emisión:</strong> ${resp?.emision ?? ''}</p>` +
@@ -265,6 +265,7 @@ export class ControlEmisionesComponent implements OnInit {
           `<p><strong>Lecturas esperadas:</strong> ${resp?.totalLecturasEsperadas ?? 0}</p>` +
           `<p><strong>Lecturas existentes:</strong> ${resp?.lecturasExistentes ?? 0}</p>` +
           `<p><strong>Lecturas pendientes:</strong> ${resp?.lecturasPendientes ?? 0}</p>` +
+          `<p><strong>Cuentas sin ruta:</strong> ${(resp?.cuentasSinRuta ?? []).join(', ') || 'Ninguna'}</p>` +
           `<hr>` +
           detalleRutas +
           `</div>`,

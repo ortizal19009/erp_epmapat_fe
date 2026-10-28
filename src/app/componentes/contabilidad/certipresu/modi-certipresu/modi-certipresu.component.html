@@ -51,7 +51,7 @@
                            <label class="input-group-text" for="fecha">Fecha<sup class="green">*</sup></label>
                         </div>
                         <input type="date" class="form-control text-center" formControlName="fecha"
-                           [readonly]="partidas > 0" [tabIndex]="partidas > 0">
+                           [readonly]="partidas > 0 || cargandoPartidas || !!errorPartidas" [tabIndex]="partidas > 0">
                      </div>
                      <div *ngIf="authService.msgval && f['fecha'].errors && f['fecha'].touched">
                         <div *ngIf="f['fecha'].errors['required']"
@@ -96,7 +96,7 @@
                      <input type="text" class="form-control form-control-sm" formControlName="idbene" list="benList"
                         (input)="onBeneficiarioSelected($event); benefixNombre($event)"
                         [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched, 'is-valid': f['idbene'].valid, '': f['idbene'].untouched}"
-                        [readonly]="partidas > 0" [tabIndex]="partidas > 0">
+                        [readonly]="partidas > 0 || cargandoPartidas || !!errorPartidas" [tabIndex]="partidas > 0">
                      <datalist role="listbox" id="benList">
                         <option *ngFor="let beneficiario of beneficiarios" value={{beneficiario.nomben}}>
                            {{ beneficiario.idgrupo.nomgru}}</option>
@@ -141,7 +141,7 @@
 
                <div class="mt-3 text-center">
                   <button type="button" class="btn btn-success btn-sm" (click)="onSubmit()"
-                     [disabled]="formCertipresu.pristine || !formCertipresu.valid">
+                     [disabled]="formCertipresu.pristine || !formCertipresu.valid || cargandoPartidas || !!errorPartidas">
                      <i class="fa fa-check-circle"></i> Aceptar
                   </button>
                   <button type="button" class="btn btn-outline-success mx-3 btn-sm" (click)="retornar()">
@@ -153,3 +153,17 @@
       </div>
    </div>
 </div>
+<div class="content"><div class="container-fluid"><div class="row justify-content-center"><div class="col-sm-7 px-0">
+   <div class="card sombra resumen-partidas mb-3">
+      <div class="card-header d-flex align-items-center"><strong><i class="bi bi-list-ul mr-2" aria-hidden="true"></i>Partidas registradas</strong><span class="badge badge-light border ml-auto">{{ partidasRegistradas.length }} partidas</span></div>
+      <div *ngIf="cargandoPartidas" class="text-center text-muted small p-3" role="status"><span class="spinner-border spinner-border-sm mr-2" aria-hidden="true"></span>Cargando partidas...</div>
+      <div *ngIf="errorPartidas" class="alert alert-warning small m-2" role="alert">{{ errorPartidas }} <button type="button" class="btn btn-outline-secondary btn-sm ml-2" (click)="cargarPartidas()">Reintentar</button></div>
+      <div *ngIf="!cargandoPartidas && !errorPartidas" class="table-responsive resumen-partidas-tabla"><table class="table table-hover table-sm mb-0">
+         <thead class="cabecera"><tr><th>Partida</th><th>Denominaci&oacute;n</th><th>Descripci&oacute;n</th><th>Estado</th><th class="text-right">Valor</th></tr></thead><tbody>
+         <tr *ngFor="let partida of partidasRegistradas"><td class="text-nowrap">{{ partida.intpre.codpar || 'Sin codigo' }}</td><td>{{ partida.intpre.nompar || 'Sin denominacion' }}</td><td>{{ partida.descripcion || '-' }}</td><td class="text-nowrap"><span class="badge" [ngClass]="partida.swreinte===1 ? 'badge-warning' : 'badge-light'">{{ partida.swreinte===1 ? 'Con reintegro' : 'Registrada' }}</span></td><td class="text-right text-nowrap">{{ partida.valor | number:'1.2-2' }}</td></tr>
+         <tr *ngIf="!partidasRegistradas.length"><td colspan="5" class="text-center text-muted py-3">Esta certificaci&oacute;n no tiene partidas registradas.</td></tr>
+         </tbody><tfoot *ngIf="partidasRegistradas.length"><tr class="font-weight-bold"><td colspan="4">Total registrado</td><td class="text-right text-nowrap">{{ totalPartidas | number:'1.2-2' }}</td></tr></tfoot>
+      </table></div>
+      <div class="card-footer text-right" *ngIf="!cargandoPartidas && !errorPartidas && partidasRegistradas.length"><button type="button" class="btn btn-outline-primary btn-sm" (click)="verPartidas()"><i class="bi bi-box-arrow-up-right mr-1" aria-hidden="true"></i>Ver detalle de partidas</button></div>
+   </div>
+</div></div></div></div>

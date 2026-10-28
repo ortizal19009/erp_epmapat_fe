@@ -1,9 +1,9 @@
+import { descargarExcelCaja, excelListaCajas, excelPlanillasCaja, excelResumenCaja, excelTransferenciasCaja, excelTransferenciasGlobalCaja, resumenCaja, totalPlanillaCaja, totalTransferenciaCaja, sumarCaja, monedaCaja } from 'src/app/servicios/caja-reporte-excel';
 ﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as ExcelJS from 'exceljs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
@@ -31,6 +31,7 @@ export class ImpInfoCajasComponent implements OnInit {
   _formacobro: any[] = [];
   total: number;
   sumtotaltarifa: number;
+  errorReporte = '';
   swbotones: boolean = false;
   swcalculando: boolean = false;
   txtcalculando = 'Calculando';
@@ -57,7 +58,7 @@ export class ImpInfoCajasComponent implements OnInit {
 
     const strfecha = this.getLocalDate();
     this.formImprimir = this.fb.group({
-      reporte: '4',
+      reporte: '1',
       extencion: 'pdf',
       d_fecha: strfecha,
       h_fecha: strfecha,
@@ -96,46 +97,12 @@ export class ImpInfoCajasComponent implements OnInit {
     );
   }
 
-  private construirFilasResumenExcel(
-    fechaCorte: string
-  ): { filas: any[][]; totalGeneral: number } {
-    const filas: any[][] = [];
-    const agregarBloque = (titulo: string, rubros: any[]) => {
-      let subtotal = 0;
-      let iva = 0;
-      filas.push(['', titulo, '']);
-      (rubros || []).forEach((rubro: any) => {
-        if (!this.debeMostrarRubroResumen(rubro)) {
-          return;
-        }
-        const totalRecaudado = this.getTotalResumen(rubro);
-        subtotal = this.redondearMoneda(subtotal + totalRecaudado);
-        iva = this.redondearMoneda(iva + this.calcularIvaResumen(rubro, fechaCorte));
-        filas.push([rubro[0], rubro[1], totalRecaudado]);
-      });
-      if (iva > 0) {
-        filas.push(['', 'IVA', +iva.toFixed(2)]);
-      }
-      const totalBloque = this.redondearMoneda(subtotal + iva);
-      filas.push(['', 'SUBTOTAL', totalBloque]);
-      return totalBloque;
-    };
-
-    const totalActual = agregarBloque('PERÍODO ACTUAL', this._cobradas);
-    const totalAnterior = agregarBloque('PERÍODOS ANTERIORES', this._rubrosanterior);
-    const totalGeneral = this.redondearMoneda(
-      (totalActual || 0) + (totalAnterior || 0)
-    );
-    filas.push(['', 'TOTAL', totalGeneral]);
-    return { filas, totalGeneral };
+  private construirFilasResumenExcel(fecha: string) {
+    return resumenCaja(this._cobradas, this._rubrosanterior, fecha);
   }
 
   private getTotalFacturaExportacion(factura: any): number {
-    const total = Number(factura?.total ?? 0);
-    const iva = Number(factura?.iva ?? 0);
-    return this.redondearMoneda(
-      (Number.isFinite(total) ? total : 0) + (Number.isFinite(iva) ? iva : 0)
-    );
+    return totalPlanillaCaja(factura);
   }
 
   private redondearMoneda(valor: number): number {
@@ -192,6 +159,8 @@ export class ImpInfoCajasComponent implements OnInit {
 
   impriexpor() {
     this.swimprimir = !this.swimprimir;
+    this.formImprimir.patchValue({ extencion: this.swimprimir ? 'pdf' : 'xlsx' });
+    this.swbotones = false;
   }
 
   //Recupera los datos de cada reporte
@@ -199,6 +168,8 @@ export class ImpInfoCajasComponent implements OnInit {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
     const elementoExistente = document.getElementById('idembed');
 
+    this.errorReporte = '';
+    this.opcreporte = Number(this.formImprimir.value.reporte);
     this.swbotones = true;
     this.swcalculando = true;
     let d_fecha = this.formImprimir.value.d_fecha;
@@ -206,7 +177,8 @@ export class ImpInfoCajasComponent implements OnInit {
     let hhasta = this.formImprimir.value.hhasta;
     let hdesde = this.formImprimir.value.hdesde;
     let f: Date = new Date();
-    let hasta = `${f.getFullYear() - 1}-12-31`;
+    let hasta = `${Number(d_fecha.slice(0,4)) - 1}-12-31`;
+    try {
     switch (this.opcreporte) {
       case 1: // Recaudación diaria - Resumen
         /*         this.facService
@@ -249,16 +221,13 @@ export class ImpInfoCajasComponent implements OnInit {
               if (this.swimprimir) this.txtcalculando = 'Mostrar';
               else this.txtcalculando = 'Descargar';
             } catch (error) {
-              console.error(
-                'Error al obtener los totales por Forma de cobro:',
-                error
-              );
+              throw error;
             }
           } catch (error) {
-            console.error('Error al obtener los Rubros anteriores:', error);
+            throw error;
           }
         } catch (error) {
-          console.error('Error al obtener los Rubros actuales:', error);
+          throw error;
         }
         break;
       case 2: // Recaudación diaria - Planillas
@@ -281,15 +250,15 @@ export class ImpInfoCajasComponent implements OnInit {
               h_fecha,
               recaudador
             );
-          this._cobradas.map(async (item: any) => {
+          await Promise.all(this._cobradas.map(async (item: any) => {
             item[0] = await this.facService.getByIdAsync(item.idfactura);
-          });
+          }));
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
           else this.txtcalculando = 'Descargar';
         } catch (error) {
-          console.error('Error al obtener las Planillas:', error);
+          throw error;
         }
         break;
       case 3:
@@ -388,6 +357,14 @@ export class ImpInfoCajasComponent implements OnInit {
       default:
         break;
     }
+    } catch (error) {
+      this.errorReporte = 'No se pudo cargar el reporte. Intente nuevamente.';
+      this.swbotones = false;
+    } finally {
+      this.swcalculando = false;
+      this.s_loading.hideLoading();
+    }
+
   }
 
   //Muestra cada reporte
@@ -399,11 +376,11 @@ export class ImpInfoCajasComponent implements OnInit {
     switch (this.opcreporte) {
       case 1: // Recaudación diaria - Resumen
         if (this.swimprimir) this.imprimirResumen();
-        else this.exportarResumen();
+        else await this.exportarResumen();
         break;
       case 2: // Recaudación diaria - Planillas
         if (this.swimprimir) this.imprimirFacturas();
-        else this.exportarFacturas();
+        else await this.exportarFacturas();
         break;
       case 3:
         this.otrapagina = null;
@@ -440,87 +417,13 @@ export class ImpInfoCajasComponent implements OnInit {
       doc
     );
 
-    const datos: any = [];
-    this.total = 0;
-    let kont = 1; //Para la fila de la segunda Tabla
-    let suma: number = 0;
-    datos.push(['', 'PERÍODO ACTUAL']);
+    const resumen = this.construirFilasResumenExcel(this.formImprimir.value.d_fecha);
+    const datos: any = resumen.filas.map(fila => fila.map((v, i) => i === 2 && typeof v === 'number' ? formatNumber(v) : v));
+    this.total = resumen.totalGeneral;
     let i = 0;
-    let iva1 = 0;
-    this._cobradas.forEach((item: any) => {
-      let totalRecaudado = this.getTotalResumen(this._cobradas[i]);
-      if (!this.debeMostrarRubroResumen(this._cobradas[i])) {
-        i++;
-        return;
-      }
-      if (
-        this._cobradas[i][3] === true &&
-        this.formImprimir.value.d_fecha >= '2024-04-01' === true
-      ) {
-        iva1 += totalRecaudado * 0.15;
-      }
-      if (
-        this._cobradas[i][3] === true &&
-        this.formImprimir.value.d_fecha < '2024-04-01' === true
-      ) {
-        iva1 += totalRecaudado * 0.12;
-      }
-      datos.push([
-        this._cobradas[i][0],
-        this._cobradas[i][1],
-        formatNumber(totalRecaudado),
-      ]);
-      suma += totalRecaudado;
-      i++;
-    });
-    kont = kont + i;
-    this.total += +suma.toFixed(2) + +iva1.toFixed(2);
-    datos.push(['', 'IVA', formatNumber(iva1)]);
-    datos.push([
-      '',
-      'SUBTOTAL',
-      formatNumber(+suma.toFixed(2) + +iva1.toFixed(2)),
-    ]);
-
-    let suma1 = 0;
-    i = 0;
-    let iva2 = 0;
-    datos.push(['', 'PERÍODOS ANTERIORES']);
-    this._rubrosanterior.forEach(() => {
-      if (this.debeMostrarRubroResumen(this._rubrosanterior[i])) {
-        let totalRecaudado = this.getTotalResumen(this._rubrosanterior[i]);
-        // Math.round(this._rubrosanterior[i][2] * 100) / 100;
-        if (
-          this._rubrosanterior[i][3] === true &&
-          this.formImprimir.value.d_fecha >= '2024-04-01' === true
-        ) {
-          iva2 += totalRecaudado * 0.15;
-        }
-        if (
-          this._rubrosanterior[i][3] === true &&
-          this.formImprimir.value.d_fecha < '2024-04-01' === true
-        ) {
-          iva2 += totalRecaudado * 0.12;
-        }
-        datos.push([
-          this._rubrosanterior[i][0],
-          this._rubrosanterior[i][1],
-          formatNumber(totalRecaudado),
-        ]);
-        suma1 += totalRecaudado;
-      }
-      i++;
-    });
-    kont = kont + i;
-    this.total += suma1 + +iva2.toFixed(2);
-    datos.push(['', 'IVA', formatNumber(iva2)]);
-    datos.push([
-      '',
-      'SUBTOTAL',
-      formatNumber(+suma1.toFixed(2) + +iva2.toFixed(2)),
-    ]);
-
-    datos.push(['', 'TOTAL', formatNumber(this.total)]);
+    const iva1 = resumen.ivaActual;
+    const iva2 = resumen.ivaAnterior;
+    let kont = datos.length;
 
     autoTable(doc, {
       head: [['Nro.', 'Rubro', 'Total Recaudado']],
@@ -561,7 +464,7 @@ export class ImpInfoCajasComponent implements OnInit {
     this._formacobro.forEach(() => {
       let totalRecaudado = Math.round(this._formacobro[i][1] * 100) / 100;
       formascobro.push([this._formacobro[i][0], formatNumber(totalRecaudado)]);
-      suma2 += totalRecaudado;
+      suma2 = sumarCaja([suma2,totalRecaudado]);
       i++;
     });
     formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
@@ -653,8 +556,7 @@ export class ImpInfoCajasComponent implements OnInit {
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro =
-        +this._cobradas[i].total + +this._cobradas[i].iva;
+      let totalPorFormaCobro = totalPlanillaCaja(this._cobradas[i]);
 
       //  Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
       datos.push([
@@ -665,7 +567,7 @@ export class ImpInfoCajasComponent implements OnInit {
         this._cobradas[i][0].idcliente.nombre,
         formatNumber(totalPorFormaCobro),
       ]);
-      suma += totalPorFormaCobro;
+      suma = sumarCaja([suma, totalPorFormaCobro]);
       i++;
     });
     this.sumtotaltarifa = suma;
@@ -858,365 +760,23 @@ export class ImpInfoCajasComponent implements OnInit {
     doc.setTextColor(0, 0, 0);
   }
 
-  exportarResumen() {
-    this.nombrearchivo = this.formImprimir.value.nombrearchivo;
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(this.nombrearchivo);
-    let titulo = 'Resumen recaudación diaria ' + this.formImprimir.value.fecha;
-    worksheet.addRow(['', titulo]);
-    // Celda B1
-    const cellB1 = worksheet.getCell('B1');
-    const customStyle = {
-      font: {
-        name: 'Times New Roman',
-        bold: true,
-        size: 14,
-        color: { argb: '002060' },
-      },
-    };
-    cellB1.font = customStyle.font;
-
-    // Aplicar el estilo personalizado a los Títulos
-    const cellC1 = worksheet.getCell('C1');
-    cellC1.font = customStyle.font;
-
-    worksheet.addRow([]);
-    const cabecera = ['Nro', 'Rubro', 'Total Recaudado'];
-    const headerRowCell = worksheet.addRow(cabecera);
-    headerRowCell.eachCell((cell) => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: '002060' },
-      };
-      cell.font = {
-        bold: true,
-        name: 'Times New Roman',
-        color: { argb: 'FFFFFF' },
-      };
-    });
-
-    const { filas } = this.construirFilasResumenExcel(
-      this.formImprimir.value.d_fecha
-    );
-    filas.forEach((row) => worksheet.addRow(row));
-
-    // Establece el ancho de las columnas
-    const anchoConfig = [
-      { columnIndex: 1, widthInChars: 10 },
-      { columnIndex: 2, widthInChars: 58 },
-      { columnIndex: 3, widthInChars: 18 },
-    ];
-    anchoConfig.forEach((config) => {
-      worksheet.getColumn(config.columnIndex).width = config.widthInChars;
-    });
-
-    // Columnas centradas
-    const columnsToCenter = [1];
-    columnsToCenter.forEach((columnIndex) => {
-      worksheet
-        .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell) => {
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        });
-    });
-    // Columnas a la derecha
-    let columnsToRigth = [3];
-    columnsToRigth.forEach((columnIndex) => {
-      worksheet
-        .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell) => {
-          cell.alignment = { horizontal: 'right' };
-        });
-    });
-
-    // Formato numérico
-    // const numeroStyle = { numFmt: '#,##0' };
-    // const columnsToFormat = [1 ];
-    // for (let i = 4; i <= this._cobradas.length + 2; i++) {
-    //    columnsToFormat.forEach(columnIndex => {
-    //       const cell = worksheet.getCell(i, columnIndex);
-    //       cell.style = numeroStyle;
-    //    });
-    // }
-
-    // Formato numérico con decimales
-    const numeroStyle1 = { numFmt: '#,##0.00' };
-    const columnsToFormat1 = [3];
-    const ultimaFila = worksheet.rowCount;
-    for (let i = 4; i <= ultimaFila; i++) {
-      columnsToFormat1.forEach((columnIndex) => {
-        const cell = worksheet.getCell(i, columnIndex);
-        cell.style = numeroStyle1;
-      });
-    }
-
-    for (let i = 4; i <= ultimaFila; i++) {
-      const label = worksheet.getCell(`B${i}`).value;
-      if (
-        label === 'PERÍODO ACTUAL' ||
-        label === 'PERÍODOS ANTERIORES' ||
-        label === 'IVA' ||
-        label === 'SUBTOTAL' ||
-        label === 'TOTAL'
-      ) {
-        worksheet.getRow(i).font = { bold: true };
-      }
-    }
-
-    // Crea el archivo Excel
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      const url = window.URL.createObjectURL(blob);
-
-      // Crear un enlace para descargar el archivo
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${this.nombrearchivo}.xlsx`; // Usa el nombre proporcionado por el usuario
-      a.click();
-
-      window.URL.revokeObjectURL(url); // Libera recursos
-    });
+  private async guardarExcel(crearLibro: () => import('exceljs').Workbook) {
+    this.errorReporte = '';
+    this.swcalculando = true; this.swbotones = true;
+    try { await descargarExcelCaja(crearLibro(), this.formImprimir.value.nombrearchivo); }
+    catch { this.errorReporte = 'No se pudo descargar el archivo Excel. Intente nuevamente.'; }
+    finally { this.swcalculando = false; this.swbotones = false; }
   }
 
-  exportarFacturas() {
-    this.nombrearchivo = this.formImprimir.value.nombrearchivo;
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(this.nombrearchivo);
-    let titulo =
-      'Recaudación diaria - Planillas ' + this.formImprimir.value.fecha;
-    worksheet.addRow(['', '', '', titulo]);
-    // Celda D1
-    const cellD1 = worksheet.getCell('D1');
-    const customStyle = {
-      font: {
-        name: 'Times New Roman',
-        bold: true,
-        size: 14,
-        color: { argb: '002060' },
-      },
-    };
-    cellD1.font = customStyle.font;
-
-    // Aplicar el estilo personalizado a los Títulos
-    const cellC1 = worksheet.getCell('C1');
-    cellC1.font = customStyle.font;
-
-    worksheet.addRow([]);
-    const cabecera = [
-      'Nro',
-      'Fecha',
-      'Nro.Factura',
-      'Cliente',
-      'Sección',
-      'Forma cobro',
-      'Valor',
-    ];
-    const headerRowCell = worksheet.addRow(cabecera);
-    headerRowCell.eachCell((cell) => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: '002060' },
-      };
-      cell.font = {
-        bold: true,
-        name: 'Times New Roman',
-        color: { argb: 'FFFFFF' },
-      };
-    });
-
-    // Agrega los datos a la hoja de cálculo
-    this._cobradas.forEach((factura: any) => {
-      const total = this.getTotalFacturaExportacion(factura);
-      const row = [
-        factura[0].idfactura,
-        factura[0].feccrea,
-        factura[0].nrofactura,
-        factura[0].idcliente.nombre,
-        factura[0].idmodulo.descripcion,
-        factura[0].formapago,
-        total,
-      ];
-      // const row = [factura[0].idfactura, total ];
-      worksheet.addRow(row);
-    });
-
-    //Coloca la fila del Total
-    worksheet.addRow(['', 'TOTAL']);
-    const filaTotal = worksheet.rowCount;
-    worksheet.getCell('B' + filaTotal.toString()).font = {
-      bold: true,
-    };
-
-    let celdaG = worksheet.getCell('G' + filaTotal.toString());
-    celdaG.numFmt = '#,##0.00';
-    celdaG.font = { bold: true };
-    celdaG.value = {
-      formula: 'SUM(G4:' + 'G' + (filaTotal - 1).toString() + ')',
-      result: 0,
-      sharedFormula: undefined,
-      date1904: false,
-    };
-
-    // Establece el ancho de las columnas
-    const anchoConfig = [
-      { columnIndex: 1, widthInChars: 12 },
-      { columnIndex: 2, widthInChars: 16 },
-      { columnIndex: 3, widthInChars: 20 },
-      { columnIndex: 4, widthInChars: 50 },
-      { columnIndex: 5, widthInChars: 25 },
-      { columnIndex: 6, widthInChars: 18 },
-      { columnIndex: 7, widthInChars: 18 },
-    ];
-    anchoConfig.forEach((config) => {
-      worksheet.getColumn(config.columnIndex).width = config.widthInChars;
-    });
-
-    // Columnas centradas
-    const columnsToCenter = [1, 2, 3, 6];
-    columnsToCenter.forEach((columnIndex) => {
-      worksheet
-        .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell) => {
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        });
-    });
-    // Columnas a la derecha
-    let columnsToRigth = [7];
-    columnsToRigth.forEach((columnIndex) => {
-      worksheet
-        .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell) => {
-          cell.alignment = { horizontal: 'right' };
-        });
-    });
-
-    // Formato numérico
-    // const numeroStyle = { numFmt: '#,##0' };
-    // const columnsToFormat = [1 ];
-    // for (let i = 4; i <= this._cobradas.length + 2; i++) {
-    //    columnsToFormat.forEach(columnIndex => {
-    //       const cell = worksheet.getCell(i, columnIndex);
-    //       cell.style = numeroStyle;
-    //    });
-    // }
-
-    // Formato numérico con decimales
-    const numeroStyle1 = { numFmt: '#,##0.00' };
-    const columnsToFormat1 = [7];
-    for (let i = 4; i <= this._cobradas.length + 3; i++) {
-      columnsToFormat1.forEach((columnIndex) => {
-        const cell = worksheet.getCell(i, columnIndex);
-        cell.style = numeroStyle1;
-      });
-    }
-
-    // Crea el archivo Excel
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      const url = window.URL.createObjectURL(blob);
-
-      // Crear un enlace para descargar el archivo
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${this.nombrearchivo}.xlsx`; // Usa el nombre proporcionado por el usuario
-      a.click();
-
-      window.URL.revokeObjectURL(url); // Libera recursos
-    });
+  async exportarResumen() {
+    await this.guardarExcel(() => excelResumenCaja(this._cobradas, this._rubrosanterior, this._formacobro,
+      this.formImprimir.value.d_fecha, 'Resumen recaudacion ' + this.formImprimir.value.d_fecha + ' - ' + this.formImprimir.value.h_fecha + ' | ' + (this.nombreUsuario || '')));
   }
-
-  exportarCajas() {
-    this.nombrearchivo = this.formImprimir.value.nombrearchivo;
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(this.nombrearchivo);
-
-    worksheet.addRow(['Lista de cajas']);
-
-    // Celda A1
-    const cellA1 = worksheet.getCell('A1');
-    const customStyle = {
-      font: {
-        name: 'Times New Roman',
-        bold: true,
-        size: 14,
-        color: { argb: '002060' },
-      },
-    };
-    cellA1.font = customStyle.font;
-
-    // Aplicar el estilo personalizado a los Títulos
-    // const cellC1 = worksheet.getCell('C1');
-    // cellC1.font = customStyle.font;
-
-    worksheet.addRow([]);
-
-    const cabecera = ['Establecimiento', 'Pto.Emisión', 'Nombre'];
-    const headerRowCell = worksheet.addRow(cabecera);
-    headerRowCell.eachCell((cell) => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: '002060' },
-      };
-      cell.font = {
-        bold: true,
-        name: 'Times New Roman',
-        color: { argb: 'FFFFFF' },
-      };
-    });
-
-    // Agrega los datos a la hoja de cálculo
-    this._cajas.forEach((caja: any) => {
-      const row = [
-        caja.codigo,
-        caja.idptoemision_ptoemision.establecimiento,
-        caja.descripcion,
-      ];
-      worksheet.addRow(row);
-    });
-
-    // Establece el ancho de las columnas
-    const anchoConfig = [
-      { columnIndex: 1, widthInChars: 20 },
-      { columnIndex: 2, widthInChars: 20 },
-      { columnIndex: 3, widthInChars: 50 },
-    ];
-    anchoConfig.forEach((config) => {
-      worksheet.getColumn(config.columnIndex).width = config.widthInChars;
-    });
-
-    // Columnas centradas
-    const columnsToCenter = [1, 2];
-    columnsToCenter.forEach((columnIndex) => {
-      worksheet
-        .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell) => {
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        });
-    });
-
-    // Crea el archivo Excel
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      const url = window.URL.createObjectURL(blob);
-
-      // Crear un enlace para descargar el archivo
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${this.nombrearchivo}.xlsx`; // Usa el nombre proporcionado por el usuario
-      a.click();
-
-      window.URL.revokeObjectURL(url); // Libera recursos
-    });
+  async exportarFacturas() {
+    await this.guardarExcel(() => excelPlanillasCaja(this._cobradas,
+      'Recaudacion - Planillas ' + this.formImprimir.value.d_fecha + ' - ' + this.formImprimir.value.h_fecha + ' | ' + (this.nombreUsuario || '')));
   }
+  async exportarCajas() { await this.guardarExcel(() => excelListaCajas(this._cajas)); }
 
   retornar() {
     this.router.navigate(['/cajas']);

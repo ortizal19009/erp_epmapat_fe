@@ -1,3 +1,6 @@
+import { RutaFormularioComponent } from './componentes/rutas/ruta-formulario/ruta-formulario.component';
+import { RutaHistorialComponent } from './componentes/rutas/ruta-historial/ruta-historial.component';
+import { ReportesCarteraComponent } from './componentes/coactivas/reportes-cartera/reportes-cartera.component';
 import { RouterModule } from '@angular/router';
 
 import { NgModule } from '@angular/core';
@@ -538,6 +541,8 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     PrmisoxtramiComponent,
     ImpTransaciComponent,
     ModificarRutasComponent,
+    RutaFormularioComponent,
+    RutaHistorialComponent,
     RegrecaudaComponent,
     ImpNiifcuentasComponent,
     IfinanComponent,
@@ -614,6 +619,7 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     RutasmorasComponent,
     LoadingComponent,
     ImpClienteComponent,
+    ReportesCarteraComponent,
     ImpInfoclienteComponent,
     ImpEmisionesComponent,
     FormatFechaPipe,

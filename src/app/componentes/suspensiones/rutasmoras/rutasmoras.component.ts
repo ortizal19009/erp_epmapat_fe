@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Facturas } from 'src/app/modelos/facturas.model';
@@ -20,12 +21,22 @@ interface RowUIState {
 @Component({
   selector: 'app-rutasmoras',
   templateUrl: './rutasmoras.component.html',
-  styleUrls: ['./rutasmoras.component.css'],
+  styleUrls: ['./rutasmoras.component.css', '../../../compartida/gestion-cuentas.css'],
 })
-export class RutasmorasComponent implements OnInit {
+export class RutasmorasComponent implements OnInit, OnDestroy {
   _ruta: any;
   today: number = Date.now();
-  titulo: string = 'Valores pendientes Abonados de la ruta ';
+  titulo = 'Mora Medidores';
+  rutas: any[] = [];
+  idrutaSeleccionada: number | null = null;
+  cargandoRutas = false;
+  cargandoCuentas = false;
+  errorRutas = '';
+  errorCuentas = '';
+  private parametros?: Subscription;
+  private listadoRutas?: Subscription;
+  private detalleRuta?: Subscription;
+  private solicitudCuentas = 0;
   datosCuentas: any[] = [];
   datosCuentasFiltradas: any[] = [];
 
@@ -54,7 +65,8 @@ export class RutasmorasComponent implements OnInit {
     private s_pdf: PdfService,
     private s_rubxfacturas: RubroxfacService,
     private interService: InteresesService,
-    private s_loading: LoadingService
+    private s_loading: LoadingService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -62,9 +74,49 @@ export class RutasmorasComponent implements OnInit {
     const coloresJSON = sessionStorage.getItem('/mora-abonados');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-    const idruta = this.rutaDato.snapshot.paramMap.get('idruta');
-    this.getRuta(+idruta!);
-    this.getDatosCuenta(+idruta!);
+    this.listarRutas();
+    this.parametros = this.rutaDato.paramMap.subscribe(parametros => {
+      const id = Number(parametros.get('idruta'));
+      this.solicitudCuentas++;
+      this.detalleRuta?.unsubscribe();
+      if (this.cargandoCuentas) this.s_loading.hideLoading();
+      this.cargandoCuentas = false;
+      this.idrutaSeleccionada = Number.isFinite(id) && id > 0 ? id : null;
+      this._ruta = null;
+      this.titulo = 'Mora Medidores';
+      this.datosCuentas = [];
+      this.datosCuentasFiltradas = [];
+      this.rowUI = {};
+      this.seleccionados = [];
+      this.selectedCount = 0;
+      this.errorCuentas = '';
+      if (this.idrutaSeleccionada) {
+        this.getRuta(this.idrutaSeleccionada);
+        this.getDatosCuenta(this.idrutaSeleccionada);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.parametros?.unsubscribe();
+    this.listadoRutas?.unsubscribe();
+    this.detalleRuta?.unsubscribe();
+    this.solicitudCuentas++;
+    if (this.cargandoCuentas) this.s_loading.hideLoading();
+  }
+
+  listarRutas() {
+    this.listadoRutas?.unsubscribe();
+    this.cargandoRutas = true;
+    this.errorRutas = '';
+    this.listadoRutas = this.s_ruta.getResumenRutas().subscribe({
+      next: rutas => { this.rutas = rutas; this.cargandoRutas = false; },
+      error: () => { this.errorRutas = 'No se pudieron cargar las rutas.'; this.cargandoRutas = false; }
+    });
+  }
+
+  seleccionarRuta(id: number | null) {
+    this.router.navigate(id ? ['/mora-abonados', id] : ['/mora-abonados']);
   }
 
   colocaColor(colores: any) {
@@ -78,10 +130,10 @@ export class RutasmorasComponent implements OnInit {
   }
 
   getRuta(idruta: number) {
-    this.s_ruta.getByIdruta(idruta).subscribe({
+    this.detalleRuta = this.s_ruta.getByIdruta(idruta).subscribe({
       next: (rutaDatos: any) => {
         this._ruta = rutaDatos;
-        this.titulo += rutaDatos.descripcion;
+        this.titulo = 'Mora Medidores - ' + rutaDatos.descripcion;
       },
       error: (e) => console.error(e),
     });
@@ -91,20 +143,20 @@ export class RutasmorasComponent implements OnInit {
   // DATA
   // =========================
   getDatosCuenta(idruta: number) {
+    const solicitud = ++this.solicitudCuentas;
+    this.cargandoCuentas = true;
+    this.errorCuentas = '';
     this.s_loading.showLoading();
-
     this.s_abonado.DeudasCuentasByRuta(idruta).then((item: any) => {
+      if (solicitud !== this.solicitudCuentas) return;
       this.datosCuentas = Array.isArray(item) ? item : [];
-
-      // init UI
       this.initRowUI(this.datosCuentas);
-
-      // aplicar filtros (y sort si ya hay)
       this.applyFilters();
-
-      this.s_loading.hideLoading();
-    }).catch((e: any) => {
-      console.error(e);
+    }).catch(() => {
+      if (solicitud === this.solicitudCuentas) this.errorCuentas = 'No se pudieron cargar los valores pendientes de la ruta.';
+    }).finally(() => {
+      if (solicitud !== this.solicitudCuentas) return;
+      this.cargandoCuentas = false;
       this.s_loading.hideLoading();
     });
   }

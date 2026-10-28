@@ -1,0 +1,24 @@
+:host { display:block; font-family:inherit; }
+.cabecera { background:var(--bgcolor1, #2c3e50); color:#fff; }
+.gestion-hero { border-radius:8px; padding:16px 18px; margin:0 0 12px; box-shadow:0 3px 10px rgba(35,55,75,.1); }
+.gestion-hero h4 { font-size:1.2rem; }
+.gestion-hero small { opacity:.85; }
+.gestion-resumen { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.gestion-resumen span { background:rgba(255,255,255,.13); padding:4px 10px; border-radius:4px; font-size:.75rem; }
+.gestion-filtros, .gestion-card { border:1px solid #dee5ec; border-radius:8px; background:#fff; box-shadow:0 2px 5px rgba(35,55,75,.04); }
+.gestion-filtros { padding:12px; margin-bottom:12px; }
+.gestion-card .card-header { background:#fff; font-size:.85rem; padding:10px 14px; border-bottom:1px solid #e4e9ef; }
+.gestion-tabla { max-height:65vh; overflow:auto; }
+.modern-table { overflow:visible; border-radius:0; font-size:.78rem; background:#fff; }
+.modern-table thead th { position:sticky; top:0; z-index:1; background:var(--bgcolor1, #2c3e50); color:white; vertical-align:middle; white-space:nowrap; font-size:.7rem; letter-spacing:.02em; text-transform:uppercase; }
+.modern-table td { vertical-align:middle; padding:.45rem .5rem; }
+.modern-table tbody tr:nth-child(even) td { background:#f8fafc; }
+.modern-table tbody tr:hover td { background:#eaf3f8; }
+.cuentas-list { display:flex; flex-wrap:wrap; gap:4px; min-width:150px; max-width:300px; max-height:110px; overflow-y:auto; }
+.cuentas-list .btn, .gestion-tabla .btn-sm { font-size:.73rem; padding:2px 7px; }
+.gestion-observacion { min-width:180px; max-width:340px; white-space:normal; overflow-wrap:anywhere; }
+.gestion-vacio { text-align:center; color:#6c7a89; padding:28px!important; }
+.gestion-datos { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+.gestion-datos small { display:block; color:#6c7a89; margin-bottom:3px; }
+.gestion-estados { display:flex; flex-wrap:wrap; gap:6px; }
+@media(max-width:767px) { .gestion-datos { grid-template-columns:repeat(2,minmax(0,1fr)); } .gestion-hero .text-right { margin-top:10px; text-align:left!important; } }

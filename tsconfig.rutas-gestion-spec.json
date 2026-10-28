@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/componentes/rutas/rutas/rutas-menu.component.spec.ts",
+    "src/app/componentes/rutas/ruta-formulario/ruta-formulario.component.spec.ts",
+    "src/app/servicios/rutas-gestion.service.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

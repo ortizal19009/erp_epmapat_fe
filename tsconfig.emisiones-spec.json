@@ -4,6 +4,8 @@
     "src/app/compartida/write-permission.interceptor.spec.ts",
     "src/app/compartida/read-only-ui.service.spec.ts",
     "src/app/componentes/emisiones/imp-emisiones/imp-emisiones.component.spec.ts",
+    "src/app/servicios/rutasxemision.service.spec.ts",
+    "src/app/componentes/rutas/rutas/rutas.component.spec.ts",
     "src/**/*.d.ts"
   ]
 }

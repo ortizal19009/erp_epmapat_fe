@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
 import { environment } from 'src/environments/environment';
 import { CertipresuCreateDTO } from 'src/app/componentes/contabilidad/certipresu/add-certipresu/add-certipresu.component';
@@ -18,8 +18,15 @@ export class CertipresuService {
 
    constructor(private http: HttpClient) { }
 
-   getDesdeHasta(tipo: number, desdeNum: number, hastaNum: number, desdeFecha: Date, hastaFecha: Date): Observable<Certipresu[]> {
-      return this.http.get<Certipresu[]>(`${baseUrl}?tipo=${tipo}&desdeNum=${desdeNum}&hastaNum=${hastaNum}&desdeFecha=${desdeFecha}&hastaFecha=${hastaFecha}`);
+   getDesdeHasta(tipo: number, desdeNum: number | null, hastaNum: number | null, desdeFecha: Date | string | null, hastaFecha: Date | string | null): Observable<Certipresu[]> {
+      let params = new HttpParams().set('tipo', tipo);
+      const valores = { desdeNum, hastaNum, desdeFecha, hastaFecha };
+      Object.entries(valores).forEach(([nombre, valor]) => {
+         if (valor !== null && valor !== undefined && String(valor).trim() !== '') {
+            params = params.set(nombre, valor instanceof Date ? valor.toISOString().slice(0, 10) : String(valor));
+         }
+      });
+      return this.http.get<Certipresu[]>(baseUrl, { params });
    }
 
    // Ultima Certificacion o Reintegrada

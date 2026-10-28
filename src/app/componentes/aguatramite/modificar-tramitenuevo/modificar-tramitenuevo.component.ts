@@ -186,7 +186,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
          return;
       }
 
-      this.aboService.getByidabonado(id).subscribe({
+      this.aboService.getById(id).subscribe({
          next: (abonado) => {
             if (abonado) {
                this.setAbonado(abonado);
@@ -293,7 +293,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
       try {
          const datos: any = await firstValueFrom(this.traminuevoService.updateTramiteNuevo(payload));
          const abonadoCreado = await this.guardarAbonadoAsync();
-         await this.actualizarAguaTramiteAsync(3);
+         await this.actualizarAguaTramiteAsync(3, abonadoCreado.idabonado);
          let correoError: string | null = null;
          try {
             await this.enviarContratoPorCorreo(
@@ -342,6 +342,14 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    async guardarAbonadoAsync(): Promise<Abonados> {
+      // Reutiliza la cuenta ya creada si se reintenta la finalizacion del mismo tramite.
+      if (Number(this._abonado?.idabonado) > 0) return this._abonado;
+      if (Number(this.aguatramite?.idabonado) > 0) {
+         const existente = await firstValueFrom(this.aboService.getById(this.aguatramite.idabonado!));
+         if (!existente?.idabonado) throw new Error('No se pudo recuperar la cuenta vinculada al tramite.');
+         this._abonado = existente;
+         return existente;
+      }
       if (!this.ruta?.idruta) {
          throw new Error('Debes seleccionar o recuperar la cuenta afectada antes de guardar el trámite.');
       }
@@ -384,6 +392,9 @@ export class ModificarTramitenuevoComponent implements OnInit {
       abonado.municipio = this.v_municipio;
 
       const datos: any = await firstValueFrom(this.aboService.saveAbonado(abonado));
+      if (!Number.isSafeInteger(Number(datos?.idabonado)) || Number(datos.idabonado) <= 0) {
+         throw new Error('El servidor no devolvio el idabonado de la cuenta creada.');
+      }
       this._abonado = datos;
       return datos;
    }
@@ -460,9 +471,17 @@ export class ModificarTramitenuevoComponent implements OnInit {
       this.actualizarAguaTramiteAsync(estado).catch((e) => console.error(e));
    }
 
-   async actualizarAguaTramiteAsync(estado: number): Promise<any> {
+   async actualizarAguaTramiteAsync(estado: number, idabonado?: number): Promise<any> {
+      if (estado === 3) {
+         const cuenta = Number(idabonado ?? this._abonado?.idabonado ?? this.aguatramite.idabonado);
+         if (!Number.isSafeInteger(cuenta) || cuenta <= 0) {
+            throw new Error('No se puede finalizar el tramite sin el idabonado de la cuenta creada.');
+         }
+         this.aguatramite.idabonado = cuenta;
+      }
+      const actualizado = await firstValueFrom(this.aguatramService.updateAguatramite({ ...this.aguatramite, estado }));
       this.aguatramite.estado = estado;
-      return firstValueFrom(this.aguatramService.updateAguatramite(this.aguatramite));
+      return actualizado;
    }
 
    private async confirmarEnvioContrato(correoPorDefecto?: string | null): Promise<string[] | null> {

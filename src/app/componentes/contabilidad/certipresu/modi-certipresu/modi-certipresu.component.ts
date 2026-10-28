@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Partixcerti } from 'src/app/modelos/contabilidad/partixcerti.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BeneficiariosService } from 'src/app/servicios/contabilidad/beneficiarios.service';
@@ -6,7 +7,7 @@ import { CertipresuService } from 'src/app/servicios/contabilidad/certipresu.ser
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, Subscription } from 'rxjs';
 import { PartixcertiService } from 'src/app/servicios/contabilidad/partixcerti.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
@@ -17,7 +18,7 @@ import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
    styleUrls: ['./modi-certipresu.component.css'],
 })
 
-export class ModiCertipresuComponent implements OnInit {
+export class ModiCertipresuComponent implements OnInit, OnDestroy {
 
    formCertipresu: FormGroup;
    idcerti: number;
@@ -29,6 +30,11 @@ export class ModiCertipresuComponent implements OnInit {
    responsables: Beneficiarios[] = [];;
    idbeneres: number | null;
    partidas: number = 0;
+   partidasRegistradas: Partixcerti[] = [];
+   totalPartidas = 0;
+   cargandoPartidas = false;
+   errorPartidas = '';
+   private consultaPartidas?: Subscription;
 
    constructor(private beneService: BeneficiariosService, private router: Router, private fb: FormBuilder,
       private docuService: DocumentosService, private certiService: CertipresuService, public authService: AutorizaService,
@@ -91,15 +97,32 @@ export class ModiCertipresuComponent implements OnInit {
                idbeneres: certi.idbeneres.nomben,
                descripcion: certi.descripcion,
             });
-            this.parxcerService.countByIdcerti(this.idcerti).subscribe({
-               next: partidas => {
-                  this.partidas = partidas;
-               },
-               error: err => { console.error(err.error); this.authService.mostrarError('Error al contar las Partidas', err.error) }
-            });
+            this.cargarPartidas();
          },
          error: err => console.error(err.error)
       });
+   }
+
+   ngOnDestroy() { this.consultaPartidas?.unsubscribe(); }
+
+   cargarPartidas() {
+      this.consultaPartidas?.unsubscribe();
+      this.cargandoPartidas = true; this.errorPartidas = '';
+      this.partidasRegistradas = []; this.totalPartidas = 0;
+      this.consultaPartidas = this.parxcerService.getByIdCerti(this.idcerti).subscribe({
+         next: datos => {
+            this.partidasRegistradas = Array.isArray(datos) ? datos : [];
+            this.partidas = this.partidasRegistradas.length;
+            this.totalPartidas = this.partidasRegistradas.reduce((suma, p) => suma + Math.round((Number(p.valor) || 0) * 100), 0) / 100;
+            this.cargandoPartidas = false;
+         },
+         error: () => { this.cargandoPartidas = false; this.errorPartidas = 'No se pudieron cargar las partidas registradas. Intente nuevamente.'; }
+      });
+   }
+
+   verPartidas() {
+      sessionStorage.setItem('datosToPartixcerti', JSON.stringify({ idcerti: this.idcerti, desdeNum: this.antnumero, hastaNum: this.antnumero }));
+      this.router.navigate(['partixcerti']);
    }
 
    get f() { return this.formCertipresu.controls; }
@@ -133,6 +156,7 @@ export class ModiCertipresuComponent implements OnInit {
    }
 
    onSubmit() {
+      if (this.cargandoPartidas || this.errorPartidas) return;
       const dto: CertipresuUpdateDTO = {};   // Todos los campos opcionales
       if (this.f['numero'].dirty) { dto.numero = this.f['numero'].value; }
       if (this.f['fecha'].dirty) { dto.fecha = this.f['fecha'].value; }

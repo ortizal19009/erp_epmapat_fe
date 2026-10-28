@@ -86,7 +86,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link" [class.disabled]="!canAnyWindowPermission(['suspensiones', 'habilitaciones'], 1)">
+              <a href="#" class="nav-link" [class.disabled]="!canAnyWindowPermission(['suspensiones', 'habilitaciones', 'mora-abonados'], 1)">
                 <i class="fa fa-calculator nav-icon"></i>
                 <p class="text-warning font-weight-bold"> Medidores
                   <i class="right fas fa-angle-right"></i>
@@ -105,6 +105,13 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="fa fa-gift nav-icon"></i>
                     <p class="text-warning"> Habilitaciones</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a routerLink="/mora-abonados" routerLinkActive="active" class="nav-link" [class.disabled]="!canWindowPermission('mora-abonados', 1)">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-cash-stack nav-icon"></i>
+                    <p class="text-warning"> Mora Medidores</p>
                   </a>
                 </li>
 

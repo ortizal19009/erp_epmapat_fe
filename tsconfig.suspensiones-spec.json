@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/servicios/suspensiones-reporte.service.spec.ts",
+    "src/app/componentes/suspensiones/suspensiones/suspensiones.component.spec.ts",
+    "src/app/componentes/suspensiones/detalles-suspensiones/detalles-suspensiones.component.spec.ts",
+    "src/app/servicios/suspensiones.service.spec.ts",
+    "src/app/componentes/suspensiones/rutasmoras/rutasmoras.component.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

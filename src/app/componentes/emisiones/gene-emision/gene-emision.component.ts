@@ -122,9 +122,10 @@ export class GeneEmisionComponent implements OnInit, OnDestroy {
           this.resumenGeneracion =
             `Rutas completas: ${resp.rutasCompletas}/${resp.totalRutasEsperadas}. ` +
             `Lecturas creadas ahora: ${resp.lecturasCreadas}. ` +
-            `Lecturas pendientes: ${resp.lecturasPendientes}.`;
+            `Lecturas pendientes: ${resp.lecturasPendientes}. ` +
+            (resp.cuentasSinRuta?.length ? `Cuentas sin ruta: ${resp.cuentasSinRuta.join(', ')}. Asigne una ruta y vuelva a completar la apertura.` : '');
           this.swgenerando = false;
-          if (resp.lecturasPendientes === 0) {
+          if (resp.lecturasPendientes === 0 && resp.aperturaCompleta !== false) {
             this.regresar();
           }
         },
@@ -419,6 +420,9 @@ interface EmisionGeneracionRuta {
 }
 
 interface EmisionGeneracionResponse {
+  aperturaCompleta?: boolean;
+  cuentasPendientes?: number[];
+  cuentasSinRuta?: number[];
   idemision: number;
   emision: string;
   totalRutasEsperadas: number;

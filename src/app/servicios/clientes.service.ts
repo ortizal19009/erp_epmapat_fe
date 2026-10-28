@@ -14,6 +14,10 @@ const baseUrl = `${apiUrl}/clientes`;
 export class ClientesService {
   constructor(private http: HttpClient) {}
 
+  getReporte(tipo: 'listado' | 'cuentas' | 'pendientes'): Observable<any[]> {
+    return this.http.get<any[]>(`${baseUrl}/reportes/${tipo}`);
+  }
+
   //Busca Clientes por Nombre ó Identificación
   getByNombreIdentifi(nombreIdentifi: String) {
     return this.http.get<Clientes[]>(

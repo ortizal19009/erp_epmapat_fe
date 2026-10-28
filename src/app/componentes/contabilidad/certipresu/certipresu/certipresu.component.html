@@ -6,23 +6,23 @@
             </h5>
          </div>
          <div class="col-sm-7">
-            <form [formGroup]="formBuscar">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
                <div class="row">
 
                   <div class="input-group col-sm-4 pl-1 ">
                      <input type="number" class="form-control form-control-sm text-center" formControlName="desdeNum"
-                        placeholder="Desde" min="1" (change)="changeDesdeHasta()">
+                        placeholder="Nro. desde" aria-label="Numero desde" min="1" step="1" (change)="changeDesdeHasta()">
                      <input type="number" class="form-control form-control-sm text-center" formControlName="hastaNum"
-                        placeholder="Hasta" min="1" (change)="changeDesdeHasta()">
+                        placeholder="Nro. hasta" aria-label="Numero hasta" min="1" step="1" (change)="changeDesdeHasta()">
                   </div>
 
                   <div class="input-group col-sm-5 px-1 ">
-                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha" />
-                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha" aria-label="Fecha desde" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha" aria-label="Fecha hasta" />
                   </div>
 
                   <div class="col-sm-2">
-                     <button class="btn btn-primary btn-sm" (click)="buscar()">
+                     <button type="submit" class="btn btn-primary btn-sm" [disabled]="cargando">
                         <i class="fa fa-search" aria-hidden="true"></i> Buscar
                      </button>
                   </div>
@@ -35,8 +35,9 @@
                <input class="form-control form-control-sm text-center col-sm-11 mb-0" type="text"
                   placeholder="Filtrar..." [(ngModel)]="filtro" (ngModelChange)="changeFiltro()" />
             </div>
-            <button *ngIf="swdesdehasta" class="bg-transparent border-0 mt-0" type="button" (click)="busquedainicial()"
-               data-toggle="tooltip" title="Ultimos">
+            <button type="button" class="btn btn-outline-light btn-sm mr-1" (click)="limpiarFiltros()" [disabled]="cargando" title="Limpiar filtros y mostrar todas" aria-label="Limpiar filtros y mostrar todas"><i class="bi bi-eraser"></i></button>
+            <button [disabled]="cargando" class="bg-transparent border-0 mt-0" type="button" (click)="busquedainicial()"
+               data-toggle="tooltip" title="Ver ultimas certificaciones" aria-label="Ver ultimas certificaciones">
                <i class="bi-skip-end text-white icoRegresar"></i>
             </button>
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
@@ -59,6 +60,7 @@
    </div>
 </div>
 
+<div class="container-fluid mt-2"><div *ngIf="errorListado" class="alert alert-danger small py-2" role="alert">{{ errorListado }}</div><small class="text-muted d-block mb-2">Los campos vac&iacute;os no restringen la b&uacute;squeda. Se combinan los rangos de n&uacute;meros y fechas que completes.</small></div>
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
@@ -77,6 +79,9 @@
                </tr>
             </thead>
             <tbody class="detalle roboto small pad0">
+               <tr *ngIf="cargando"><td colspan="8" class="text-center py-4" role="status"><span class="spinner-border spinner-border-sm mr-2"></span>Cargando certificaciones...</td></tr>
+               <tr *ngIf="!cargando && !errorListado && !(certipresu | filter:filtro)?.length"><td colspan="8" class="text-center text-muted py-4">No hay certificaciones para los filtros seleccionados. Limpia los filtros para consultar todas.</td></tr>
+
                <tr class="fila" *ngFor="let certificacion of certipresu | filter: filtro; let i=index"
                   (click)="onCellClick($event, certificacion)">
                   <td class="text-center"><i *ngIf="certificacion.idcerti == ultIdSelec"

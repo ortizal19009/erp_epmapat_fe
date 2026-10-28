@@ -158,6 +158,30 @@
             "emisiones": {
               "tsConfig": "tsconfig.emisiones-spec.json",
               "scripts": []
+            },
+            "suspensiones": {
+              "tsConfig": "tsconfig.suspensiones-spec.json",
+              "scripts": []
+            },
+            "aguatramite": {
+              "tsConfig": "tsconfig.aguatramite-spec.json",
+              "scripts": []
+            },
+            "clientes-reportes": {
+              "tsConfig": "tsconfig.clientes-reportes-spec.json",
+              "scripts": []
+            },
+            "caja-reportes": {
+              "tsConfig": "tsconfig.caja-reportes-spec.json",
+              "scripts": []
+            },
+            "rutas-gestion": {
+              "tsConfig": "tsconfig.rutas-gestion-spec.json",
+              "scripts": []
+            },
+            "certipresu": {
+              "tsConfig": "tsconfig.certipresu-spec.json",
+              "scripts": []
             }
           }
         }

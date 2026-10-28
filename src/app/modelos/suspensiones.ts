@@ -11,6 +11,8 @@ export class Suspensiones {
   fecha: Date;
   numero: number;
   total: number;
+  cuentasAfectadas?: number[];
+  totalCuentas?: number;
   iddocumento_documentos: Documentos;
   numdoc: string;
   observa: string;

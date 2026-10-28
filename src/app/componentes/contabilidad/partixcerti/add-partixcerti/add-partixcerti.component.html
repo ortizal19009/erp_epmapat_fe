@@ -48,7 +48,7 @@
                {{iCertificacion.numero}}
             </h5>
             <div class="card card-body sombra fondo detalle">
-               <form *ngIf="iCertificacion" [formGroup]="formPartixcerti">
+               <form *ngIf="iCertificacion" [formGroup]="formPartixcerti" (ngSubmit)="guardar()">
                   <div class="row">
 
                      <div class="form-group col-md-12">
@@ -89,6 +89,7 @@
                         </div>
                      </div>
 
+                     <div class="col-12" *ngIf="intpre != null && f['saldo'].value < 0"><div class="alert alert-warning small py-2" role="alert">La partida seleccionada ya tiene saldo disponible negativo antes de ingresar este valor. Revise sus certificaciones y modificaciones presupuestarias.</div></div>
                      <div class="form-group col-md-4">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
@@ -107,6 +108,7 @@
                               class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
                               <strong>Ups!</strong> No puede ser menor a 0.01
                            </div>
+                           <div *ngIf="f['valor'].errors['numeroInvalido'] || f['valor'].errors['decimales']" class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">Ingrese un importe v&aacute;lido con un m&aacute;ximo de dos decimales.</div>
                            <div *ngIf="f['valor'].errors['invalido']"
                               class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
                               <strong>Ups!</strong> No puede ser mayor que <strong>{{f['saldo'].value |
@@ -139,7 +141,7 @@
 
                   <div class="text-center">
                      <button type="submit" class="btn btn-success btn-sm mx-1" [disabled]="!formPartixcerti.valid"
-                        (click)="guardar()">
+                        >
                         <i class="fa fa-check-circle"></i> Aceptar</button>
                      <button type="button" class="btn btn-outline-success btn-sm mb-0" (click)="regresar()"><i
                            class="fa fa-times-circle"></i> Cancelar

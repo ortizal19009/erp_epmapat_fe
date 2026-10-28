@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from '@compartida/autoriza.service';
 import { Certipresu } from '@modelos/contabilidad/certipresu.model';
@@ -8,20 +8,21 @@ import { Presupue } from '@modelos/contabilidad/presupue.model';
 import { CertipresuService } from '@servicios/contabilidad/certipresu.service';
 import { PartixcertiService } from '@servicios/contabilidad/partixcerti.service';
 import { PresupueService } from '@servicios/contabilidad/presupue.service';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-add-partixcerti',
   templateUrl: './add-partixcerti.component.html',
   styleUrls: ['./add-partixcerti.component.css']
 })
-export class AddPartixcertiComponent implements OnInit {
+export class AddPartixcertiComponent implements OnInit, OnDestroy {
 
    iCertificacion = {} as interfaceCertificacion; //Interface para los datos de la Certificación
    idcerti: number;
    formPartixcerti: FormGroup;
    presupue: Presupue[] = [];
-   intpre: number | null;
+   intpre: number | null = null;
+   private calculos = new Subscription();
 
    constructor(public authService: AutorizaService, private router: Router, private certiService: CertipresuService,
       private presuService: PresupueService, private fb: FormBuilder, private parxcerService: PartixcertiService) { }
@@ -38,12 +39,26 @@ export class AddPartixcertiComponent implements OnInit {
                intpre: ['', Validators.required, this.valCodpar()],
                codpar: '',
                nompar: '',
-               saldo: '',
-               valor: ['', [Validators.required, Validators.min(0.01)], this.valValor()],
-               newsaldo: '',
+               saldo: null,
+               valor: this.fb.control(null, { validators: [Validators.required, Validators.min(0.01), this.valValor()], updateOn: 'change' }),
+               newsaldo: null,
                descripcion: ''
             }, { updateOn: "blur" });
+      this.calculos.add(this.f['valor'].valueChanges.subscribe(() => this.recalcularSaldo()));
+      this.calculos.add(this.f['saldo'].valueChanges.subscribe(() => {
+         this.f['valor'].updateValueAndValidity({ emitEvent: false }); this.recalcularSaldo();
+      }));
       this.buscaCertipresu();
+   }
+
+   ngOnDestroy() { this.calculos.unsubscribe(); }
+
+   recalcularSaldo() {
+      const saldo = Number(this.f['saldo'].value);
+      const valor = Number(this.f['valor'].value ?? 0);
+      const resultado = this.intpre != null && this.f['saldo'].value !== null && Number.isFinite(saldo) && Number.isFinite(valor)
+         ? (Math.round(saldo * 100) - Math.round(valor * 100)) / 100 : null;
+      this.f['newsaldo'].setValue(resultado, { emitEvent: false });
    }
 
    colocaColor(colores: any) {
@@ -88,15 +103,18 @@ export class AddPartixcertiComponent implements OnInit {
          this.intpre = selectedOption.intpre;
          this.formPartixcerti.patchValue({
             nompar: selectedOption.nompar,
-            saldo: selectedOption.inicia + selectedOption.totmod - selectedOption.totcerti,
-            valor: '',
-            newsaldo: ''
+            saldo: Math.round((Number(selectedOption.inicia ?? 0) + Number(selectedOption.totmod ?? 0) - Number(selectedOption.totcerti ?? 0)) * 100) / 100,
+            valor: null,
+            newsaldo: null
          });
       }
       else {
          this.intpre = null;
-         this.formPartixcerti.patchValue({ nompar: '' });
+         this.formPartixcerti.patchValue({ nompar: '', saldo: null, valor: null, newsaldo: null });
       }
+      this.f['intpre'].updateValueAndValidity({ emitEvent: false });
+      this.f['valor'].updateValueAndValidity({ emitEvent: false });
+      this.recalcularSaldo();
    }
 
    seleccionarTexto(event: FocusEvent): void {
@@ -105,6 +123,8 @@ export class AddPartixcertiComponent implements OnInit {
    }
 
    guardar() {
+      this.formPartixcerti.markAllAsTouched();
+      if (this.formPartixcerti.invalid || this.formPartixcerti.pending || this.intpre == null) return;
       const dto: PartixcertiCreateDTO = {
          idcerti: { idcerti: this.idcerti },
          intpre: { intpre: this.intpre },
@@ -137,15 +157,15 @@ export class AddPartixcertiComponent implements OnInit {
    }
 
    //Valida el Valor
-   valValor(): AsyncValidatorFn {
-      return (control: AbstractControl): Observable<ValidationErrors | null> => {
-         const valor = +control.value;
-         const saldo = this.formPartixcerti.controls['saldo'].value
-         const newsaldo = Math.round((saldo - valor) * 100) / 100;
-         // Coloca newsaldo
-         this.formPartixcerti.get('newsaldo')?.setValue(newsaldo, { emitEvent: false });
-         if (newsaldo < 0) { return of({ invalido: true }) }
-         return of(null);
+   valValor(): ValidatorFn {
+      return (control: AbstractControl): ValidationErrors | null => {
+         if (control.value === null || control.value === undefined || control.value === '') return null;
+         const valor = Number(control.value);
+         if (!Number.isFinite(valor)) return { numeroInvalido: true };
+         if (Math.abs(valor * 100 - Math.round(valor * 100)) > 0.000001) return { decimales: true };
+         const saldo = this.formPartixcerti?.get('saldo')?.value;
+         if (this.intpre == null || saldo === null || saldo === undefined) return null;
+         return Math.round(valor * 100) > Math.round(Number(saldo) * 100) ? { invalido: true } : null;
       };
    }
 

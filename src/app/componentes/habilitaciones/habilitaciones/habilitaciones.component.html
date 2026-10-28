@@ -1,60 +1,29 @@
-<div class="content px-1 pt-1 suspension-template">
-  <div class="container-fluid">
-    <div class="row cabecera panel-hero">
-      <div class="col-sm-3">
-        <h5 class="m-0 font-weight-bold py-1">{{ titulo }}</h5>
-      </div>
-      <div class="col-sm-2 py-1">
-        <p class="m-0 font-weight-bold summary-pill">Registros: {{ suspensiones.length || 0 }}</p>
-      </div>
-      <div class="col-sm-4 py-1 text-right">
-        <button class="btn btn-outline-light btn-sm action-btn" data-toggle="modal" data-target="#buscarAbonado">
-          <i class="fa fa-plus-square-o" aria-hidden="true"></i> Nueva habilitacion
-        </button>
-      </div>
-      <div class="col-sm-3 py-1 text-right">
-        <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..." [(ngModel)]="filterTerm" />
-      </div>
+<div class="content px-2 pt-2">
+  <div class="container-fluid px-0">
+    <div class="gestion-hero cabecera">
+      <div class="row align-items-center"><div class="col-md-8"><h4 class="mb-1 font-weight-bold"><i class="bi bi-check-circle mr-2" aria-hidden="true"></i>Habilitaciones</h4><small>Gesti&oacute;n de registros, documentos y cuentas afectadas.</small></div><div class="col-md-4 text-right"><div class="dropdown d-inline-block">
+ <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="bi bi-list mr-1"></i>Acciones</button>
+ <div class="dropdown-menu dropdown-menu-right">
+ <button class="dropdown-item" type="button" data-toggle="modal" data-target="#buscarAbonado"><i class="bi bi-plus-lg mr-2"></i>Nueva habilitaci&oacute;n</button>
+ <div class="dropdown-divider"></div>
+ <button class="dropdown-item" type="button" (click)="descargarReporte('pdf')" [disabled]="cargandoListado || exportandoReporte"><i class="bi bi-printer mr-2"></i>Imprimir / Descargar PDF</button>
+ <button class="dropdown-item" type="button" (click)="descargarReporte('xlsx')" [disabled]="cargandoListado || exportandoReporte"><i class="bi bi-file-earmark-excel mr-2"></i>Exportar a Excel</button>
+</div></div></div></div>
+      <div class="gestion-resumen"><span><strong>{{ suspensiones.length }}</strong> registros</span><span><strong>{{ totalCuentasVinculadas }}</strong> cuentas vinculadas a los registros</span></div>
     </div>
+    <div class="gestion-filtros">
+      <form [formGroup]="f_buscarxFechas" (ngSubmit)="buscarxFecha()">
+        <div class="row align-items-end">
+          <div class="col-sm-3 mb-2 mb-sm-0"><label for="desde" class="col-form-label col-form-label-sm py-0 mb-1">Desde</label><input type="date" id="desde" class="form-control form-control-sm" formControlName="desde" [max]="today"></div>
+          <div class="col-sm-3 mb-2 mb-sm-0"><label for="hasta" class="col-form-label col-form-label-sm py-0 mb-1">Hasta</label><input type="date" id="hasta" class="form-control form-control-sm" formControlName="hasta" [max]="today"></div>
+          <div class="col-sm-2 mb-2 mb-sm-0"><button type="submit" class="btn btn-primary btn-sm" [disabled]="cargandoListado"><i class="bi bi-search mr-1"></i>Consultar</button></div>
+          <div class="col-sm-4"><label for="filtroRegistros" class="col-form-label col-form-label-sm py-0 mb-1">Buscar en el listado</label><input id="filtroRegistros" type="search" class="form-control form-control-sm" placeholder="N&uacute;mero, cuenta, documento u observaci&oacute;n" [(ngModel)]="filterTerm" [ngModelOptions]="{standalone:true}"></div>
+        </div>
+      </form>
+    </div>
+    <div *ngIf="errorListado" class="alert alert-danger small py-2" role="alert">{{ errorListado }}</div>
   </div>
 </div>
-
-<div class="container-fluid px-0">
-  <form [formGroup]="f_buscarxFechas">
-    <div class="row mx-1 cabecera form-strip">
-      <div class="col-sm-3">
-        <label class="col-sm-12 col-form-label-sm">
-          Desde
-          <input
-            type="date"
-            class="form-control form-control-sm text-center"
-            id="desde"
-            formControlName="desde"
-            [max]="today"
-          />
-        </label>
-      </div>
-      <div class="col-sm-3">
-        <label class="col-sm-12 col-form-label-sm">
-          Hasta
-          <input
-            type="date"
-            class="form-control form-control-sm text-center"
-            id="hasta"
-            formControlName="hasta"
-            [max]="today"
-          />
-        </label>
-      </div>
-      <div class="col-sm-2 d-flex align-items-end pb-2">
-        <button class="btn btn-primary btn-sm action-btn" (click)="buscarxFecha()">
-          <i class="fa fa-search" aria-hidden="true"></i> Buscar
-        </button>
-      </div>
-    </div>
-  </form>
-</div>
-
 <div class="container-fluid mt-3">
   <ng-template #habilitacion>
     <div class="row">
@@ -160,38 +129,27 @@
     </div>
   </ng-template>
 
-  <div class="row" *ngIf="l_habilitaciones; else habilitacion">
-    <div class="col-sm-12">
-      <div class="card card-outline shadow-sm table-card">
-        <div class="card-body p-0">
-          <table class="table table-hover table-bordered table-sm modern-table mb-0">
-            <thead class="text-center cabecera">
-              <tr>
-                <th class="col-sm-1">Numero</th>
-                <th class="col-sm-1">Fecha</th>
-                <th class="col-sm-1">Total</th>
-                <th class="col-sm-1">Documento</th>
-                <th class="col-sm-1">Doc#</th>
-                <th class="col-sm-2">Tipo</th>
-                <th>Observaciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let suspension of suspensiones | filter : filterTerm; let i = index">
-                <td class="text-center">{{ suspension.numero }}</td>
-                <td class="text-center">{{ suspension.fecha | date : "dd-M-y" }}</td>
-                <td class="text-center">{{ suspension.total | number : "1." }}</td>
-                <td>{{ suspension.iddocumento_documentos.nomdoc }}</td>
-                <td>{{ suspension.numdoc }}</td>
-                <td>{{ getTipoLabel(suspension.tipo) }}</td>
-                <td>{{ suspension.observa }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+  <ng-container *ngIf="l_habilitaciones; else habilitacion"><div class="card gestion-card mb-3">
+  <div class="card-header d-flex align-items-center"><strong>Listado de registros</strong><span class="badge badge-light ml-auto">{{ (suspensiones | filter: filterTerm)?.length || 0 }} / {{ suspensiones.length }}</span></div>
+  <div class="gestion-tabla table-responsive"><table class="table table-hover table-sm modern-table mb-0">
+    <thead><tr><th>N&uacute;mero</th><th>Fecha</th><th>Cantidad</th><th>Cuentas afectadas</th><th>Documento</th><th>N&uacute;m. documento</th><th>Tipo</th><th>Observaciones</th><th class="text-center">Detalle</th></tr></thead>
+    <tbody>
+      <tr *ngIf="cargandoListado"><td colspan="9" class="gestion-vacio" role="status"><span class="spinner-border spinner-border-sm mr-2"></span>Cargando registros...</td></tr>
+      <ng-container *ngIf="!cargandoListado">
+        <tr *ngFor="let suspension of suspensiones | filter: filterTerm">
+          <td class="font-weight-bold text-nowrap">#{{ suspension.numero }}</td><td class="text-nowrap">{{ suspension.fecha | date:'dd/MM/yyyy' }}</td>
+          <td class="text-center"><span class="badge badge-light border">{{ suspension.totalCuentas ?? suspension.total ?? 0 }}</span></td>
+          <td><div class="cuentas-list"><button type="button" class="btn btn-outline-info btn-sm" *ngFor="let cuenta of (suspension.cuentasAfectadas || [])" (click)="abrirCuenta(cuenta)" [attr.aria-label]="'Ver cuenta ' + cuenta">{{ cuenta }}</button><small class="text-muted" *ngIf="suspension.cuentasAfectadas && !suspension.cuentasAfectadas.length">Sin cuentas vinculadas</small><button type="button" class="btn btn-light btn-sm" *ngIf="!suspension.cuentasAfectadas" (click)="info(suspension)">Consultar cuentas en Info</button></div></td>
+          <td>{{ suspension.iddocumento_documentos?.nomdoc || 'Sin documento' }}</td><td>{{ suspension.numdoc || '—' }}</td>
+          <td><span class="badge" [ngClass]="suspension.tipo === 1 ? 'badge-success' : suspension.tipo === 3 ? 'badge-danger' : 'badge-warning'">{{ getTipoLabel(suspension.tipo) }}</span></td>
+          <td class="gestion-observacion">{{ suspension.observa || 'Sin observaciones' }}</td>
+          <td class="text-center"><button type="button" class="btn btn-outline-primary btn-sm" (click)="info(suspension)" title="Ver informaci&oacute;n y cuentas" [attr.aria-label]="'Ver informacion del registro ' + suspension.numero"><i class="bi bi-eye" aria-hidden="true"></i></button></td>
+        </tr>
+        <tr *ngIf="!(suspensiones | filter: filterTerm)?.length"><td colspan="9" class="gestion-vacio"><i class="bi bi-inbox d-block h4"></i>No hay registros para las fechas o la b&uacute;squeda seleccionadas.</td></tr>
+      </ng-container>
+    </tbody>
+  </table></div>
+</div></ng-container>
 </div>
 
 <div class="modal fade" id="buscarAbonado" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="buscarAbonadoLabel" aria-hidden="true">

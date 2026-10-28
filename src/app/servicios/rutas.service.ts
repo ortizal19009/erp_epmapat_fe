@@ -13,8 +13,12 @@ const baseUrl = `${apiUrl}/rutas`;
 export class RutasService {
   constructor(private http: HttpClient) {}
 
-  getListaRutas(): Observable<Rutas[]> {
-    return this.http.get<Rutas[]>(`${baseUrl}`);
+  getCuentasMapa(idruta: number): Observable<any[]> {
+    return this.http.get<any[]>(`${baseUrl}/${idruta}/cuentas-mapa`);
+  }
+
+  getListaRutas(incluirInactivas = false): Observable<Rutas[]> {
+    return this.http.get<Rutas[]>(`${baseUrl}${incluirInactivas ? "?incluirInactivas=true" : ""}`);
   }
 
   getResumenRutas(estado?: boolean): Observable<Partial<Rutas>[]> {
@@ -59,7 +63,7 @@ export class RutasService {
     return this.http.get<Rutas>(`${baseUrl}?rutaConsulta=${dato}`);
   }
 
-  //Valida el Código
+  //Valida el CÃ³digo
   valCodigo(codigo: string): Observable<boolean> {
     return this.http.get<boolean>(`${baseUrl}/valCodigo?codigo=${codigo}`);
   }

@@ -250,11 +250,12 @@ export class AbonadosService {
     return this.http.get<PageResponse<Abonados>>(`${baseUrl}/estado/${estado}/pageable`, { params });
   }
 
-  getAbonadosByRutaPageable(idruta: number, page: number, size: number): Observable<PageResponse<Abonados>> {
+  getAbonadosByRutaPageable(idruta: number, page: number, size: number, filtro = ''): Observable<PageResponse<Abonados>> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
-      .set('sort', 'idabonado,asc');
+      .set('sort', 'idabonado,asc')
+      .set('filtro', filtro.trim());
     return this.http.get<PageResponse<Abonados>>(`${baseUrl}/ruta/${idruta}/pageable`, { params });
   }
 

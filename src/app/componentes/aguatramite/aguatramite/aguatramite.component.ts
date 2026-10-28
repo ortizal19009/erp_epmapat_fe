@@ -1,3 +1,4 @@
+import { cuentaRealTramite } from 'src/app/compartida/aguatramite-cuenta';
 import { formatDate } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -511,21 +512,7 @@ export class AguatramiteComponent implements OnInit {
    }
 
    getCuentaTramite(aguatramite: any): string {
-      const cuenta =
-         aguatramite?.idabonado ??
-         aguatramite?.idabonado_abonados?.idabonado ??
-         aguatramite?.abonado?.idabonado ??
-         aguatramite?.codmedidorvecino ??
-         aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idabonado ??
-         aguatramite?.idtramitenuevo_tramitenuevo?.codmedidorvecino ??
-         aguatramite?.idaguatramite_aguatramite?.idabonado ??
-         aguatramite?.idaguatramite_aguatramite?.codmedidorvecino ??
-         aguatramite?.idtramitenuevo_tramitenuevo?.idabonado ??
-         aguatramite?.cuenta ??
-         aguatramite?.codmedidor ??
-         '';
-
-      return `${cuenta}`;
+      return cuentaRealTramite(aguatramite);
    }
 
    getNombreClienteVisible(aguatramite: any): string {
@@ -670,14 +657,7 @@ export class AguatramiteComponent implements OnInit {
    }
 
    private extraerCuentaDesdeTramiteNuevo(tramiteNuevo: any): string {
-      const cuenta =
-         tramiteNuevo?.codmedidorvecino ??
-         tramiteNuevo?.idaguatramite_aguatramite?.idabonado ??
-         tramiteNuevo?.idaguatramite_aguatramite?.codmedidorvecino ??
-         tramiteNuevo?.idabonado ??
-         '';
-
-      return `${cuenta}`.trim();
+      return cuentaRealTramite(tramiteNuevo);
    }
 
    private asignarCuentaATramite(aguatramite: any, cuenta: string): void {
@@ -685,7 +665,7 @@ export class AguatramiteComponent implements OnInit {
          return;
       }
 
-      aguatramite.cuenta = cuenta;
+      aguatramite.idabonado = Number(cuenta);
    }
 
    private async obtenerTramitesFiltradosParaImpresion(): Promise<any[]> {

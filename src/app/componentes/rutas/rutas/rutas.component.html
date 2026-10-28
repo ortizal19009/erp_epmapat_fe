@@ -11,6 +11,7 @@
             aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+            <button class="dropdown-item" type="button" [routerLink]="['/add-rutas']"><i class="bi bi-plus-lg mr-1"></i>Nueva ruta</button>
             <button class="dropdown-item" type="button" [routerLink]="['/add-ruta-lector']">
               <i class="bi-file-earmark-arrow-up"></i>&nbsp; Ruta a Lector
             </button>
@@ -24,84 +25,102 @@
   </div>
 </div>
 
-<div class="container-fluid">
-  <div class="row mb-0">
-    <div class="col-sm-6">
-      <table class="table table-hover table-bordered table-sm sombra">
-        <thead>
-          <tr class="text-center font-weight-bold cabecera">
-            <th>Ord</th>
-            <th>Nombre</th>
-            <th>Código</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody class="detalle">
-          <tr class="fila" *ngFor="let ruta of _rutas | filter: filtro;" (click)="onCellClick($event, ruta)"
-            [class.table-info]="rutaSeleccionada?.idruta === ruta.idruta">
-            <td class="text-center">{{ ruta.orden }}</td>
-            <td> {{ ruta.descripcion }} </td>
-            <td class="text-center">{{ ruta.codigo }}</td>
-
-            <td class="text-center">
-              <div class="btn-group py-0">
-                <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                  aria-expanded="false">
-                </button>
-
-                <div class="dropdown-menu dropdown-menu-right popLista">
-
-                  <button class="dropdown-item" type="button">
-                    <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                  <button class="dropdown-item" (click)="setRuta(ruta)" data-toggle="modal"
-                    data-target="#infoRutas" type="button">
-                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                    &nbsp; Info</button>
-                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalUnico"
-                    (click)="eliminarRuta(ruta)">
-                    <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
-                </div>
-              </div>
-            </td>
-
-            <!-- <td class="text-center"> -->
-            <!-- <button (click)="modificarRuta(ruta)" class="badge badge-warning mx-1">Modificar</button>
-              <button (click)="eliminarRuta(ruta.idruta)" class="badge badge-danger mx-1">Eliminar</button> -->
-            <!-- <button (click)="scrollToElement(target)" class="badge badge-pill badge-info mx-1" data-toggle="collapse"
-                data-target="#collapseInfRuta">&nbsp;&nbsp;&nbsp;&nbsp;Info&nbsp;&nbsp;&nbsp;&nbsp;</button> -->
-            <!-- <button class="btn btn-outline-info btn-xs" (click)="info(ruta.idruta)">
-                  <i class="fa fa-info-circle"></i> Info&nbsp;&nbsp;</button> -->
-            <!-- </td> -->
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="col-sm-6 mt-3">
-      <div class="collapse sombra" id="addRuta">
-        <div class="card card-body pt-0 pb-1 px-0 detalle">
-          <h5 class="font-weight-bold py-1 text-center titDocumentos">Nueva Ruta</h5>
-          <app-add-rutas></app-add-rutas>
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-lg-5">
+      <div class="card sombra">
+        <div class="card-header d-flex align-items-center"><strong>Listado de rutas</strong><span class="badge badge-light ml-auto">{{ (rutasPorEstado | filter: filtro)?.length || 0 }} / {{ _rutas?.length || 0 }}</span></div>
+        <div class="card-body p-2">
+          <label for="estadoRutas" class="col-form-label col-form-label-sm py-0 mb-1">Estado de las rutas</label>
+          <select id="estadoRutas" class="form-control form-control-sm mb-2" [(ngModel)]="filtroEstado" (ngModelChange)="cambiarEstado()">
+            <option value="todas">Todas las rutas</option>
+            <option value="activas">Activas</option>
+            <option value="inactivas">Inactivas</option>
+            <option value="sinEstado">Sin estado definido</option>
+          </select>
+          <label class="sr-only" for="filtroRutas">Buscar ruta</label>
+          <input id="filtroRutas" class="form-control form-control-sm mb-2" [(ngModel)]="filtro" placeholder="Buscar por nombre o código">
+          <p *ngIf="cargandoRutas" role="status">Cargando rutas...</p>
+          <div *ngIf="errorRutas" class="alert alert-danger">{{ errorRutas }} <button class="btn btn-sm btn-outline-danger" (click)="listaRutas()">Reintentar</button></div>
+          <div class="rutas-lista table-responsive" (scroll)="cerrarMenuRuta()">
+            <table class="table table-hover table-bordered table-sm small mb-0">
+              <thead class="cabecera"><tr><th>Orden</th><th>Nombre</th><th>Código</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                <tr class="fila" *ngFor="let ruta of rutasPorEstado | filter: filtro" (click)="seleccionarRuta(ruta)" (keydown.enter)="seleccionarRuta(ruta)" (keydown.space)="$event.preventDefault(); seleccionarRuta(ruta)" tabindex="0" [attr.aria-selected]="rutaSeleccionada?.idruta === ruta.idruta" [class.table-info]="rutaSeleccionada?.idruta === ruta.idruta">
+                  <td>{{ ruta.orden }}</td><td>{{ ruta.descripcion }}</td><td>{{ ruta.codigo }}</td><td><span class="badge" [ngClass]="{ 'badge-success': ruta.estado === true, 'badge-secondary': ruta.estado === false, 'badge-light': ruta.estado == null }">{{ ruta.estado === true ? 'Activa' : ruta.estado === false ? 'Inactiva' : 'Sin definir' }}</span></td>
+                  <td (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="alternarMenuRuta($event,ruta)"
+                      [attr.aria-expanded]="menuRuta?.idruta === ruta.idruta" aria-controls="accionesRuta" aria-haspopup="true"
+                      [attr.aria-label]="'Acciones de ruta '+ruta.codigo" title="Acciones de ruta"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
+                  </td>
+                </tr>
+                <tr *ngIf="!cargandoRutas && !errorRutas && !(rutasPorEstado | filter: filtro)?.length"><td colspan="5" class="text-center text-muted">No hay rutas para mostrar.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="menuRuta" id="accionesRuta" class="dropdown-menu show ruta-menu-acciones" [style.top.px]="menuRutaTop" [style.left.px]="menuRutaLeft" (click)="$event.stopPropagation()">
+            <small class="dropdown-header text-truncate">Ruta {{ menuRuta.codigo }}</small>
+            <button type="button" class="dropdown-item" (click)="ejecutarAccionRuta('editar')"><i class="bi bi-pencil-square mr-2" aria-hidden="true"></i>Editar ruta y cuentas</button>
+            <button type="button" class="dropdown-item" (click)="ejecutarAccionRuta('info')"><i class="bi bi-eye mr-2" aria-hidden="true"></i>Ver informaci&oacute;n</button>
+            <button type="button" class="dropdown-item text-danger" (click)="ejecutarAccionRuta('eliminar')"><i class="bi bi-trash mr-2" aria-hidden="true"></i>Eliminar</button>
+          </div>
         </div>
       </div>
     </div>
-
-
-  </div>
-
-  <!-- <div class="row">
-      <div class="container">
-         <div class="collapse" id="collapseInfRuta">
-            <div class="card card-body">
-               <h3 class="m-0 font-weight-bold">Lecturas de la Ruta</h3>
-               <p>Lorem ipsum......</p>
+    <div class="col-lg-7">
+      <div class="card sombra ruta-panel" aria-live="polite">
+        <div class="card-body text-center text-muted py-5" *ngIf="!rutaSeleccionada"><i class="bi bi-signpost-2 h1 d-block"></i>Selecciona una ruta para consultar su información.</div>
+        <ng-container *ngIf="rutaSeleccionada">
+          <div class="card-header cabecera"><small>INFORMACIÓN DE LA RUTA · {{ rutaSeleccionada.codigo }}</small><h5 class="mb-0 mt-1">{{ rutaSeleccionada.descripcion }}</h5></div>
+          <div class="card-body">
+            <div class="ruta-datos small mb-2">
+              <div><small class="text-muted d-block">Orden</small><strong>{{ rutaSeleccionada.orden }}</strong></div>
+              <div><small class="text-muted d-block">Creación</small>{{ (rutaSeleccionada.feccrea | date:'dd/MM/yyyy') || 'Sin registro' }}</div>
+              <div><small class="text-muted d-block">Estado</small><span class="badge" [ngClass]="{ 'badge-success': rutaSeleccionada.estado === true, 'badge-secondary': rutaSeleccionada.estado === false, 'badge-light': rutaSeleccionada.estado == null }">{{ rutaSeleccionada.estado === true ? 'Activa' : rutaSeleccionada.estado === false ? 'Inactiva' : 'Sin definir' }}</span></div>
+              <div><small class="text-muted d-block">Última modificación</small>{{ (rutaSeleccionada.fecmodi | date:'dd/MM/yyyy') || 'Sin registro' }}</div>
             </div>
-         </div>
+            <div class="nav nav-tabs mb-3" role="tablist">
+              <button type="button" class="nav-link" role="tab" [class.active]="tabDetalle === 'abonados'" [attr.aria-selected]="tabDetalle === 'abonados'" (click)="cambiarTab('abonados')">Abonados</button>
+              <button type="button" class="nav-link" role="tab" [class.active]="tabDetalle === 'mapa'" [attr.aria-selected]="tabDetalle === 'mapa'" (click)="cambiarTab('mapa')">Mapa de cuentas</button>
+            </div>
+            <div *ngIf="tabDetalle === 'abonados'" class="row mb-3">
+              <div class="col-sm-8"><label for="buscarCuentaRuta" class="col-form-label col-form-label-sm py-0 mb-1">Buscar abonados</label><input id="buscarCuentaRuta" type="search" class="form-control form-control-sm" [(ngModel)]="filtroAbonados" (ngModelChange)="buscarAbonados()" placeholder="Cuenta, cliente o responsable de pago"></div>
+              <div class="col-sm-4"><label for="tamanoPaginaRuta" class="col-form-label col-form-label-sm py-0 mb-1">Filas por p&aacute;gina</label><select id="tamanoPaginaRuta" class="form-control form-control-sm" [(ngModel)]="tamanoPagina" (ngModelChange)="cambiarTamanoPagina()"><option *ngFor="let cantidad of [10, 20, 30, 50, 100]" [ngValue]="cantidad">{{ cantidad }}</option></select></div>
+            </div>
+            <p *ngIf="cargandoDetalle" role="status"><span class="spinner-border spinner-border-sm mr-2"></span>Cargando información...</p>
+            <div *ngIf="errorDetalle" class="alert alert-danger">{{ errorDetalle }} <button class="btn btn-sm btn-outline-danger" (click)="reintentarDetalle()">Reintentar</button></div>
+            <ng-container *ngIf="!cargandoDetalle && !errorDetalle">
+              <div *ngIf="tabDetalle === 'abonados'">
+                <p class="text-muted">{{ totalAbonados }} abonados activos o suspendidos</p>
+                <div class="table-responsive ruta-tabla"><table class="table table-sm table-striped small align-middle">
+                  <thead><tr><th>Cuenta</th><th>Cliente</th><th>Responsable de pago</th><th>Estado</th></tr></thead>
+                  <tbody><tr *ngFor="let abonado of _abonados"><td><button type="button" class="btn btn-sm btn-outline-info text-nowrap" (click)="abrirDetalleCuenta(abonado.idabonado)" [attr.aria-label]="'Ver detalle de la cuenta ' + abonado.idabonado" title="Ver detalle de la cuenta"><i class="bi bi-box-arrow-up-right mr-1" aria-hidden="true"></i>{{ abonado.idabonado }}</button></td><td>{{ abonado.idcliente_clientes?.nombre || 'Sin registro' }}</td><td>{{ abonado.idresponsable?.nombre || 'Sin registro' }}</td><td class="text-nowrap"><span class="badge" [ngClass]="{ 'badge-success': abonado.estado === 1, 'badge-warning': abonado.estado === 2, 'badge-secondary': abonado.estado !== 1 && abonado.estado !== 2 }">{{ abonado.estado === 1 ? 'Activo' : abonado.estado === 2 ? 'Suspendido' : abonado.estado === 0 ? 'Eliminado' : abonado.estado === 3 ? 'Suspendido y retirado' : 'Sin definir' }}</span></td></tr>
+                  <tr *ngIf="!_abonados?.length"><td colspan="4" class="text-center text-muted">No hay abonados que coincidan con la b&uacute;squeda.</td></tr></tbody>
+                </table></div>
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-2" *ngIf="totalPaginas > 0">
+                  <small>P&aacute;gina {{ paginaAbonados + 1 }} de {{ totalPaginas }} &middot; {{ totalAbonados }} resultados</small>
+                  <div class="btn-group mt-1" aria-label="Navegar entre p&aacute;ginas">
+                    <button class="btn btn-sm btn-outline-secondary" [disabled]="paginaAbonados === 0" (click)="cargarAbonados(0)" title="Primera página" aria-label="Primera página"><i class="bi bi-chevron-bar-left" aria-hidden="true"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" [disabled]="paginaAbonados === 0" (click)="cargarAbonados(paginaAbonados - 1)" title="Página anterior" aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" [disabled]="paginaAbonados + 1 >= totalPaginas" (click)="cargarAbonados(paginaAbonados + 1)" title="Página siguiente" aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" [disabled]="paginaAbonados + 1 >= totalPaginas" (click)="cargarAbonados(totalPaginas - 1)" title="Última página" aria-label="Última página"><i class="bi bi-chevron-bar-right" aria-hidden="true"></i></button>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="tabDetalle === 'mapa'">
+                <p class="mb-2"><strong>{{ cuentasMapa.length - cuentasSinCoordenadas }}</strong> cuentas ubicadas de {{ cuentasMapa.length }} activas o suspendidas.</p>
+                <p *ngIf="cuentasSinCoordenadas" class="text-muted small">{{ cuentasSinCoordenadas }} cuentas no tienen coordenadas v&aacute;lidas y no aparecen en el mapa.</p>
+                <div *ngIf="cuentasMapa.length > cuentasSinCoordenadas; else sinUbicaciones" #mapaCuentas class="mapa-cuentas" role="region" aria-label="Mapa de cuentas de la ruta"></div>
+                <ng-template #sinUbicaciones><div class="alert alert-info">Esta ruta no tiene cuentas con ubicaci&oacute;n registrada.</div></ng-template>
+                <small class="text-muted d-block mt-2" *ngIf="cuentasMapa.length > cuentasSinCoordenadas">Selecciona un punto para ver la cuenta, el cliente y su direcci&oacute;n.</small>
+              </div>
+            </ng-container>
+          </div>
+        </ng-container>
       </div>
-      <div #target><br></div>
-   </div> -->
+    </div>
+  </div>
 </div>
-
 <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
@@ -123,14 +142,14 @@
         <div class="row">
           <div class="col-md-6">
             <label class="font-weight-bold">Reporte</label>
-            <select class="form-control" [(ngModel)]="tipoReporteSeleccionado">
+            <select class="form-control form-control-sm" [(ngModel)]="tipoReporteSeleccionado">
               <option value="resumen">Resumen total de la ruta</option>
               <option value="lecturas">Todas las lecturas de la ruta</option>
             </select>
           </div>
           <div class="col-md-6">
             <label class="font-weight-bold">Formato</label>
-            <select class="form-control" [(ngModel)]="formatoReporteSeleccionado">
+            <select class="form-control form-control-sm" [(ngModel)]="formatoReporteSeleccionado">
               <option value="pdf">PDF</option>
               <option value="xml">XML</option>
             </select>
@@ -157,92 +176,4 @@
     </div>
   </div>
 </div>
-
-
-<!-- Modal -->
-<div class="modal fade" id="infoRutas" data-backdrop="static" data-keyboard="false" tabindex="-1"
-  aria-labelledby="infoRutasLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="infoRutasLabel">Información de Rutas</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="card text-center">
-          <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" id="abonados-tab" (click)="getAbonadosByRuta(ruta.idruta)" data-toggle="tab" href="#abonados" role="tab"
-                  aria-controls="abonados" aria-selected="true">Abonados</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="deudas-tab" (click)="getDeudasOfRuta(ruta.idruta)" data-toggle="tab" href="#deudas" role="tab" aria-controls="deudas"
-                  aria-selected="false">Deudas</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="mapa-tab" data-toggle="tab" href="#mapa" role="tab" aria-controls="deudas"
-                  aria-selected="false">Mapa</a>
-              </li>
-            </ul>
-          </div>
-
-          <div class="card-body">
-            <div class="tab-content" id="myTabContent">
-              <!-- TAB 1 -->
-              <div class="tab-pane fade show active" id="abonados" role="tabpanel" aria-labelledby="abonados-tab">
-                <h5 class="card-title">Lista de abonados</h5>
-                <p class="card-text">Aquí puedes mostrar la información de los abonados.</p>
-                <a href="#" class="btn btn-primary">Acción abonados</a>
-              </div>
-
-              <!-- TAB 2 -->
-              <div class="tab-pane fade" id="deudas" role="tabpanel" aria-labelledby="deudas-tab">
-                <table class="table table-sm table-hover table-bordered">
-                  <thead class="cabecera">
-                    <tr>
-                      <th>Nr.</th>
-                      <th>Nombre</th>
-                      <th>Identificación</th>
-                      <th>Cuenta</th>
-                      <th>Subtotal</th>
-                      <th>Interés</th>
-                      <th>Total</th>
-                      <th>Cant.Facturas</th>
-                    </tr>
-                  </thead>
-                  <tbody class="detalle">
-                    <tr *ngFor="let dr of _deudasRuta; let i = index">
-                      <td>{{i+1}}</td>
-                      <td>{{dr.nombre}}</td>
-                      <td>{{dr.cedula}}</td>
-                      <td>{{dr.cuenta}}</td>
-                      <td>{{ (dr?.subtotal ?? 0) | number:'1.2-2' }}</td>
-                      <td>{{ (dr?.total_interes ?? 0) | number:'1.2-2' }}</td>
-                      <td>{{ (dr?.total_final ?? 0) | number:'1.2-2' }}</td>
-                      <td>{{ dr?.total_facturas ?? 0 }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <!-- TAB 3 -->
-              <div class="tab-pane fade" id="mapa" role="tabpanel" aria-labelledby="mapa-tab">
-                <h5 class="card-title">Lista de mapa</h5>
-                <p class="card-text">Aquí puedes mostrar las mapa de los abonados.</p>
-                <a href="#" class="btn btn-warning">Acción mapa</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-success" data-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success">Aceptar</button>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="container-fluid"><app-ruta-historial *ngIf="rutaSeleccionada" [ruta]="rutaSeleccionada.idruta"></app-ruta-historial></div>

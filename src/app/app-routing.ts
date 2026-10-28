@@ -1,3 +1,5 @@
+import { RutaFormularioComponent } from './componentes/rutas/ruta-formulario/ruta-formulario.component';
+import { ReportesCarteraComponent } from './componentes/coactivas/reportes-cartera/reportes-cartera.component';
 import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simuladordos.component';
 import { SimuladortresComponent } from './componentes/pliego24/simuladortres/simuladortres.component';
 import { NgModule } from '@angular/core';
@@ -351,6 +353,12 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    matcher: segments => segments.length === 2 && segments[0].path === 'imp-clientes' && ['cv-rubros','cv-facturas','cv-clientes'].includes(segments[1].path)
+      ? {consumed: segments, posParams: {page: segments[1]}} : null,
+    component: ReportesCarteraComponent,
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'imp-clientes/:page',
     component: ImpClienteComponent,
     canActivate: [AuthGuard],
@@ -421,6 +429,11 @@ const routes: Routes = [
   {
     path: 'habilitaciones',
     component: HabilitacionesComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'mora-abonados',
+    component: RutasmorasComponent,
     canActivate: [AuthGuard],
   },
   {
@@ -773,7 +786,9 @@ const routes: Routes = [
 
   //Rutas
   { path: 'rutas', component: RutasComponent, canActivate: [AuthGuard] },
-  { path: 'add-rutas', component: AddRutasComponent, canActivate: [AuthGuard] },
+  { path: 'add-rutas', component: RutaFormularioComponent, canActivate: [AuthGuard] },
+  { path: 'editar-ruta/:id', component: RutaFormularioComponent, canActivate: [AuthGuard] },
+  { path: 'modificar-rutas', component: RutaFormularioComponent, canActivate: [AuthGuard] },
   { path: 'info-ruta', component: InfoRutaComponent, canActivate: [AuthGuard] },
   {
     path: 'add-ruta-lector',

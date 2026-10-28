@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Eliminadosapp } from 'src/app/modelos/administracion/eliminadosapp.model';
@@ -15,52 +16,58 @@ import Swal from 'sweetalert2';
   templateUrl: './reintegradas.component.html',
   styleUrls: ['./reintegradas.component.css']
 })
-export class ReintegradasComponent implements OnInit {
+export class ReintegradasComponent implements OnInit, OnDestroy {
 
    formBuscar: FormGroup;
    certipresu: Certipresu[] = [];
-   buscaReintegradas: { desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
-   swdesdehasta: boolean; //Visibilidad Buscar últimos
-   filtro: string;
-   tot: number;
-   sumvalor: number;
-   swfiltro: boolean;
+   buscaReintegradas: { desdeNum: number | null, hastaNum: number | null, desdeFecha: string | null, hastaFecha: string | null }
+   swdesdehasta = false; //Visibilidad Buscar últimos
+   filtro = '';
+   cargando = false;
+   errorListado = '';
+   private consulta?: Subscription;
+   private consultaUltima?: Subscription;
+   tot = 0;
+   sumvalor = 0;
+   swfiltro = false;
    ultIdSelec: number = -1;
 
    constructor(private fb: FormBuilder, private router: Router, public authService: AutorizaService, private coloresService: ColoresService,
-      private certiService: CertipresuService, private parxcerService: PartixcertiService, private elimService: EliminadosappService) { }
+      private certiService: CertipresuService, private parxcerService: PartixcertiService, private elimService: EliminadosappService) {
+      this.formBuscar = this.fb.group({ desdeNum: null, hastaNum: null, desdeFecha: null, hastaFecha: null });
+   }
 
    ngOnInit(): void {
-      if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
+      if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); return; }
       sessionStorage.setItem('ventana', '/reintegradas');
       let coloresJSON = sessionStorage.getItem('/reintegradas');
-      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
-      else this.buscaColor();
+      try { if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON)); else this.buscaColor(); }
+      catch { this.buscaColor(); }
 
-      const datos = this.authService.getDatosEmpresa()
-      const año = datos!.fechap.toString().slice(0, 4);
-      this.formBuscar = this.fb.group({
+      let datos: any;
+      try { datos = this.authService.getDatosEmpresa(); } catch {}
+      const fechaEmpresa = String(datos?.fechap || '');
+      const anio = /^\d{4}-/.test(fechaEmpresa) ? fechaEmpresa.slice(0, 4) : String(new Date().getFullYear());
+      this.formBuscar.patchValue({
          desdeNum: '',
          hastaNum: '',
-         desdeFecha: año + '-01-01',
-         hastaFecha: año + '-12-31',
+         desdeFecha: anio + '-01-01',
+         hastaFecha: anio + '-12-31',
       });
 
-      //Datos de búsqueda: últimas Reintegradas o guardadas
+      //Datos de búsqueda: últimas Certificaciones o guardadas
       this.ultIdSelec = sessionStorage.getItem('ultreintegrada') ? Number(sessionStorage.getItem('ultreintegrada')) : 0;
-      this.buscaReintegradas = JSON.parse(sessionStorage.getItem("buscaReintegradas")!);
-      if (this.buscaReintegradas == null) {
-         this.ultimaReintegrada();
-      } else {
-         this.formBuscar.patchValue({
-            desdeNum: this.buscaReintegradas.desdeNum,
-            hastaNum: this.buscaReintegradas.hastaNum,
-            desdeFecha: this.buscaReintegradas.desdeFecha,
-            hastaFecha: this.buscaReintegradas.hastaFecha
-         });
+      let guardada: any = null;
+      try { guardada = JSON.parse(sessionStorage.getItem('buscaReintegradas') || 'null'); }
+      catch { sessionStorage.removeItem('buscaReintegradas'); }
+      if (guardada && typeof guardada === 'object' && !Array.isArray(guardada)) {
+         this.formBuscar.patchValue(guardada);
+         this.swdesdehasta = true;
          this.buscar();
-      }
+      } else this.ultimaReintegrada();
    }
+
+   ngOnDestroy() { this.consulta?.unsubscribe(); this.consultaUltima?.unsubscribe(); }
 
    colocaColor(colores: any) {
       document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -81,47 +88,58 @@ export class ReintegradasComponent implements OnInit {
    }
 
    ultimaReintegrada() {
-      this.certiService.ultima(2).subscribe({
-         next: (resp: Certipresu) => {
-            let desde = resp.numero - 16;
-            if (desde <= 0) desde = 1;
-            this.formBuscar.patchValue({
-               desdeNum: desde,
-               hastaNum: resp.numero,
-            });
+      this.consulta?.unsubscribe(); this.consultaUltima?.unsubscribe();
+      this.cargando = true; this.errorListado = '';
+      this.consultaUltima = this.certiService.ultima(2).subscribe({
+         next: (resp: Certipresu | null) => {
+            if (!resp) { this.certipresu = []; this.total(); this.cargando = false; return; }
+            const fecha = String(resp.fecha || '');
+            const anio = /^\d{4}-/.test(fecha) ? fecha.slice(0, 4) : null;
+            this.formBuscar.patchValue({ desdeNum: Math.max(1, Number(resp.numero) - 16), hastaNum: Number(resp.numero),
+               desdeFecha: anio ? anio + '-01-01' : null, hastaFecha: anio ? anio + '-12-31' : null });
             this.buscar();
          },
-         error: err => console.error(err.error)
+         error: () => { this.cargando = false; this.errorListado = 'No se pudo consultar la ultima reintegrada. Intente nuevamente.'; }
       });
    }
 
    buscar() {
-      //Numeros
-      let desdeNum: number = 1;
-      if (this.formBuscar.value.desdeNum != null) { desdeNum = this.formBuscar.value.desdeNum; }
-      let hastaNum: number = 999999999;
-      if (this.formBuscar.value.hastaNum != null) { hastaNum = this.formBuscar.value.hastaNum; }
-      this.certiService.getDesdeHasta(2, desdeNum, hastaNum, this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
-         next: (certipresu: Certipresu[]) => {
-            this.certipresu = certipresu;
-            //Guarda los datos de búsqueda
-            this.buscaReintegradas = {
-               desdeNum: this.formBuscar.value.desdeNum,
-               hastaNum: this.formBuscar.value.hastaNum,
-               desdeFecha: this.formBuscar.value.desdeFecha,
-               hastaFecha: this.formBuscar.value.hastaFecha
-            };
-            sessionStorage.setItem("buscaReintegradas", JSON.stringify(this.buscaReintegradas));
-            this.total();
+      const valores = this.formBuscar.value;
+      const numero = (v: any) => v === null || v === undefined || String(v).trim() === '' ? null : Number(v);
+      const desdeNum = numero(valores.desdeNum), hastaNum = numero(valores.hastaNum);
+      const desdeFecha = valores.desdeFecha || null, hastaFecha = valores.hastaFecha || null;
+      this.errorListado = '';
+      if ([desdeNum, hastaNum].some(n => n !== null && (!Number.isSafeInteger(n) || n < 1))
+            || (desdeNum !== null && hastaNum !== null && desdeNum > hastaNum)) {
+         this.errorListado = 'Indique numeros enteros positivos y un rango desde menor o igual que hasta.'; return;
+      }
+      const fechaValida = (v: string | null) => !v || (/^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v)) && new Date(v).toISOString().slice(0, 10) === v);
+      if (!fechaValida(desdeFecha) || !fechaValida(hastaFecha) || (desdeFecha && hastaFecha && desdeFecha > hastaFecha)) {
+         this.errorListado = 'Seleccione fechas validas y un rango desde menor o igual que hasta.'; return;
+      }
+      const aplicados = { desdeNum, hastaNum, desdeFecha, hastaFecha };
+      this.consulta?.unsubscribe(); this.consultaUltima?.unsubscribe();
+      this.cargando = true; this.certipresu = []; this.total();
+      this.consulta = this.certiService.getDesdeHasta(2, desdeNum, hastaNum, desdeFecha, hastaFecha).subscribe({
+         next: datos => {
+            this.certipresu = Array.isArray(datos) ? datos : []; this.cargando = false;
+            this.buscaReintegradas = aplicados;
+            sessionStorage.setItem('buscaReintegradas', JSON.stringify(aplicados)); this.total();
          },
-         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar', err.error) }
+         error: () => { this.cargando = false; this.errorListado = 'No se pudieron cargar las reintegros. Revise los filtros e intente nuevamente.'; }
       });
+   }
+
+   limpiarFiltros() {
+      this.filtro = ''; this.swfiltro = false; this.swdesdehasta = true;
+      this.formBuscar.reset({ desdeNum: null, hastaNum: null, desdeFecha: null, hastaFecha: null });
+      sessionStorage.removeItem('buscaReintegradas'); this.buscar();
    }
 
    total() {
       this.sumvalor = 0;
-      this.certipresu.forEach((certificacion: any) => {
-         this.sumvalor = this.sumvalor + certificacion.valor;
+      this.certipresu.forEach((certipresu: Certipresu) => {
+         this.sumvalor += Number(certipresu.valor) || 0;
       });
       this.tot = this.certipresu.length;
    }
@@ -130,6 +148,7 @@ export class ReintegradasComponent implements OnInit {
 
    busquedainicial() {
       sessionStorage.removeItem('buscaReintegradas');
+      this.filtro = ''; this.swfiltro = false;
       this.swdesdehasta = false;
       this.ultimaReintegrada();
    }

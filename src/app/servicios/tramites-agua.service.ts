@@ -1,3 +1,4 @@
+import { cuentaRealTramite } from 'src/app/compartida/aguatramite-cuenta';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import jsPDF from 'jspdf';
@@ -416,18 +417,7 @@ export class TramitesAguaService {
   }
 
   private getCuentaTramite(aguatramite: any): string {
-    return `${
-      aguatramite?.idabonado ??
-      aguatramite?.idabonado_abonados?.idabonado ??
-      aguatramite?.abonado?.idabonado ??
-      aguatramite?.codmedidorvecino ??
-      aguatramite?.idaguatramite_aguatramite?.idabonado ??
-      aguatramite?.idaguatramite_aguatramite?.codmedidorvecino ??
-      aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idabonado ??
-      aguatramite?.idtramitenuevo_tramitenuevo?.codmedidorvecino ??
-      aguatramite?.codmedidor ??
-      ''
-    }`;
+    return cuentaRealTramite(aguatramite);
   }
 
   private getClienteNombre(origen: any): string {
