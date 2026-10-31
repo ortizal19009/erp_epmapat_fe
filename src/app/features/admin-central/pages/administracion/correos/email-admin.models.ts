@@ -1,7 +1,7 @@
 export type EmailTransportType = 'SMTP' | 'API_HTTP';
 export type EmailSecurityType = 'NONE' | 'STARTTLS' | 'SSL_TLS';
 export type EmailDefaultUse = 'FACTURACION' | 'NOTIFICACION' | 'CUSTOM' | 'GENERAL';
-export type EmailMessageState = 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED';
+export type EmailMessageState = 'PENDING' | 'SENT' | 'FAILED' | 'UNCERTAIN' | 'CANCELLED';
 export type EmailMessageType = 'DOC_ELECTRONICO' | 'NOTIFICACION' | 'CUSTOM';
 export type BlacklistEntryType = 'DOMAIN' | 'HOST' | 'EMAIL';
 export type EmailApiAuthScheme = 'Bearer' | 'Basic' | 'Token';
@@ -22,6 +22,7 @@ export interface EmailAccount {
   authRequired?: boolean;
   username?: string;
   password?: string;
+  hasPassword?: boolean;
   apiUrl?: string;
   apiAuthHeader?: string;
   apiAuthScheme?: EmailApiAuthScheme;
@@ -128,7 +129,7 @@ export interface BlacklistFormValue {
 export const EMAIL_TRANSPORT_OPTIONS: EmailTransportType[] = ['SMTP', 'API_HTTP'];
 export const EMAIL_SECURITY_OPTIONS: EmailSecurityType[] = ['NONE', 'STARTTLS', 'SSL_TLS'];
 export const EMAIL_DEFAULT_USE_OPTIONS: EmailDefaultUse[] = ['FACTURACION', 'NOTIFICACION', 'CUSTOM', 'GENERAL'];
-export const EMAIL_STATE_OPTIONS: EmailMessageState[] = ['PENDING', 'SENT', 'FAILED', 'CANCELLED'];
+export const EMAIL_STATE_OPTIONS: EmailMessageState[] = ['PENDING', 'SENT', 'FAILED', 'UNCERTAIN', 'CANCELLED'];
 export const EMAIL_TYPE_OPTIONS: EmailMessageType[] = ['DOC_ELECTRONICO', 'NOTIFICACION', 'CUSTOM'];
 export const BLACKLIST_TYPE_OPTIONS: BlacklistEntryType[] = ['DOMAIN', 'HOST', 'EMAIL'];
 export const EMAIL_API_AUTH_SCHEME_OPTIONS: EmailApiAuthScheme[] = ['Bearer', 'Basic', 'Token'];

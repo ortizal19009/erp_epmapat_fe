@@ -1,0 +1,48 @@
+
+Initial Chunk Files                                                                                     | Names                                                                             |  Raw Size
+main.js                                                                                                 | main                                                                              |  14.44 MB |
+vendor.js                                                                                               | vendor                                                                            |   6.12 MB |
+styles.css, styles.js                                                                                   | styles                                                                            |   1.50 MB |
+polyfills.js                                                                                            | polyfills                                                                         | 238.17 kB |
+scripts.js                                                                                              | scripts                                                                           | 209.41 kB |
+runtime.js                                                                                              | runtime                                                                           |  14.12 kB |
+
+| Initial Total                                                                     |  22.50 MB
+
+Lazy Chunk Files                                                                                        | Names                                                                             |  Raw Size
+node_modules_canvg_lib_index_es_js.js                                                                   | canvg                                                                             | 432.24 kB |
+node_modules_html2canvas_dist_html2canvas_js.js                                                         | html2canvas                                                                       | 390.80 kB |
+src_app_features_admin-central_pages_administracion_correos_email-admin_component_ts.js                 | features-admin-central-pages-administracion-correos-email-admin-component         | 290.22 kB |
+src_app_componentes_ntacredito_endosos_nc-endosos_module_ts.js                                          | componentes-ntacredito-endosos-nc-endosos-module                                  | 117.48 kB |
+src_app_features_documentos_documento-detalle_documento-detalle_ts.js                                   | features-documentos-documento-detalle-documento-detalle                           |  65.30 kB |
+src_app_features_documentos_documentos-list_documentos-list_ts.js                                       | features-documentos-documentos-list-documentos-list                               |  64.53 kB |
+node_modules_dompurify_dist_purify_es_mjs.js                                                            | dompurify                                                                         |  63.50 kB |
+src_app_componentes_ntacredito_endosos_consulta_nc-endosos-listado_module_ts.js                         | componentes-ntacredito-endosos-consulta-nc-endosos-listado-module                 |  50.41 kB |
+src_app_features_documentos_documento-form_documento-form_ts.js                                         | features-documentos-documento-form-documento-form                                 |  46.17 kB |
+src_app_features_documentos_inbox_inbox_ts.js                                                           | features-documentos-inbox-inbox                                                   |  42.03 kB |
+src_app_features_admin-central_pages_administracion_impresion-qz_impresion-qz_component_ts.js           | features-admin-central-pages-administracion-impresion-qz-impresion-qz-component   |  39.12 kB |
+src_app_features_admin-central_pages_administracion_request-audit_request-audit_component_ts.js         | features-admin-central-pages-administracion-request-audit-request-audit-component |  39.02 kB |
+src_app_features_trazabilidad_trazabilidad_module_ts.js                                                 | features-trazabilidad-trazabilidad-module                                         |  35.94 kB |
+src_app_features_documentos_alerts_alerts_ts.js                                                         | features-documentos-alerts-alerts                                                 |  35.48 kB |
+src_app_features_documentos_dashboard_dashboard_ts.js                                                   | features-documentos-dashboard-dashboard                                           |  32.19 kB |
+src_app_features_settings_access-admin_access-admin_ts.js                                               | features-settings-access-admin-access-admin                                       |  29.86 kB |
+src_app_features_settings_module-window-catalog_module-window-catalog_component_ts.js                   | features-settings-module-window-catalog-module-window-catalog-component           |  28.90 kB |
+src_app_features_case-files_case-files-list_ts.js                                                       | features-case-files-case-files-list                                               |  28.39 kB |
+default-src_app_shared_help_info-help_ts.js                                                             | features-documentos-documentos-list-documentos-list                               |  25.00 kB |
+src_app_features_settings_dependencies_dependencies-list_dependencies-list_ts.js                        | features-settings-dependencies-dependencies-list-dependencies-list                |  22.45 kB |
+src_app_features_settings_trd_trd-settings_ts.js                                                        | features-settings-trd-trd-settings                                                |  20.49 kB |
+src_app_core_api_http-base_ts-src_app_features_settings_document-types_document-types-list_do-635a28.js | features-settings-document-types-document-types-list-document-types-list          |  19.41 kB |
+default-src_app_core_api_dependency-api_ts-src_app_core_api_documentos-api_ts-src_app_core_ap-c653b2.js | features-documentos-documentos-list-documentos-list                               |  16.37 kB |
+src_app_features_settings_entities_entities-list_entities-list_ts.js                                    | features-settings-entities-entities-list-entities-list                            |  16.31 kB |
+src_app_features_settings_system_system-settings_ts.js                                                  | features-settings-system-system-settings                                          |  14.76 kB |
+src_app_features_settings_ccd_ccd-settings_ts.js                                                        | features-settings-ccd-ccd-settings                                                |  11.74 kB |
+src_app_features_documentos_my-profile_my-profile_ts.js                                                 | features-documentos-my-profile-my-profile                                         |   7.88 kB |
+src_app_extras_service-unavailable_service-unavailable_ts.js                                            | extras-service-unavailable-service-unavailable                                    |   6.59 kB |
+common.js                                                                                               | common                                                                            |   6.47 kB |
+
+Build at: 2026-10-28T20:52:25.367Z - Hash: d603ca6eb0bfcfe9 - Time: 40325ms
+
+** Angular Live Development Server is listening on localhost:4200, open your browser on http://localhost:4200/ **
+
+
+√ Compiled successfully.

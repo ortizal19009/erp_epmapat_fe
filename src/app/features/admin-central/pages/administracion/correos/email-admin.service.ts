@@ -136,7 +136,7 @@ export class EmailAdminService {
   }
 
   testConnection(accountId: number): Observable<{ success: boolean; message: string }> {
-    return throwError(() => new Error('El backend de cuentas de correo no expone un endpoint para probar conexion.'));
+    return this.http.post<{ success: boolean; message: string }>(this.url(`${this.endpoints.accountDetail(accountId)}/test-connection`), {});
   }
 
   retryEmail(emailId: string, compose: EmailComposeFormValue, mode: 'retry' | 'edit-resend'): Observable<EmailLog> {
@@ -296,7 +296,8 @@ export class EmailAdminService {
       securityType: this.toSecurityType(raw?.securityType ?? raw?.tipoSeguridad),
       authRequired: this.toBoolean(raw?.authRequired ?? raw?.requiereAuth, false),
       username: this.nullableText(raw?.username ?? raw?.usuario),
-      password: this.nullableText(raw?.password ?? raw?.clave),
+      password: undefined,
+      hasPassword: this.toBoolean(raw?.hasPassword, false),
       apiUrl: this.nullableText(raw?.apiUrl ?? raw?.apiKeyName ?? raw?.nombreApiKey),
       apiAuthHeader: this.nullableText(raw?.apiAuthHeader),
       apiAuthScheme: this.toApiAuthScheme(raw?.apiAuthScheme ?? raw?.apiAccessLevel ?? raw?.nivelAccesoApi),
@@ -474,9 +475,9 @@ export class EmailAdminService {
     }
   }
 
-  private toMessageState(value: unknown): 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED' {
+  private toMessageState(value: unknown): 'PENDING' | 'SENT' | 'FAILED' | 'UNCERTAIN' | 'CANCELLED' {
     const text = this.toText(value, 'PENDING').toUpperCase();
-    if (text === 'SENT' || text === 'FAILED' || text === 'CANCELLED') {
+    if (text === 'SENT' || text === 'FAILED' || text === 'UNCERTAIN' || text === 'CANCELLED') {
       return text;
     }
     return 'PENDING';

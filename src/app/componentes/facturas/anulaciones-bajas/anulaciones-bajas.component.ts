@@ -1,5 +1,5 @@
 ﻿import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RecaudacionReportsService } from '../../recaudacion/recaudacion-reports.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
@@ -90,6 +90,8 @@ export class AnulacionesBajasComponent implements OnInit {
   reasignacionSeleccionada: any = null;
   xmlPreviewTitulo: string = '';
   xmlPreviewContenido: string = '';
+  readonly maxMotivoFactura = 254;
+  errorAccion = '';
   procesandoAccion: boolean = false;
   sliceDate: string = new Date().toISOString().slice(0, 10);
   userAuth: number;
@@ -136,9 +138,9 @@ export class AnulacionesBajasComponent implements OnInit {
     this.userAuth = this.authService.idusuario;
     this.f_factura = this.fb.group({
       usuarioanulacion: '',
-      razonanulacion: '',
+      razonanulacion: ['', Validators.maxLength(this.maxMotivoFactura)],
       usuarioeliminacion: '',
-      razoneliminacion: '',
+      razoneliminacion: ['', Validators.maxLength(this.maxMotivoFactura)],
       razonreasignacion: '',
     });
     this.f_reportes = this.fb.group({
@@ -1199,6 +1201,7 @@ export class AnulacionesBajasComponent implements OnInit {
   }
 
   abrirNuevoModal(): void {
+    this.errorAccion = '';
     const fechaDesdeActual = this.formBuscar?.value?.fechaDesde ?? '';
     const fechaHastaActual = this.formBuscar?.value?.fechaHasta ?? this.sliceDate;
 
@@ -1236,6 +1239,7 @@ export class AnulacionesBajasComponent implements OnInit {
       !!this.textodato &&
       !!this._factura?.idfactura &&
       this.motivoActual.trim().length >= 5 &&
+      (this.option === '2' || this.motivoActual.length <= this.maxMotivoFactura) &&
       !this.procesandoAccion
     );
   }
@@ -1276,6 +1280,7 @@ export class AnulacionesBajasComponent implements OnInit {
     }
 
     const motivo = this.motivoActual.trim();
+    this.errorAccion = '';
     this.procesandoAccion = true;
 
     if (this.option === '2') {
@@ -1294,6 +1299,7 @@ export class AnulacionesBajasComponent implements OnInit {
           },
           error: (e) => {
             this.procesandoAccion = false;
+            this.errorAccion = e?.error?.message || 'No se pudo completar la operacion. Revise el motivo e intente nuevamente.';
             console.error(e);
           },
         });
@@ -1326,6 +1332,7 @@ export class AnulacionesBajasComponent implements OnInit {
               },
               error: (e) => {
                 this.procesandoAccion = false;
+                this.errorAccion = e?.error?.message || 'No se pudo completar la operacion. Revise el motivo e intente nuevamente.';
                 console.error(e);
               },
             });
@@ -1339,12 +1346,14 @@ export class AnulacionesBajasComponent implements OnInit {
         },
         error: (e) => {
           this.procesandoAccion = false;
+          this.errorAccion = e?.error?.message || 'No se pudo completar la operacion. Revise el motivo e intente nuevamente.';
           console.error(e);
         },
       });
   }
 
   /* REPORTES  */
+
 
   /* REPORTE ELIMINACION */
   generarReport(idfactura: number) {

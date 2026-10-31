@@ -182,6 +182,14 @@
             "certipresu": {
               "tsConfig": "tsconfig.certipresu-spec.json",
               "scripts": []
+            },
+            "correos": {
+              "tsConfig": "tsconfig.correos-spec.json",
+              "scripts": []
+            },
+            "anulaciones": {
+              "tsConfig": "tsconfig.anulaciones-spec.json",
+              "scripts": []
             }
           }
         }

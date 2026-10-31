@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "compilerOptions": { "types": ["jasmine", "jquery"] },
+  "include": ["src/app/features/admin-central/pages/administracion/correos/email-admin.service.spec.ts", "src/**/*.d.ts"]
+}

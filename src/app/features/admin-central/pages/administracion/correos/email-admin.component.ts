@@ -1,3 +1,4 @@
+import { FacturaMonitorComponent } from './components/factura-monitor.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -28,6 +29,7 @@ import { EmailStatusBadgeComponent } from './components/email-status-badge.compo
   selector: 'app-email-admin',
   imports: [
     CommonModule,
+    FacturaMonitorComponent,
     FormsModule,
     ReactiveFormsModule,
     EmailSummaryCardComponent,
@@ -307,7 +309,7 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
           securityType: detail.securityType || 'STARTTLS',
           authRequired: !!detail.authRequired,
           username: detail.username || '',
-          password: detail.password || '',
+          password: '',
           apiUrl: detail.apiUrl || '',
           apiAuthHeader: detail.apiAuthHeader || 'Authorization',
           apiAuthScheme: detail.apiAuthScheme || 'Bearer',
@@ -647,7 +649,8 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
     });
     authFields.forEach((field) => {
       const control = this.accountForm.get(field);
-      control?.setValidators(isSmtp && this.accountForm.get('authRequired')?.value ? [Validators.required] : []);
+      const needsValue = field === 'password' ? !this.selectedAccount?.hasPassword : true;
+      control?.setValidators(isSmtp && this.accountForm.get('authRequired')?.value && needsValue ? [Validators.required] : []);
       control?.updateValueAndValidity({ emitEvent: false });
     });
     apiFields.forEach((field) => {

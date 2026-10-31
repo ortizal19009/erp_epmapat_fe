@@ -732,17 +732,18 @@
                                                     class="form-control professional-textarea"
                                                     rows="4"
                                                     placeholder="Describe claramente por qu&eacute; se anula la factura"
-                                                    formControlName="razonanulacion"></textarea>
+                                                    formControlName="razonanulacion" aria-describedby="limiteMotivoFactura"></textarea>
                                                 <textarea *ngIf="option === '1'"
                                                     class="form-control professional-textarea"
                                                     rows="4"
                                                     placeholder="Describe claramente por qu&eacute; se elimina la factura"
-                                                    formControlName="razoneliminacion"></textarea>
+                                                    formControlName="razoneliminacion" aria-describedby="limiteMotivoFactura"></textarea>
                                                 <textarea *ngIf="option === '2'"
                                                     class="form-control professional-textarea"
                                                     rows="4"
                                                     placeholder="Indica el motivo de la reasignaci&oacute;n del n&uacute;mero de factura"
                                                     formControlName="razonreasignacion"></textarea>
+                                                <small *ngIf="option !== '2'" id="limiteMotivoFactura" class="d-block mt-1" [class.text-danger]="motivoActual.length > maxMotivoFactura" [class.text-muted]="motivoActual.length <= maxMotivoFactura">{{ motivoActual.length }} / {{ maxMotivoFactura }} caracteres. Describe el motivo sin superar este l&iacute;mite.</small>
                                             </div>
 
                                             <div class="alert action-note mt-3 mb-0" *ngIf="textodato">
@@ -752,6 +753,7 @@
                                                 <span *ngIf="option === '2'"> se generar&aacute; un nuevo n&uacute;mero de factura con el secuencial del recaudador y quedar&aacute; el historial de reasignaci&oacute;n.</span>
                                             </div>
 
+                                            <div *ngIf="errorAccion" class="alert alert-danger small mt-3" role="alert">{{ errorAccion }}</div>
                                             <div class="action-footer mt-4">
                                                 <button class="btn btn-light border" data-dismiss="modal"
                                                     type="button">Cancelar</button>

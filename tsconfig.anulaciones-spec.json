@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "compilerOptions": {
+    "types": [
+      "jasmine",
+      "jquery"
+    ]
+  },
+  "include": [
+    "src/app/componentes/facturas/anulaciones-bajas/anulaciones-bajas.component.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

@@ -1,0 +1,81 @@
+- Generating browser application bundles (phase: setup)...
+√ Browser application bundle generation complete.
+
+./node_modules/admin-lte/dist/css/adminlte.min.css.webpack[javascript/auto]!=!./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[5].rules[0].oneOf[0].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[5].rules[0].oneOf[0].use[2]!./node_modules/admin-lte/dist/css/adminlte.min.css - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(11:62244) autoprefixer: Replace color-adjust to print-color-adjust. The color-adjust shorthand is currently deprecated.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/control-sidebar/control-sidebar.component.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/core/models/documento-form.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/core/models/documento.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/features/admin-central/pages/administracion/correos/email-admin.mocks.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/features/settings/dependencies/dependencies-form/dependencies-form.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/features/settings/document-types/document-types-form/document-types-form.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/features/settings/entities/entities-form/entities-form.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/features/settings/usuarios/usuarios-list.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/interfaces/abonado_interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/modelos/administracion/acceso.model.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/modelos/administracion/erpmodulos.model.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/modelos/administracion/usrxmodulos.model.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/modelos/contabilidad/concilia-ban.model.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/modelos/fec_factura_detalles.model.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/modelos/fec_factura_pagos.model.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/modelos/rubrox-fac.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/servicios/administracion/acceso.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/servicios/administracion/correos-enviados.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/servicios/ciclos.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/servicios/contabilidad/concilia-ban.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/servicios/microservicios/recaudacion.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/servicios/reportejr.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/app/servicios/servicios.module.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: C:/Users/Alexi/Documents/PROYECTOS_EPMAPA-T/erp_epmapat_fe/src/environments/environment.prod.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+
