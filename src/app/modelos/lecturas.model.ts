@@ -14,6 +14,7 @@ export class Lecturas {
     lecturaanterior: number;
     lecturaactual: number;
     lecturadigitada: number;
+    promedio?: number | null;
     mesesmulta: number;
     observaciones: String;
     idnovedad_novedades: Novedad;

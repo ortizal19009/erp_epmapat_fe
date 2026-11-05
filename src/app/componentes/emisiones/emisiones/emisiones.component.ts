@@ -91,7 +91,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
           const abonado = l.idabonado_abonados;
           const ruta = l.idrutaxemision_rutasxemision?.idruta_rutas;
           return `Ruta: ${escape(ruta?.descripcion || ruta?.codigo || 'Sin ruta')} | Cuenta: ${escape(abonado?.idabonado)} - ${escape(abonado?.idcliente_clientes?.nombre)}<br>` +
-            `Consumo: ${analisisLecturas.getConsumo(l)} m³ | Promedio: ${Number(abonado?.promedio || 0)} m³`;
+            `Consumo: ${analisisLecturas.getConsumo(l)} m³ | Promedio: ${Number(l.promedio ?? abonado?.promedio ?? 0)} m³`;
         }).join('<br><br>');
         const extra = g.lecturas.length > 8 ? `<br><br>Y ${g.lecturas.length - 8} lectura(s) adicional(es). Consulte el reporte completo.` : '';
         return `<b>${g.titulo} (${g.lecturas.length})</b><br>${items}${extra}`;
@@ -138,7 +138,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
           String(l.idabonado_abonados?.idabonado ?? ''),
           String(l.idabonado_abonados?.idcliente_clientes?.nombre ?? ''),
           String(l.lecturaanterior ?? 0), String(l.lecturaactual ?? 0),
-          String(analisisLecturas.getConsumo(l)), String(l.idabonado_abonados?.promedio || 0),
+          String(analisisLecturas.getConsumo(l)), String(l.promedio ?? l.idabonado_abonados?.promedio ?? 0),
         ]),
         theme: 'grid', styles: { fontSize: 8 },
       });
@@ -308,7 +308,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     this.emiService.ultimo().subscribe({
       next: (datos) => {
         this.fechaemision = datos.feccrea;
-        this.cerrado = datos.estado;
+        this.cerrado = Number(datos.estado);
         hasta = datos.emision;
         this.f_emisionIndividual.patchValue({
           emision: datos.idemision,
@@ -375,6 +375,11 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   buscar() {
+    this.cerrado = 0;
+    this.emiService.ultimo().subscribe({
+      next: (ultima) => { this.cerrado = Number(ultima?.estado ?? 0); },
+      error: () => { this.cerrado = 0; },
+    });
     this.emiService
       .getControlRango(this.formBuscar.value.desde, this.formBuscar.value.hasta)
       .subscribe({
@@ -1514,10 +1519,12 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   nuevo() {
-    if (this.bloquearEdicion()) return;
+    if (this.bloquearEdicion() || this.cerrado !== 1) return;
 
     this.emiService.ultimo().subscribe({
       next: (datos) => {
+        this.cerrado = Number(datos.estado);
+        if (this.cerrado !== 1) return;
         let nuevoAnio: string;
         let nuevomes: string;
         let anio = datos.emision.substring(0, 2);
@@ -1537,7 +1544,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   }
 
   saveEmision() {
-    if (this.bloquearEdicion()) return;
+    if (this.bloquearEdicion() || this.cerrado !== 1) return;
 
     this.emiService.saveEmision(this.formAddEmision.value).subscribe({
       next: (dato) => {
@@ -1546,7 +1553,14 @@ export class EmisionesComponent implements OnInit, OnDestroy {
         this.formBuscar.controls['hasta'].setValue(this.nuevaemision);
         this.buscar();
       },
-      error: (err) => console.error(err.error),
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo crear la emision',
+          text: err?.error?.message || 'Verifique que la emision anterior este cerrada.',
+        });
+        this.buscar();
+      },
     });
   }
 
@@ -3471,7 +3485,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       0,
     );
     const categoria = abonado?.idcategoria_categorias?.descripcion ?? '';
-    const promedioM3 = Number(abonado?.promedio ?? 0);
+    const promedioM3 = Number(lectura?.promedio ?? abonado?.promedio ?? 0);
 
     console.log('[Cierre de ruta - Emisiones] Cuenta procesada', {
       idlectura: lectura?.idlectura ?? null,

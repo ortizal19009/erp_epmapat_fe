@@ -450,7 +450,7 @@ export class LecturasComponent implements OnInit {
 
   getAlertDescription(lectura: any): string {
     const consumo = this.getConsumo(lectura);
-    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+    const promedio = Number(lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0);
 
     if (this.hasNegativeConsumption(lectura)) {
       return `Consumo negativo: ${consumo} m3`;
@@ -483,7 +483,7 @@ export class LecturasComponent implements OnInit {
     const abonado = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
     const categoria = this.getCategoriaDescripcion(lectura);
     const consumo = this.getConsumo(lectura);
-    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+    const promedio = Number(lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0);
 
     await Swal.fire({
       icon: 'info',
@@ -650,7 +650,7 @@ export class LecturasComponent implements OnInit {
         const cuenta = lectura?.idabonado_abonados?.idabonado ?? 'S/N';
         const nombre = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
         const consumo = this.getConsumo(lectura);
-        const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+        const promedio = Number(lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0);
         return `${index + 1}. Cuenta ${cuenta} - ${nombre}<br>Consumo: ${consumo} m3 | Promedio: ${promedio} m3`;
       })
       .join('<br><br>');
@@ -750,7 +750,7 @@ export class LecturasComponent implements OnInit {
       const cuenta = lectura?.idabonado_abonados?.idabonado ?? 'S/N';
       const abonado = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
       const categoria = this.getCategoriaDescripcion(lectura) || '';
-      const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+      const promedio = Number(lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0);
       const anterior = Number(lectura?.lecturaanterior || 0);
       const actual = Number(lectura?.lecturaactual || 0);
       const consumo = this.getConsumo(lectura);
@@ -804,7 +804,7 @@ export class LecturasComponent implements OnInit {
         suma +=
           this._lecturas[i].lecturaactual - this._lecturas[i].lecturaanterior;
       }
-      promedio += Number(this._lecturas[i]?.idabonado_abonados?.promedio || 0);
+      promedio += Number(this._lecturas[i]?.promedio ?? this._lecturas[i]?.idabonado_abonados?.promedio ?? 0);
       arecaudar += Number(this._lecturas[i]?.total1 || 0);
       i++;
     });
@@ -1464,7 +1464,7 @@ export class LecturasComponent implements OnInit {
       0,
     );
     const categoria = abonado?.idcategoria_categorias?.descripcion ?? '';
-    const promedioM3 = Number(abonado?.promedio ?? 0);
+    const promedioM3 = Number(lectura?.promedio ?? abonado?.promedio ?? 0);
 
     console.log('[Cierre de ruta - Lecturas] Cuenta procesada', {
       idlectura: lectura?.idlectura ?? null,

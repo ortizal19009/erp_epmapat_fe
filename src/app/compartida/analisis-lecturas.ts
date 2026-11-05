@@ -10,7 +10,7 @@ export class AnalisisLecturas {
 
   hasHighConsumptionVsAverage(lectura: any): boolean {
     const consumo = this.getConsumo(lectura);
-    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+    const promedio = Number(lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0);
 
     if (consumo < 0 || promedio <= 0) return false;
 

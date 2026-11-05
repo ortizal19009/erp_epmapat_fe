@@ -96,7 +96,7 @@
             <td class="text-right"
               [ngClass]="{'fontwarning': ((lectura.lecturaanterior == 0 && lectura.lecturaactual == 0) || lectura.lecturaactual - lectura.lecturaanterior <= 0 || (lectura.lecturaanterior > 0 && lectura.lecturaactual == 0)), 'transparente': !swcargado }">
               {{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0' }}</td>
-            <td class="text-right">{{ lectura?.idabonado_abonados?.promedio ?? 0 }}</td>
+            <td class="text-right">{{ lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0 }}</td>
             <td class="text-right">{{ lectura.total1 | number: '1.2-2' }}</td>
             <td>{{ lectura?.idnovedad_novedades?.descripcion ?? '' }}</td>
             <td class="text-center">

@@ -41,7 +41,7 @@ export function crearExcelAnalisisLecturas(reporte: ReporteAnalisisLecturas): Ex
         String(abonado?.idabonado ?? ''), String(abonado?.idcliente_clientes?.nombre ?? ''),
         String(abonado?.idcategoria_categorias?.descripcion ?? ''),
         Number(lectura?.lecturaanterior || 0), Number(lectura?.lecturaactual || 0),
-        analisisLecturas.getConsumo(lectura), Number(abonado?.promedio || 0),
+        analisisLecturas.getConsumo(lectura), Number(lectura?.promedio ?? abonado?.promedio ?? 0),
       ]);
     }
   }

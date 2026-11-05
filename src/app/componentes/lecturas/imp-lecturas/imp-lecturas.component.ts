@@ -705,7 +705,7 @@ export class ImpLecturasComponent implements OnInit {
 
   private hasHighConsumptionVsAverage(lectura: any): boolean {
     const consumo = this.getConsumo(lectura);
-    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+    const promedio = Number(lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0);
     if (consumo < 0 || promedio <= 0) return false;
     return consumo > promedio * 2;
   }
@@ -812,7 +812,7 @@ export class ImpLecturasComponent implements OnInit {
         this.formatoNumero(lectura?.idabonado_abonados?.idabonado, 0),
         lectura?.idabonado_abonados?.idcliente_clientes?.nombre || '',
         lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || '',
-        this.formatoNumero(lectura?.idabonado_abonados?.promedio || 0, 0),
+        this.formatoNumero(lectura?.promedio ?? lectura?.idabonado_abonados?.promedio ?? 0, 0),
         this.formatoNumero(lectura?.lecturaanterior || 0, 0),
         this.formatoNumero(lectura?.lecturaactual || 0, 0),
         this.formatoNumero(this.getConsumo(lectura), 0),
