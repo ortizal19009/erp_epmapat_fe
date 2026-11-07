@@ -62,3 +62,8 @@ table tbody tr:hover  {
 .transparente{ opacity: 0;}
 
 .sombra{ box-shadow: 0 0 10px rgba(0, 0, 0, 0.75); }
+
+/* El texto y la insignia complementan el color para identificar cuotas vencidas. */
+table tbody tr.cuotas-vencidas { background-color: #fff1f0; }
+table tbody tr.cuotas-vencidas > td:first-child { border-left: 4px solid #dc3545; }
+table tbody tr.cuotas-vencidas:hover { background-color: #f8d7da; color: #721c24; }

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from '@compartida/autoriza.service';
 import { ColoresService } from '@compartida/colores.service';
@@ -9,13 +9,28 @@ import { EliminadosappService } from '@servicios/administracion/eliminadosapp.se
 import { ReportesjrService } from '@servicios/administracion/reportesjr.service';
 import { RepoxopcionService } from '@servicios/administracion/repoxopcion.service';
 import Swal from 'sweetalert2';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-reportejr',
   templateUrl: './reportejr.component.html',
   styleUrls: ['./reportejr.component.css']
 })
-export class ReportesjrComponent implements OnInit {
+export class ReportesjrComponent implements OnInit, OnDestroy {
+
+  reporteVisualizado: Reportesjr | null = null;
+  parametrosVisualizados: ParametroVisual[] = [];
+  formVistaPrevia: FormGroup = new FormGroup({});
+  cargandoDetalle = false;
+  generandoVista = false;
+  errorVista = '';
+  pdfSeguro: SafeResourceUrl | null = null;
+  private pdfUrl: string | null = null;
+  private detalleSub?: Subscription;
+  private vistaSub?: Subscription;
+  private focoAnterior: HTMLElement | null = null;
+  private overflowAnterior = '';
 
   formBuscar!: FormGroup;
   swbuscando?: boolean;
@@ -34,7 +49,7 @@ export class ReportesjrComponent implements OnInit {
 
   constructor(public fb: FormBuilder, private router: Router, public authService: AutorizaService,
     private coloresService: ColoresService, private repoxopService: RepoxopcionService,
-    private repojrService: ReportesjrService, private elimService: EliminadosappService) { }
+    private repojrService: ReportesjrService, private elimService: EliminadosappService, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
     if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
@@ -131,38 +146,131 @@ export class ReportesjrComponent implements OnInit {
       },
       error: err => {
         console.error('Error al buscar las Opciones:', err.error)
+        this.swbuscando = false;
+        this.txtbuscar = 'Buscar';
         this.authService.mostrarError('Error al buscar las Opciones', err.error);
       }
     });
   }
 
+  parametrosDe(reporte: Reportesjr): ParametroVisual[] {
+    try {
+      const raw = typeof reporte.parametros === 'string' ? JSON.parse(reporte.parametros) : reporte.parametros;
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
+      return Object.entries(raw).map(([nombre, valor]) => {
+        const [tipo, ancho = '12', orden = '999'] = String(valor).split('|');
+        const entrada = ['java.util.Date', 'java.sql.Date'].includes(tipo) ? 'date'
+          : tipo === 'java.sql.Timestamp' ? 'datetime-local'
+          : /^java\.lang\.(Integer|Long|Short|Double|Float)$/.test(tipo) || tipo === 'java.math.BigDecimal' ? 'number'
+          : tipo === 'java.lang.Boolean' ? 'boolean' : 'text';
+        const editable = entrada !== 'text' || tipo === 'java.lang.String';
+        return { nombre, tipo, ancho: Number(ancho) || 12, orden: Number(orden) || 999, entrada, editable };
+      }).sort((a, b) => a.orden - b.orden);
+    } catch { return []; }
+  }
+
   calcCantidadPorRegistro(): void {
-    this.totalParametros = []; // reiniciar el arreglo
+    this.totalParametros = this.reportesjr.map(reporte => this.parametrosDe(reporte).length);
+  }
 
-    for (const r of this.reportesjr) {
-      try {
-        const safeParametros = JSON.parse(r.parametros || '{}');
-
-        const cantidad = Object.entries(safeParametros).filter(([_, valor]) => {
-          const partes = String(valor).split('|');
-          return partes.length === 2 && partes[0].includes('.') && partes[1].trim() !== '';
-        }).length;
-
-        this.totalParametros.push(cantidad);
-      } catch {
-        this.totalParametros.push(0); // si el JSON está mal, se guarda 0
+  visualizar(reporte: Reportesjr): void {
+    this.cerrarVisualizacion();
+    this.focoAnterior = document.activeElement as HTMLElement;
+    this.overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    this.reporteVisualizado = reporte;
+    this.cargandoDetalle = true;
+    this.detalleSub = this.repojrService.getById(reporte.idreporte!).subscribe({
+      next: detalle => {
+        this.reporteVisualizado = detalle;
+        this.parametrosVisualizados = this.parametrosDe(detalle);
+        const campos: Record<string, any> = {};
+        this.parametrosVisualizados.filter(p => p.editable).forEach(p => {
+          const entero = /^java\.lang\.(Integer|Long|Short)$/.test(p.tipo);
+          campos[p.nombre] = [p.nombre === 'idusuario' ? this.authService.idusuario : '',
+            entero ? Validators.pattern(/^-?\d+$/) : []];
+        });
+        this.formVistaPrevia = this.fb.group(campos);
+        this.cargandoDetalle = false;
+      },
+      error: () => {
+        this.cargandoDetalle = false;
+        this.errorVista = 'No se pudieron cargar los datos del reporte. Cierra la ventana e intenta nuevamente.';
       }
+    });
+    setTimeout(() => document.getElementById('cerrarDetalleReporte')?.focus());
+  }
+
+  generarVistaPrevia(): void {
+    if (!this.reporteVisualizado || this.reporteVisualizado.metodo !== 1 || this.formVistaPrevia.invalid
+      || this.cargandoDetalle || this.generandoVista) return;
+    this.vistaSub?.unsubscribe();
+    this.liberarPdf();
+    this.errorVista = '';
+    this.generandoVista = true;
+    const parameters = this.parametrosVisualizados.filter(p => p.editable).map(p => {
+      let value = this.formVistaPrevia.get(p.nombre)?.value;
+      if (p.tipo === 'java.sql.Timestamp' && value) value = value.replace('T', ' ') + (value.length === 16 ? ':00' : '');
+      return { name: p.nombre, type: p.tipo, value };
+    }).filter(p => p.value !== '' && p.value !== null && p.value !== undefined);
+    this.vistaSub = this.repojrService.ejecutaReporteSQL({
+      reportName: this.reporteVisualizado.nomrep, parameters, extension: 'pdf'
+    }).subscribe({
+      next: blob => {
+        this.pdfUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        this.pdfSeguro = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfUrl);
+        this.generandoVista = false;
+      },
+      error: () => {
+        this.generandoVista = false;
+        this.errorVista = 'No se pudo generar el PDF. Revisa los parámetros y la disponibilidad de los datos del reporte.';
+      }
+    });
+  }
+
+  private liberarPdf(): void {
+    if (this.pdfUrl) URL.revokeObjectURL(this.pdfUrl);
+    this.pdfUrl = null;
+    this.pdfSeguro = null;
+  }
+
+  cerrarVisualizacion(): void {
+    this.detalleSub?.unsubscribe();
+    this.vistaSub?.unsubscribe();
+    this.liberarPdf();
+    if (this.reporteVisualizado) document.body.style.overflow = this.overflowAnterior;
+    this.reporteVisualizado = null;
+    this.parametrosVisualizados = [];
+    this.errorVista = '';
+    this.generandoVista = false;
+    this.cargandoDetalle = false;
+    this.focoAnterior?.focus();
+    this.focoAnterior = null;
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  tecladoModal(event: KeyboardEvent): void {
+    if (!this.reporteVisualizado) return;
+    if (event.key === 'Escape') { event.preventDefault(); this.cerrarVisualizacion(); }
+    if (event.key === 'Tab') {
+      const controles = Array.from(document.querySelectorAll<HTMLElement>(
+        '#detalleReporteDialog button:not([disabled]), #detalleReporteDialog input, #detalleReporteDialog select'));
+      const primero = controles[0], ultimo = controles[controles.length - 1];
+      if (event.shiftKey && document.activeElement === primero) { event.preventDefault(); ultimo?.focus(); }
+      else if (!event.shiftKey && document.activeElement === ultimo) { event.preventDefault(); primero?.focus(); }
     }
   }
 
+  ngOnDestroy(): void { this.cerrarVisualizacion(); }
+
   filtrar(valor: any): void {
-    const filtro = valor.toLowerCase();
+    const filtro = String(valor || '').toLowerCase();
     if (!filtro) {
-      if (this.repojrFiltrados.length > 0) this.repojrFiltrados = [...this.reportesjr];
+      this.repojrFiltrados = [...this.reportesjr];
       return;
     }
     this.repojrFiltrados = this.reportesjr.filter(a => {
-      return [a.codigo, a.nomrep, a.desrep].some(campo =>
+      return [a.repoxopcion?.codigo, a.repoxopcion?.opcion, a.repoxopcion?.nombre, a.nomrep, a.desrep].some(campo =>
         String(campo).toLowerCase().includes(filtro)
       );
     });
@@ -181,12 +289,12 @@ export class ReportesjrComponent implements OnInit {
       let valorB: any;
       switch (campo) {
         case 'codigo':
-          valorA = `${a.repoxopcion.codigo}`;
-          valorB = `${b.repoxopcion.codigo}`;
+          valorA = `${a.repoxopcion?.codigo}`;
+          valorB = `${b.repoxopcion?.codigo}`;
           break;
         case 'opcion':
-          valorA = a.repoxopcion.opcion;
-          valorB = b.repoxopcion.opcion;
+          valorA = a.repoxopcion?.opcion;
+          valorB = b.repoxopcion?.opcion;
           break;
         default:
           valorA = a[campo];
@@ -210,55 +318,22 @@ export class ReportesjrComponent implements OnInit {
   }
 
   onCellClick(event: any, reportejr: Reportesjr) {
-    const tagName = event.target.tagName;
+    if ((event.target as HTMLElement).closest('button, .dropdown-menu')) return;
     this.ultIdSelec = reportejr.idreporte!;
     sessionStorage.setItem('ultidreporte', this.ultIdSelec.toString());
-    if (tagName === 'TD') {
-      if (reportejr.metodo == 1) {
-        const reportejrJson = JSON.stringify(reportejr);
-        sessionStorage.setItem('reportejrToImpExp', reportejrJson);
-        this.router.navigate(['imp-reportejr']);
-      }
-    }
+    this.visualizar(reportejr);
+  }
+
+  imprimirReporte(reporte: Reportesjr): void {
+    sessionStorage.setItem('reportejrToImpExp', JSON.stringify(reporte));
+    this.cerrarVisualizacion();
+    this.router.navigate(['/imp-reportejr']);
   }
 
   nuevo() { this.router.navigate(['/add-reportejr']); }
 
   parametros(repo: Reportesjr) {
-    let parametros = repo.parametros;
-
-    // Asegura que parametros sea un objeto antes de usar Object.entries
-    const safeParametros = (parametros && typeof parametros === 'object') ? parametros : {};
-
-    // Construir filas de la tabla
-    const filas = Object.entries(safeParametros)
-      .map(([nombre, valor]) => {
-        const [tipoCompleto, longitud] = String(valor).split('|');
-        const tipoSimple = tipoCompleto.split('.').pop();
-        return `<tr><td><strong>${nombre}</strong></td><td>${tipoSimple}</td><td>${longitud}</td></tr>`;
-      })
-      .join('');
-
-    // Mostrar el modal con tabla
-    Swal.fire({
-      title: `Parámetros del Reporte: ${repo.nomrep}`,
-      // html: `<table style="width:100%; text-align:left; border-collapse:collapse">
-      html: `<table class="table table-hover table-bordered table-sm sombra mb-0">
-         <thead class="bg-success text-white">
-         <tr><th>Parametro</th><th>Tipo</th><th>Longitud</th></tr>
-         </thead>
-         <tbody class="roboto">
-            ${filas}
-         </tbody>
-         </table> `,
-      // icon: 'info',
-      confirmButtonText: 'Cerrar',
-      customClass: {
-        confirmButton: 'btn btn-success',
-        popup: 'swaInfo',
-        title: 'swafantacyblack',
-      }
-    });
+    this.visualizar(repo);
   }
 
   modificar(reportejr: Reportesjr): void {
@@ -351,4 +426,12 @@ interface BuscarReportesjr {
   codigo: string;
   nomrep: string;
   desrep: string;
+}
+interface ParametroVisual {
+  nombre: string;
+  tipo: string;
+  ancho: number;
+  orden: number;
+  entrada: string;
+  editable: boolean;
 }

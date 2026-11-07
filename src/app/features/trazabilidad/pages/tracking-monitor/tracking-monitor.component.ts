@@ -1,3 +1,4 @@
+import { crearIconoMapa } from 'src/app/compartida/mapa-marcadores';
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { TrazabilidadService, TrackingReader } from '../../services/trazabilidad.service';
 import * as L from 'leaflet';
@@ -101,7 +102,7 @@ export class TrackingMonitorComponent implements OnInit, AfterViewInit, OnDestro
 
     this.playbackIndex = 0;
     const start = this.points[0];
-    this.readerMarker = L.marker([start.latitude, start.longitude]).addTo(this.map);
+    this.readerMarker = L.marker([start.latitude, start.longitude], { icon: crearIconoMapa('lector'), title: 'Posicion del lector' }).addTo(this.map);
   }
 
   togglePlayback(): void {

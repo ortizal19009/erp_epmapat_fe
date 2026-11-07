@@ -46,9 +46,7 @@ export class ImpReportejrComponent implements OnInit {
       if (reportejrJSON) {
          this.reportejr = JSON.parse(reportejrJSON);
          this.nomrep = this.reportejr.nomrep!;
-         const jrxmlBase64 = this.reportejr.jrxml!;
-         const xmlString = decodeBase64ToXml(jrxmlBase64);
-         const nombreReporte = extractReportNameFromJrxml(xmlString);
+         const nombreReporte = this.reportejr.jrxmlPath || this.reportejr.nomrep;
 
          this.formImprimir = this.fb.group({
             opcion: this.reportejr.repoxopcion.opcion,
@@ -229,23 +227,6 @@ export class ImpReportejrComponent implements OnInit {
       }
    }
 
-}
-
-function decodeBase64ToXml(base64: string): string {
-   const binary = atob(base64); // decodifica Base64 a string binario
-   const bytes = new Uint8Array(binary.length);
-   for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-   }
-   const decoder = new TextDecoder('utf-8');
-   return decoder.decode(bytes);
-}
-
-function extractReportNameFromJrxml(xmlString: string): string | null {
-   const parser = new DOMParser();
-   const doc = parser.parseFromString(xmlString, 'application/xml');
-   const jasperReport = doc.getElementsByTagName('jasperReport')[0];
-   return jasperReport?.getAttribute('name') ?? null;
 }
 
 function nombreMetodo(metodo: number): string {

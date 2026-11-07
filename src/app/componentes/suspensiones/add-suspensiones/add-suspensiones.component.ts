@@ -185,7 +185,7 @@ export class AddSuspensionesComponent implements OnInit {
         abonado,
         this.authService.idusuario,
         this.f_dsuspension.value.observa || 'Suspension de medidor',
-        Number(this.f_dsuspension.value.tipo) === 3 ? 'RETIRO_MEDIDOR' : 'SUSPENSION'
+        Number(this.f_dsuspension.value.tipo) === 3 ? 'RETIRO_MEDIDOR' : 'SUSPENSION', 'SUSPENSIONES'
       )
       .subscribe({
         next: () => undefined,

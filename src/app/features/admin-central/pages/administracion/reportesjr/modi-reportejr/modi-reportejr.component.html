@@ -41,13 +41,30 @@
                      </div>
                   </div>
 
+                  <div class="form-group col-md-12">
+                     <label for="opcionesAcceso">Opciones adicionales que pueden usar este reporte</label>
+                     <select id="opcionesAcceso" class="form-control" multiple size="6" (change)="cambiarOpciones($event)">
+                        <option *ngFor="let opcion of opcionesDisponibles" [value]="opcion.idrepoxopcion"
+                           [selected]="opcionesSeleccionadas.includes(opcion.idrepoxopcion)">
+                           {{ opcion.codigo }} · {{ opcion.nombre }}
+                        </option>
+                     </select>
+                     <small class="form-text text-muted">La opción principal también tendrá acceso. Usa Ctrl para seleccionar varias opciones.</small>
+                     <small class="form-text text-muted">Los archivos se guardan en la carpeta de reportes del backend; la base de datos conserva las rutas y los parámetros.</small>
+                  </div>
+
+                  <div class="col-md-12 mb-3" *ngIf="!reportejr.jasperPath">
+                     <p>Este reporte aún tiene sus archivos en la base de datos.</p>
+                     <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="swactualizando"
+                        (click)="migrarArchivos()">Mover archivos a la carpeta del backend</button>
+                  </div>
                   <div class="form-group col-md-8">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Reporte guardado</label>
                         </div>
                         <input type="text" class="form-control robotosmall" formControlName="jrxml" readonly
-                           tabindex="-1" [ngClass]="{'text-danger': nomrep !== f['jrxml'].value}">
+                           tabindex="-1">
                      </div>
                   </div>
 
@@ -115,6 +132,30 @@
                            <option value=3>3. Desde el Frontend</option>
                         </select>
                      </div>
+                     <small class="form-text text-muted" aria-live="polite">
+                        <span *ngIf="f['metodo'].value == 1">El JRXML contiene la consulta SQL; el backend la ejecuta con los parámetros del reporte.</span>
+                        <span *ngIf="f['metodo'].value == 2">El backend prepara una lista de objetos Java (Beans) y Jasper utiliza sus propiedades como campos.</span>
+                        <span *ngIf="f['metodo'].value == 3">El frontend envía una lista de datos al backend para generar el documento.</span>
+                     </small>
+                  </div>
+
+                  <div class="col-md-12 mb-3">
+                     <details class="border rounded p-2 bg-light">
+                        <summary class="text-primary">¿Qué método debo elegir?</summary>
+                        <p class="small mt-2 mb-2">El método indica de dónde obtiene Jasper los datos que mostrará.</p>
+                        <div class="table-responsive">
+                           <table class="table table-bordered table-sm small mb-2">
+                              <thead><tr><th scope="col">Método</th><th scope="col">Origen de los datos</th><th scope="col">Cuándo usarlo</th></tr></thead>
+                              <tbody>
+                                 <tr><th scope="row">1. SQL directo</th><td>La consulta está en el JRXML y el backend la ejecuta en la base de datos.</td><td>Consultas de cobros, emisiones, saldos o trámites. Ejemplo: RubrosCobrados recibe fechas y consulta los cobros.</td></tr>
+                                 <tr><th scope="row">2. Conjunto de Beans</th><td>El backend prepara una lista de objetos Java y Jasper lee sus propiedades.</td><td>Cuando necesitas calcular, combinar o transformar datos con lógica Java antes de imprimir.</td></tr>
+                                 <tr><th scope="row">3. Desde el frontend</th><td>La pantalla envía una lista de datos al backend, que genera el reporte.</td><td>Para imprimir datos preparados o seleccionados en una pantalla.</td></tr>
+                              </tbody>
+                           </table>
+                        </div>
+                        <p class="small mb-2"><strong>Parámetros:</strong> los tres métodos pueden recibir información adicional, como fechas, ID de usuario, título o número de factura.</p>
+                        <p class="small mb-0"><strong>Al elegir:</strong> verifica cómo el módulo consumidor entrega los datos. Una plantilla sin SQL puede usar Beans o datos del frontend. Cambiar este selector requiere que esa integración corresponda al método elegido.</p>
+                     </details>
                   </div>
 
                   <div class="form-group col-md-12 my-0 py-0">

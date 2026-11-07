@@ -50,37 +50,21 @@ export class FacturacionComponent implements OnInit {
     sessionStorage.setItem('ventana', `/${this.ventana}`);
     void this.loadRolePermission();
 
+    const partesFecha = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Guayaquil', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const parte = (tipo: string) => partesFecha.find(p => p.type === tipo)!.value;
+    const anio = parte('year');
+    const hoy = `${anio}-${parte('month')}-${parte('day')}`;
+
     this.formBuscar = this.fb.group({
       desde: '',
       hasta: '',
-      del: '',
-      al: '',
-      cliente: '',
+      del: `${anio}-01-01`,
+      al: hoy,
+      cliente: sessionStorage.getItem('clienteFacturacion') || '',
     });
-
-    this.factuServicio.ultimo().subscribe({
-      next: (datos) => {
-        let al: string = datos.feccrea.toString().slice(0, 10);
-        let del: string = '';
-        let fechaRestada: Date;
-        fechaRestada = new Date(datos.feccrea);
-        fechaRestada.setMonth(fechaRestada.getMonth() - 1);
-        del = fechaRestada.toISOString().slice(0, 10);
-        let cliente: string = '';
-        if (sessionStorage.getItem('clienteFacturacion') != null)
-          cliente = sessionStorage.getItem('clienteFacturacion')!;
-
-        this.formBuscar.patchValue({
-          desde: '',
-          hasta: '',
-          del: del,
-          al: al,
-          cliente: cliente,
-        });
-        this.buscar();
-      },
-      error: (err) => console.error(err.error),
-    });
+    this.buscar();
   }
 
   iniDesdeHasta() {
@@ -497,16 +481,29 @@ export class FacturacionComponent implements OnInit {
     return Number(item?.valorPendiente ?? item?.totalPendiente ?? item?.pendiente ?? 0);
   }
 
+  getResumenCuotas(item: any): any {
+    return this.facturacionesPendientesMap.get(Number(item?.idfacturacion)) || item;
+  }
+
+  getCuotasVencidas(item: any): number {
+    return Number(this.getResumenCuotas(item)?.cuotasVencidas || 0);
+  }
+
+  getValorVencido(item: any): number {
+    return Number(this.getResumenCuotas(item)?.valorVencido || 0);
+  }
+
   getEstadoFacturacion(item: any): string {
-    const idfacturacion = Number(item?.idfacturacion ?? 0);
-    if (this.facturacionesPendientesMap.has(idfacturacion)) {
-      return 'Pendiente';
+    if (this.getCuotasVencidas(item) > 0) return 'Cuotas vencidas';
+    if (this.facturacionesPendientesMap.has(Number(item?.idfacturacion)) || this.getPendientesPendiente(item) > 0) {
+      return 'Pendiente sin vencidas';
     }
     return 'Pagada';
   }
 
   getClaseEstadoFacturacion(item: any): string {
-    return this.getEstadoFacturacion(item) === 'Pendiente' ? 'badge badge-warning' : 'badge badge-success';
+    if (this.getCuotasVencidas(item) > 0) return 'badge badge-danger';
+    return this.getEstadoFacturacion(item) === 'Pagada' ? 'badge badge-success' : 'badge badge-info';
   }
 
   private cargarEstadosPendientes(desde: any, hasta: any, cliente: any) {
@@ -592,6 +589,10 @@ export class FacturacionComponent implements OnInit {
         return this.getPagadasPendiente(item);
       case 'pendientes':
         return this.getPendientesPendiente(item);
+      case 'vencidas':
+        return this.getCuotasVencidas(item);
+      case 'valorVencido':
+        return this.getValorVencido(item);
       case 'valorPendiente':
         return this.getValorPendientePendiente(item);
       default:

@@ -128,3 +128,5 @@ table {
 .map-photo-panel {
   background-color: #fffef1;
 }
+
+.historial-valor { min-width: 140px; max-width: 300px; overflow-wrap: anywhere; white-space: pre-wrap; }

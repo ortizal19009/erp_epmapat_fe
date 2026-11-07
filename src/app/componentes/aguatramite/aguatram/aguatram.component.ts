@@ -341,7 +341,7 @@ export class AguatramComponent implements OnInit {
       abonado.fecmodi = this.obtenerFechaActualLocal();
       const observacion = this.observaciones || 'Trámite de agua';
       await firstValueFrom(
-         this.s_abonados.updateAbonadoAuditoria(abonado, this.authService.idusuario, observacion, 'MODIFICACION')
+         this.s_abonados.updateAbonadoAuditoria(abonado, this.authService.idusuario, observacion, 'MODIFICACION', 'TRAMITES_AGUA')
       );
    }
 

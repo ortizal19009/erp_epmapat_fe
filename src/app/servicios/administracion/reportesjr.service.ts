@@ -41,7 +41,7 @@ export class ReportesjrService {
    }
 
    // Es POST para add-reportejr
-   uploadReporte(idrepoxopcion: number, nomrep: string, metodo: number, desrep: string, jrxml: File, jasper: File): Observable<Reportesjr> {
+   uploadReporte(idrepoxopcion: number, nomrep: string, metodo: number, desrep: string, jrxml: File, jasper: File, opciones: number[] = []): Observable<Reportesjr> {
       const formData = new FormData();
       formData.append('idrepoxopcion', idrepoxopcion.toString());
       formData.append('nomrep', nomrep);
@@ -49,16 +49,18 @@ export class ReportesjrService {
       formData.append('desrep', desrep);
       formData.append('jrxml', jrxml);
       formData.append('jasper', jasper);
+      formData.append('opciones', [idrepoxopcion, ...opciones].join(','));
       return this.http.post<Reportesjr>(`${baseUrl}`, formData);
    }
 
    // Actualiza solo los datos del reporte (sin archivos)
-   actualizarMetadatos(id: number, datos: { idrepoxopcion: number; nomrep: string; metodo: number; desrep: string }): Observable<Reportesjr> {
+   actualizarMetadatos(id: number, datos: { idrepoxopcion: number; nomrep: string; metodo: number; desrep: string; opciones?: number[] }): Observable<Reportesjr> {
       const params = new HttpParams()
          .set('idrepoxopcion', datos.idrepoxopcion.toString())
          .set('nomrep', datos.nomrep)
          .set('metodo', datos.metodo)
-         .set('desrep', datos.desrep);
+         .set('desrep', datos.desrep)
+         .set('opciones', [datos.idrepoxopcion, ...(datos.opciones || [])].join(','));
       return this.http.put<Reportesjr>(`${baseUrl}/${id}/metadatos`, null, { params });
    }
 
@@ -70,6 +72,7 @@ export class ReportesjrService {
       desrep: string;
       jrxml: File;
       jasper: File;
+      opciones?: number[];
    }): Observable<Reportesjr> {
       const formData = new FormData();
       formData.append('idrepoxopcion', datos.idrepoxopcion.toString());
@@ -78,8 +81,13 @@ export class ReportesjrService {
       formData.append('desrep', datos.desrep);
       formData.append('jrxml', datos.jrxml);
       formData.append('jasper', datos.jasper);
+      formData.append('opciones', [datos.idrepoxopcion, ...(datos.opciones || [])].join(','));
 
       return this.http.put<Reportesjr>(`${baseUrl}/${id}`, formData);
+   }
+
+   migrarArchivos(id: number): Observable<Reportesjr> {
+      return this.http.post<Reportesjr>(`${baseUrl}/${id}/migrar-archivos`, null);
    }
 
    deleteReporte(id: number) {

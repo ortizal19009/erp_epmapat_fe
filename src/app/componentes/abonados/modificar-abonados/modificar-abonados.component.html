@@ -1,26 +1,31 @@
-<div class="content abonado-edit-page">
+<div class="content abonado-edit-page mt-1 pt-1 pl-0">
   <div class="container-fluid">
     <div class="row justify-content-center">
-      <div class="col-xl-11 col-12 pt-3">
-        <div class="edit-hero mb-3">
+      <div class="col-12 pt-1">
+        <div class="edit-hero cabecera gestion-hero mb-3">
           <div class="edit-hero__content">
             <div>
               <div class="edit-hero__eyebrow">Gestión de abonados</div>
-              <h3 class="edit-hero__title mb-1">Modificar abonado</h3>
+              <h4 class="edit-hero__title mb-1"><i class="bi bi-pencil-square mr-2" aria-hidden="true"></i>Modificar abonado</h4>
               <p class="edit-hero__subtitle mb-0">
                 Actualiza datos técnicos, ubicación, responsables y evidencia fotográfica desde una sola vista.
               </p>
             </div>
-            <div class="edit-hero__badge">
-              <span class="edit-hero__badge-label">Cuenta</span>
-              <span class="edit-hero__badge-value">{{ abonadoForm.value.idabonado || abonado.idabonado || '--' }}</span>
+            <div class="edit-hero__actions">
+              <div class="edit-hero__badge">
+                <span class="edit-hero__badge-label">Cuenta</span>
+                <span class="edit-hero__badge-value">{{ abonadoForm.value.idabonado || abonado.idabonado || '--' }}</span>
+              </div>
+              <button type="button" class="btn btn-outline-light btn-sm" (click)="retornar()" [disabled]="guardando">
+                <i class="bi bi-arrow-left mr-1" aria-hidden="true"></i> Regresar
+              </button>
             </div>
           </div>
         </div>
 
         <div class="row">
           <div class="col-lg-4 col-xl-3 mb-3">
-            <div class="card border-0 shadow-sm abonado-sidecard">
+            <div class="card gestion-card abonado-sidecard">
               <div class="card-body">
                 <div class="abonado-sidecard__header">
                   <div class="abonado-sidecard__icon">
@@ -93,8 +98,8 @@
           </div>
 
           <div class="col-lg-8 col-xl-9">
-            <div class="card shadow-sm fondoAbonado detalle edit-shell border-0">
-              <div class="card-body p-3 p-lg-4">
+            <div class="card gestion-card detalle edit-shell">
+              <div class="card-body p-3">
                 <form [formGroup]="abonadoForm">
                   <div class="alert alert-warning mb-4" *ngIf="formSubmitted && abonadoForm.invalid">
                     <strong>Faltan datos por revisar.</strong>
@@ -456,7 +461,7 @@
           aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
-              <div class="modal-header">
+              <div class="modal-header cabecera">
                 <h5 class="modal-title" id="responsablePagoModalLabel">Buscar responsable de pago</h5>
               </div>
               <div class="modal-body">
@@ -469,7 +474,7 @@
         <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
-              <div class="modal-header">
+              <div class="modal-header cabecera">
                 <h5 class="modal-title" id="clienteModalLabel">Buscar cliente</h5>
               </div>
               <div class="modal-body">

@@ -1,3 +1,4 @@
+import { crearIconoMapa } from 'src/app/compartida/mapa-marcadores';
 import {
   AfterViewInit,
   Component,
@@ -10,7 +11,7 @@ import {
 import { Router } from '@angular/router';
 import { Categoria } from 'src/app/modelos/categoria.model';
 import { Lecturas } from 'src/app/modelos/lecturas.model';
-import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { AbonadosService, HistorialCuenta } from 'src/app/servicios/abonados.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
@@ -151,6 +152,57 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   notificacionesTotalElements: number = 0;
   notificacionesLoading: boolean = false;
   notificacionesLoaded: boolean = false;
+  historialCuenta: HistorialCuenta[] = [];
+  historialCuentaPage = 0;
+  historialCuentaTotalPages = 0;
+  historialCuentaTotal = 0;
+  historialCuentaLoading = false;
+  historialCuentaError = '';
+  readonly camposHistorial: Record<string, string> = {
+    nromedidor: 'Medidor', idcategoria_categorias: 'Categoría', idresponsable: 'Responsable de pago',
+    idcliente_clientes: 'Propietario', idruta_rutas: 'Ruta', secuencia: 'Secuencia', estado: 'Estado de la cuenta',
+    lecturainicial: 'Lectura inicial', fechainstalacion: 'Fecha de instalacion', marca: 'Marca',
+    direccionubicacion: 'Dirección', localizacion: 'Localización', observacion: 'Observación',
+    departamento: 'Departamento', piso: 'Piso', idubicacionm_ubicacionm: 'Ubicación del medidor',
+    idtipopago_tipopago: 'Tipo de pago', idestadom_estadom: 'Estado del medidor', medidorprincipal: 'Medidor principal',
+    adultomayor: 'Adulto mayor', municipio: 'Municipio', swalcantarillado: 'Alcantarillado',
+    promedio: 'Promedio', geolocalizacion: 'Geolocalización', swbasura: 'Basura',
+    fotocasa_path: 'Foto de la casa', fotomedidor_path: 'Foto del medidor'
+  };
+
+  cargarHistorialCuenta(page = 0): void {
+    const id = this.resolverIdAbonado();
+    if (!id || this.historialCuentaLoading) return;
+    this.historialCuentaLoading = true;
+    this.historialCuentaError = '';
+    this.aboService.getHistorialCuenta(id, page).subscribe({
+      next: respuesta => {
+        this.historialCuenta = respuesta.content;
+        this.historialCuentaPage = respuesta.number;
+        this.historialCuentaTotalPages = respuesta.totalPages;
+        this.historialCuentaTotal = respuesta.totalElements;
+        this.historialCuentaLoading = false;
+      },
+      error: () => {
+        this.historialCuentaError = 'No se pudo cargar el historial de cambios. Intente nuevamente.';
+        this.historialCuentaLoading = false;
+      }
+    });
+  }
+
+  valorHistorial(campo: string, valor: string | null): string {
+    if (valor == null || valor === '') return 'Sin dato';
+    if (valor === 'true') return 'Sí';
+    if (valor === 'false') return 'No';
+    if (campo === 'estado') return ({ '0': 'Eliminado', '1': 'Activo', '2': 'Suspendido', '3': 'Suspendido y retirado' } as Record<string, string>)[valor] || valor;
+    return valor;
+  }
+
+  moduloHistorial(modulo: string): string {
+    return ({ ABONADOS: 'Modificar abonado', TRAMITES_AGUA: 'Trámites de agua', RUTAS: 'Rutas',
+      MOVIL: 'Aplicación móvil', SUSPENSIONES: 'Suspensiones', HABILITACIONES: 'Habilitaciones', OTROS: 'Otros / origen no informado' } as Record<string, string>)[modulo] || modulo;
+  }
+
 
   mensajeBody = `<h3>Se adjunta su documénto electrónico. No responder este mensaje.</h3>
 
@@ -393,7 +445,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
         const popupFoto = fotoUrl
           ? `<div style="margin-top:8px;"><img src="${fotoUrl}" alt="Foto del abonado" style="width:220px;max-width:100%;max-height:180px;object-fit:cover;border-radius:6px;" /></div>`
           : '<div style="margin-top:8px;color:#666;">Sin foto registrada</div>';
-        L.marker(coordsArray)
+        L.marker(coordsArray, { icon: crearIconoMapa(), title: 'Ubicacion del abonado' })
           .addTo(this.map)
           .bindPopup(`<strong>${abonado.idabonado}</strong><br/>${abonado.direccionubicacion}${popupFoto}`)
           .openPopup();
@@ -520,7 +572,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
 
     autoTable(doc, {
       startY: 110,
-      head: [['#', 'Emision', 'Categoria', 'Novedad', 'F. Lectura', 'Consumo', 'Anterior', 'Actual', 'Planilla']],
+      head: [['#', 'Emision', 'Categoría', 'Novedad', 'F. Lectura', 'Consumo', 'Anterior', 'Actual', 'Planilla']],
       body: lecturas.map((lectura: any, index: number) => [
         index + 1,
         lectura?.idrutaxemision_rutasxemision?.idemision_emisiones?.emision ?? '',

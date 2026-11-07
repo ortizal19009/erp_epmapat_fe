@@ -1,3 +1,4 @@
+import { crearIconoMapa } from 'src/app/compartida/mapa-marcadores';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -23,7 +24,7 @@ import * as L from 'leaflet';
 @Component({
   selector: 'app-modificar-abonados',
   templateUrl: './modificar-abonados.component.html',
-  styleUrls: ['./modi-abonado.component.css'],
+  styleUrls: ['../../../compartida/gestion-cuentas.css', './modi-abonado.component.css'],
 })
 export class ModificarAbonadosComponent implements OnInit, AfterViewInit, OnDestroy {
   abonado: Abonados = new Abonados();
@@ -637,7 +638,7 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit, OnDest
     if (!this.map) return;
 
     if (!this.marker) {
-      this.marker = L.marker(coords, { draggable: true }).addTo(this.map);
+      this.marker = L.marker(coords, { draggable: true, icon: crearIconoMapa(), title: 'Ubicacion del abonado: arrastre para mover' }).addTo(this.map);
       this.marker.on('dragend', () => {
         const latlng = this.marker?.getLatLng();
         if (!latlng) return;

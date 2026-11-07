@@ -88,6 +88,11 @@
 <div class="container-fluid">
   <div class="row mb-0">
     <div class="col-md-12">
+      <p class="small text-muted mt-2" *ngIf="soloPendientesCuotas">
+        Las cuotas vencidas son las impagas con fecha programada anterior a hoy (hora de Ecuador).
+        Las cuotas de hoy y futuras se mantienen pendientes sin marcarse como vencidas.
+      </p>
+      <div class="table-responsive">
       <table class="table table-hover table-bordered table-sm">
         <thead>
           <tr class="text-center" *ngIf="!soloPendientesCuotas">
@@ -108,11 +113,14 @@
             <th class="sortable" (click)="ordenarPor('pagadas')">Pagadas <i *ngIf="getSortIcon('pagadas')" class="bi" [ngClass]="getSortIcon('pagadas')"></i></th>
             <th class="sortable" (click)="ordenarPor('pendientes')">Pendientes <i *ngIf="getSortIcon('pendientes')" class="bi" [ngClass]="getSortIcon('pendientes')"></i></th>
             <th class="sortable" (click)="ordenarPor('valorPendiente')">Valor pendiente <i *ngIf="getSortIcon('valorPendiente')" class="bi" [ngClass]="getSortIcon('valorPendiente')"></i></th>
+            <th class="sortable" (click)="ordenarPor('vencidas')">Vencidas</th>
+            <th class="sortable" (click)="ordenarPor('valorVencido')">Valor vencido</th>
+            <th>Estado</th>
           </tr>
         </thead>
 
         <tbody *ngIf="!soloPendientesCuotas">
-          <tr *ngFor="let factu of registrosPaginados; let i = index" (click)="info(factu)">
+          <tr *ngFor="let factu of registrosPaginados; let i = index" (click)="info(factu)" [class.cuotas-vencidas]="getCuotasVencidas(factu) > 0">
             <td class="text-center">{{ factu.idfacturacion }}</td>
             <td class="text-center">{{ factu.feccrea | date:'dd-MM-y' }}</td>
             <td>{{ factu.idcliente_clientes?.nombre || getClientePendiente(factu) }}</td>
@@ -131,7 +139,7 @@
         </tbody>
 
         <tbody *ngIf="soloPendientesCuotas">
-          <tr *ngFor="let factu of registrosPaginados; let i = index" (click)="info(factu)">
+          <tr *ngFor="let factu of registrosPaginados; let i = index" (click)="info(factu)" [class.cuotas-vencidas]="getCuotasVencidas(factu) > 0">
             <td class="text-center">{{ factu.idfacturacion }}</td>
             <td class="text-center">{{ factu.feccrea | date:'dd-MM-y' }}</td>
             <td>{{ getClientePendiente(factu) }}</td>
@@ -140,14 +148,19 @@
             <td class="text-center">{{ getPagadasPendiente(factu) }}</td>
             <td class="text-center">{{ getPendientesPendiente(factu) }}</td>
             <td class="text-right">{{ getValorPendientePendiente(factu) | number: '1.2-2' }}</td>
+            <td class="text-center">{{ getCuotasVencidas(factu) }}</td>
+            <td class="text-right">{{ getValorVencido(factu) | number: '1.2-2' }}</td>
+            <td class="text-center"><span [class]="getClaseEstadoFacturacion(factu)">{{ getEstadoFacturacion(factu) }}</span></td>
           </tr>
           <tr *ngIf="registrosFiltrados.length > 0">
             <td colspan="6" class="font-weight-bold text-right">TOTAL</td>
             <td class="font-weight-bold text-center">{{ totalFacturasPendientes }}</td>
             <td class="font-weight-bold text-right">{{ totalValorPendiente | number: '1.2-2' }}</td>
+            <td colspan="3"></td>
           </tr>
         </tbody>
       </table>
+      </div>
 
       <div class="d-flex justify-content-between align-items-center flex-wrap pagination-bar px-2 py-2">
         <div class="small">

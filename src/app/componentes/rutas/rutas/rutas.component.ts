@@ -1,3 +1,4 @@
+import { crearIconoMapa } from 'src/app/compartida/mapa-marcadores';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -94,11 +95,7 @@ export class RutasComponent implements OnInit, OnDestroy {
       popup.append(titulo, document.createElement('br'),
         document.createTextNode(cuenta.nombre || 'Sin nombre'), document.createElement('br'),
         document.createTextNode(cuenta.direccion || 'Sin direccion'));
-      const icono = L.divIcon({
-        className: 'cuenta-marcador',
-        html: '<span style="display:block;width:18px;height:18px;background:#007bff;border:3px solid white;border-radius:50%;box-shadow:0 1px 5px #333"></span>',
-        iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -10]
-      });
+      const icono = crearIconoMapa();
       L.marker(coords, { icon: icono, title: `Cuenta ${cuenta.idabonado}`, keyboard: true })
         .bindTooltip(`Cuenta ${cuenta.idabonado}`).bindPopup(popup).addTo(mapa);
     }

@@ -1,114 +1,134 @@
-<div class="content-header">
-   <div class="container-fluid">
-      <div class="row mt-3 justify-content-center text-center">
-         <div class="col-sm-8 cabecera border sombra">
-            <h5 class="font-weight-bold mt-1 mb-0">Archivos para el SINAFIP</h5>
-            <span class="fantacyblack mt-0 small">Sistema Integrado de Administración de las Finanzas Públicas del
-               Ecuador</span>
-         </div>
-      </div>
-   </div>
-</div>
-
-<div class="content">
-   <div class="container-fluid">
-      <div class="row justify-content-center">
-         <div class="card card-body col-sm-8 detalle sombra">
-            <form [formGroup]="formSinafip">
-               <div class="row">
-                  <div class="col-sm-6">
-                     Archivo:
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="archivo" id="archivo1" value="option1">
-                        <label class="form-check-label" for="archivo1">
-                           Apertura inicial
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="archivo" id="archivo2" value="option2">
-                        <label class="form-check-label" for="archivo2">
-                           Detalle apertura inicial
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="archivo" id="archivo3" value="option3">
-                        <label class="form-check-label" for="archivo3">
-                           Balance de comprobación
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="archivo" id="archivo4" value="option4">
-                        <label class="form-check-label" for="archivo4">
-                           Transacciones recíprocas
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="archivo" id="archivo5" value="option5">
-                        <label class="form-check-label" for="archivo5">
-                           Presupuesto inicial
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="archivo" id="archivo6" value="option6">
-                        <label class="form-check-label" for="archivo6">
-                           Cédula de Ingresos y Gastos
-                        </label>
-                     </div>
-                  </div>
-
-                  <div class="col-sm-6">
-                     Tipo:
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="tipo" id="tipo1" value="opt1" checked>
-                        <label class="form-check-label" for="tipo1">
-                           Texto
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="tipo" id="tipo2" value="opt2">
-                        <label class="form-check-label" for="tipo2">
-                           Hoja electrónica
-                        </label>
-                     </div>
-                     <div class="form-group col-md-12 mt-1 mb-0">
-                        <div class="input-group input-group-sm mb-3">
-                           <div class="input-group-prepend">
-                              <span class="input-group-text font-weight-bold">Nombre</span>
-                           </div>
-                           <input type="text" class="form-control" formControlName="nombre" [ngClass]="{'is-invalid': f['nombre'].invalid && f['nombre'].touched,
-                        'is-valid': f['nombre'].valid, '': f['nombre'].untouched}">
-                        </div>
-                     </div>
-                     <div class="form-group col-md-7 my-0 py-0">
-                        <div class="input-group mb-3 input-group-sm">
-                           <div class="input-group-prepend">
-                              <label class="input-group-text" for="periodo">Período</label>
-                           </div>
-                           <select class="custom-select" id="periodo" formControlName="periodo">
-                              <option value="1" selected>Enero</option>
-                              <option value="2">Febrero</option>
-                              <option value="3">Marzo</option>
-                              <option value="4">Abril</option>
-                              <option value="5">Mayo</option>
-                              <option value="6">Junio</option>
-                              <option value="7">Julio</option>
-                              <option value="8">Agosto</option>
-                              <option value="9">Septiembre</option>
-                              <option value="10">Octubre</option>
-                              <option value="11">Noviembre</option>
-                              <option value="12">Diciembre</option>
-                           </select>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-               <div class="col-md-12 text-center mt-2">
-                  <button class="btn btn-success  mx-1 mt-1 col-sm-12" (click)="generar()"
-                     [disabled]="!formSinafip.valid">
-                     <i class="fa fa-check-circle"></i>&nbsp; Generar</button>
-               </div>
-            </form>
-         </div>
-      </div>
-   </div>
+<div class="container-fluid py-3">
+  <header class="cabecera border sombra rounded p-3 mb-3">
+    <h5 class="mb-1">Archivos para el SINAFIP</h5>
+    <small>Sistema Integrado de Administración de las Finanzas Públicas del Ecuador</small>
+  </header>
+  <div class="row">
+    <div class="col-xl-4 mb-3">
+      <section class="card card-body detalle sombra">
+        <form [formGroup]="formSinafip" (ngSubmit)="generar()">
+          <fieldset [disabled]="generando || guardandoAsignacion !== null">
+            <legend class="h6 font-weight-bold">Archivo a generar</legend>
+            <div class="form-check mb-2" *ngFor="let archivo of archivos; let i = index">
+              <input class="form-check-input" type="radio" formControlName="archivo" [id]="'archivoSinafip' + i" [value]="archivo.valor">
+              <label class="form-check-label" [for]="'archivoSinafip' + i">{{ archivo.nombre }}</label>
+              <small class="d-block text-muted">{{ archivo.descripcion }}</small>
+            </div>
+            <div class="row mt-3">
+              <div class="form-group col-5">
+                <label for="anioSinafip">Ejercicio</label>
+                <input id="anioSinafip" type="number" class="form-control form-control-sm" formControlName="anio" min="2000" max="2100">
+                <small class="text-danger" *ngIf="f['anio'].invalid && f['anio'].touched">Ingresa un año válido.</small>
+              </div>
+              <div class="form-group col-7">
+                <label for="periodoSinafip">Período</label>
+                <select id="periodoSinafip" class="form-control form-control-sm" formControlName="periodo" [attr.disabled]="esInicial ? true : null">
+                  <option *ngFor="let mes of meses; let i = index" [ngValue]="i + 1">{{ mes }}</option>
+                </select>
+              </div>
+            </div>
+            <p class="small text-muted" *ngIf="esInicial">Los archivos iniciales usan período 01 y los asientos de apertura del ejercicio seleccionado. El presupuesto corresponde al inicial del ejercicio activo en la base.</p>
+            <p class="small text-muted" *ngIf="!esInicial && !esReciprocas">Los movimientos se acumulan desde el 1 de enero hasta el último día del mes seleccionado.</p>
+            <div class="form-group">
+              <label for="nombreSinafip">Nombre del archivo</label>
+              <input id="nombreSinafip" class="form-control form-control-sm" formControlName="nombre">
+              <small class="text-muted">Se añaden el ejercicio, período y extensión.</small>
+              <small class="text-danger d-block" *ngIf="f['nombre'].invalid && f['nombre'].touched">Ingresa un nombre sin caracteres de ruta.</small>
+            </div>
+            <div class="form-group">
+              <label for="tipoSinafip">Formato de descarga</label>
+              <select id="tipoSinafip" class="form-control form-control-sm" formControlName="tipo">
+                <option value="txt">Archivo plano (.txt)</option>
+                <option value="xlsx">Hoja electrónica (.xlsx)</option>
+              </select>
+            </div>
+            <p *ngIf="esReciprocas" class="small text-muted">Incluye los movimientos del mes seleccionado. En enero comienza el día 2, igual que el sistema anterior. Las cuentas recíprocas deben estar asignadas en las distribuciones de beneficiarios.</p>
+            <button *ngIf="esReciprocas" type="button" class="btn btn-outline-secondary btn-sm mb-2" (click)="revisarAsignaciones()" [disabled]="generando">
+              Revisar / asignar contrapartidas
+            </button>
+            <div class="d-flex flex-wrap" style="gap: 8px">
+              <button type="button" class="btn btn-outline-primary btn-sm" (click)="generar(false)" [disabled]="generando">
+                <i class="bi bi-eye"></i> Vista previa
+              </button>
+              <button type="submit" class="btn btn-success btn-sm" [disabled]="generando || formSinafip.invalid">
+                <i [class]="generando ? 'fa fa-spinner fa-spin' : 'bi bi-download'"></i>
+                {{ generando ? 'Generando...' : 'Generar y descargar' }}
+              </button>
+            </div>
+          </fieldset>
+        </form>
+      </section>
+    </div>
+    <div class="col-xl-8">
+      <div class="alert alert-danger" role="alert" *ngIf="error">{{ error }}</div>
+      <div *ngIf="generando" class="alert alert-info" role="status">Consultando y preparando el archivo. Espera a que termine la generación.</div>
+      <section class="card card-body sombra" *ngIf="asignaciones as filas">
+        <h6 class="font-weight-bold">Asignaciones de transacciones recíprocas</h6>
+        <p class="small text-muted">Selecciona una cuenta SINAFIP y guarda cada distribución. La partida es opcional (00.00.00). El asiento de referencia corresponde al asiento original del cobro o pago; los tipos 2, 3, 5 y 6 usan su propio asiento. Se conservan los importes y beneficiarios.</p>
+        <datalist id="cuentasReciprocasSinafip"><option *ngFor="let cuenta of cuentas" [value]="cuenta.codcue">{{ cuenta.nomcue }}</option></datalist>
+        <div class="sinafip-tabla" *ngIf="filas.length; else sinAsignaciones">
+          <table class="table table-sm table-bordered small mb-0">
+            <thead><tr><th>Asiento / transacción</th><th>Cuenta / beneficiario</th><th>Cuenta recíproca</th><th>Partida</th><th>Asiento referencia</th><th>Acción</th></tr></thead>
+            <tbody><tr *ngFor="let fila of filas; let i = index">
+              <td>{{ fila.asiento }} / {{ fila.inttra }}</td>
+              <td>{{ fila.codcue }}<br>{{ fila.nomben }}</td>
+              <td><input class="form-control form-control-sm" style="min-width: 130px" list="cuentasReciprocasSinafip" [value]="fila.codcuereci || ''"
+                [attr.aria-label]="'Cuenta recíproca de la distribución ' + (i + 1)"
+                (input)="fila.codcuereci = $any($event.target).value; fila.guardado = false" [disabled]="guardandoAsignacion !== null || generando"></td>
+              <td><input class="form-control form-control-sm" style="min-width: 110px" placeholder="00.00.00" [value]="fila.codparreci || ''"
+                [attr.aria-label]="'Partida de la distribución ' + (i + 1)"
+                (input)="fila.codparreci = $any($event.target).value; fila.guardado = false" [disabled]="guardandoAsignacion !== null || generando"></td>
+              <td><input type="number" min="0" step="1" class="form-control form-control-sm" style="min-width: 110px" [value]="fila.asierefe === null ? '' : fila.asierefe"
+                [attr.aria-label]="'Asiento de referencia de la distribución ' + (i + 1)"
+                (input)="fila.asierefe = $any($event.target).value === '' ? null : +$any($event.target).value; fila.guardado = false" [disabled]="guardandoAsignacion !== null || generando"></td>
+              <td><button type="button" class="btn btn-outline-success btn-sm" (click)="guardarAsignacion(fila)" [disabled]="guardandoAsignacion !== null || generando || !fila.codcuereci || fila.guardado">{{ fila.guardado ? 'Guardado' : 'Guardar' }}</button></td>
+            </tr></tbody>
+          </table>
+        </div>
+        <ng-template #sinAsignaciones><p class="text-muted small">No hay distribuciones recíprocas en este período.</p></ng-template>
+      </section>
+      <section class="card card-body sombra" *ngIf="resultado as datos; else sinResultado">
+        <div class="d-flex flex-wrap justify-content-between mb-2">
+          <h6 class="font-weight-bold mb-1">Vista previa del archivo</h6>
+          <span>{{ totalFilas }} registros · Corte: {{ datos.corte }}</span>
+        </div>
+        <div class="alert alert-warning small py-2" *ngFor="let aviso of datos.avisos">{{ aviso }}</div>
+        <p class="small text-muted">TXT sin cabeceras, separado por |, con coma decimal, dos decimales y saltos de línea Windows. Excel conserva los mismos campos y orden, sin cabeceras.</p>
+        <details class="border rounded p-2 mb-3">
+          <summary class="text-primary">Comparar con un TXT del sistema anterior</summary>
+          <label for="referenciaSinafip" class="small mt-2">Archivo de referencia del mismo ejercicio y período</label>
+          <input id="referenciaSinafip" type="file" accept=".txt" class="form-control-file mb-2" (change)="compararArchivo($event)">
+          <p class="small text-muted">La comparación se realiza en tu navegador. El archivo no se envía al servidor. Se comparan los campos completos, incluidos espacios y filas repetidas; se ignora el orden de las filas.</p>
+          <div *ngIf="comparacion as comparado">
+            <p class="small mb-2"><strong>{{ comparado.nombre }}</strong>: {{ comparado.anteriores }} filas anteriores, {{ totalFilas }} actuales, {{ comparado.iguales }} coincidentes.</p>
+            <p class="alert alert-success small" *ngIf="!comparado.soloAnterior.length && !comparado.soloActual.length">Las filas coinciden con la referencia.</p>
+            <div *ngIf="comparado.soloAnterior.length || comparado.soloActual.length">
+              <p class="alert alert-warning small">{{ comparado.soloAnterior.length }} filas solo en la referencia y {{ comparado.soloActual.length }} solo en el resultado actual. Revisa el catálogo de cuentas, los movimientos y el período antes de usar el archivo.</p>
+              <p class="small font-weight-bold">Solo en la referencia (primeras 10)</p>
+              <pre class="small border p-2" *ngFor="let fila of comparado.soloAnterior | slice:0:10">{{ fila }}</pre>
+              <p class="small font-weight-bold">Solo en el resultado actual (primeras 10)</p>
+              <pre class="small border p-2" *ngFor="let fila of comparado.soloActual | slice:0:10">{{ fila }}</pre>
+            </div>
+          </div>
+        </details>
+        <section *ngFor="let bloque of datos.bloques" class="mb-3">
+          <h6>{{ bloque.nombre }} <span class="badge badge-light">{{ bloque.filas.length }}</span></h6>
+          <div class="sinafip-tabla" *ngIf="bloque.filas.length; else bloqueVacio">
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead><tr><th *ngFor="let columna of bloque.columnas" scope="col">{{ columna }}</th></tr></thead>
+              <tbody><tr *ngFor="let fila of bloque.filas | slice:0:100"><td *ngFor="let valor of fila">{{ valor }}</td></tr></tbody>
+            </table>
+          </div>
+          <ng-template #bloqueVacio><p class="text-muted small">Sin registros.</p></ng-template>
+          <small class="text-muted" *ngIf="bloque.filas.length > 100">Se muestran los primeros 100 registros. La descarga incluye todos.</small>
+        </section>
+      </section>
+      <ng-template #sinResultado>
+        <section class="card card-body sombra text-muted" *ngIf="!generando">
+          <h6>Revisa los datos antes de descargar</h6>
+          <p class="mb-0">Selecciona el archivo, ejercicio y período, y pulsa Vista previa. Los cálculos se realizan en el backend sin modificar los datos contables.</p>
+        </section>
+      </ng-template>
+    </div>
+  </div>
 </div>

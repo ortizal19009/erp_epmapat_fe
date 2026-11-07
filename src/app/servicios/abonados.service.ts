@@ -101,8 +101,12 @@ export class AbonadosService {
     return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado);
   }
 
-  updateAbonadoAuditoria(abonado: any, usumodi: number, observacion: string, tipo: string = 'MODIFICACION'): Observable<any> {
-    const params = { usumodi, tipo, observacion };
+  getHistorialCuenta(idabonado: number, page = 0, size = 10): Observable<PageResponse<HistorialCuenta>> {
+    return this.http.get<PageResponse<HistorialCuenta>>(`${baseUrl}/${idabonado}/historial`, { params: { page, size } });
+  }
+
+  updateAbonadoAuditoria(abonado: any, usumodi: number, observacion: string, tipo: string = 'MODIFICACION', modulo: string = 'ABONADOS'): Observable<any> {
+    const params = { usumodi, tipo, observacion, modulo };
     return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado, { params });
   }
 
@@ -286,4 +290,14 @@ export class AbonadosService {
 
     return this.http.get<PageResponse<Abonados>>(`${baseUrl}/buscar`, { params });
   }
+}
+
+export interface HistorialCuenta {
+  idhistorial: number;
+  fecha: string;
+  usuario: number | null;
+  persona: string | null;
+  modulo: string;
+  observacion: string | null;
+  cambios: Array<{ campo: string; anterior: string | null; nuevo: string | null }>;
 }

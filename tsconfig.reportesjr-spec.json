@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/features/admin-central/pages/administracion/reportesjr/reportejr/reportejr.component.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

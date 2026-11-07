@@ -15,6 +15,14 @@ import { map, of } from 'rxjs';
 })
 export class AddReportejrComponent implements OnInit {
 
+  opcionesDisponibles: any[] = [];
+  opcionesSeleccionadas: number[] = [];
+
+  cambiarOpciones(event: Event): void {
+    this.opcionesSeleccionadas = Array.from((event.target as HTMLSelectElement).selectedOptions)
+      .map(option => Number(option.value));
+  }
+
    formReportejr!: FormGroup;
    idrepoxopcion: number | null = null;
    repoxopcion: Repoxopcion[] = [];
@@ -27,6 +35,10 @@ export class AddReportejrComponent implements OnInit {
       private repoxopService: RepoxopcionService, private repojrService: ReportesjrService) { }
 
    ngOnInit(): void {
+    this.repoxopService.datalist('').subscribe({
+      next: opciones => this.opcionesDisponibles = opciones,
+      error: err => this.authService.mostrarError('Error al cargar opciones', err.error)
+    });
       if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
       sessionStorage.setItem('ventana', '/reportesjr');
       let coloresJSON = sessionStorage.getItem('/reportesjr');
@@ -141,6 +153,7 @@ export class AddReportejrComponent implements OnInit {
          this.formReportejr.value.desrep,
          this.jrxmlFile,
          this.jasperFile,
+         this.opcionesSeleccionadas,
       ).subscribe({
          next: (reportejr: Reportesjr) => {
             sessionStorage.setItem('ultidreporte', reportejr.idreporte!.toString());

@@ -15,6 +15,14 @@ import { map, of } from 'rxjs';
 
 export class ModiReportejrComponent implements OnInit {
 
+  opcionesDisponibles: any[] = [];
+  opcionesSeleccionadas: number[] = [];
+
+  cambiarOpciones(event: Event): void {
+    this.opcionesSeleccionadas = Array.from((event.target as HTMLSelectElement).selectedOptions)
+      .map(option => Number(option.value));
+  }
+
   idreporte!: number;
   formReportejr!: FormGroup;
   idrepoxopcion: number | null = null;
@@ -31,6 +39,10 @@ export class ModiReportejrComponent implements OnInit {
     private repoxopService: RepoxopcionService, private repojrService: ReportesjrService) { }
 
   ngOnInit(): void {
+    this.repoxopService.datalist('').subscribe({
+      next: opciones => this.opcionesDisponibles = opciones,
+      error: err => this.authService.mostrarError('Error al cargar opciones', err.error)
+    });
     if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
     sessionStorage.setItem('ventana', '/reportesjr');
     let coloresJSON = sessionStorage.getItem('/reportesjr');
@@ -43,16 +55,15 @@ export class ModiReportejrComponent implements OnInit {
       this.nomrep = this.reportejr.nomrep;
       this.antnomrep = this.nomrep;
 
-      const jrxmlBase64 = this.reportejr.jrxml!;
-      const xmlString = decodeBase64ToXml(jrxmlBase64);
-      const nombreReporte = extractReportNameFromJrxml(xmlString);
+      const nombreReporte = this.reportejr.jrxmlPath || this.reportejr.nomrep;
+      this.opcionesSeleccionadas = (this.reportejr.opciones || []).map((opcion: any) => opcion.idrepoxopcion);
 
       this.idrepoxopcion = this.reportejr.repoxopcion!.idrepoxopcion;
       this.formReportejr = this.fb.group({
         repoxopcion: [this.reportejr.repoxopcion.codigo, [Validators.required], [this.valRepoxopcion.bind(this)]],
         nombre: [this.reportejr.repoxopcion?.nombre, Validators.required],
         jrxml: nombreReporte,
-        archivos: [null],
+        archivos: [null, (control: AbstractControl) => control.value ? this.validaArchivos(control) : null],
         nomrep: [this.reportejr.nomrep, Validators.required, [this.valNomrep.bind(this)]],
         metodo: this.reportejr.metodo,
         desrep: [this.reportejr.desrep, Validators.required],
@@ -140,9 +151,27 @@ export class ModiReportejrComponent implements OnInit {
     this.formReportejr.get('archivos')?.updateValueAndValidity();
   }
 
+  migrarArchivos(): void {
+    this.swactualizando = true;
+    this.repojrService.migrarArchivos(this.idreporte).subscribe({
+      next: reporte => {
+        this.reportejr = reporte;
+        sessionStorage.setItem('reportejrToModi', JSON.stringify(reporte));
+        this.formReportejr.patchValue({ jrxml: reporte.jrxmlPath });
+        this.swactualizando = false;
+        this.authService.swal('success', 'Archivos migrados a la carpeta del backend');
+      },
+      error: err => {
+        this.swactualizando = false;
+        this.authService.mostrarError('Error al migrar archivos', err.error);
+      }
+    });
+  }
+
   regresar() { this.router.navigate(['/reportesjr']); }
 
   actualizar() {
+    if (this.formReportejr.invalid) { this.formReportejr.markAllAsTouched(); return; }
     if (this.jrxmlFile == null || this.jasperFile == null) {
       this.actualizarMetadatos();
     } else {
@@ -157,6 +186,7 @@ export class ModiReportejrComponent implements OnInit {
       idrepoxopcion: this.idrepoxopcion!,
       nomrep: this.formReportejr.value.nomrep,
       metodo: this.formReportejr.value.metodo,
+      opciones: this.opcionesSeleccionadas,
       desrep: this.formReportejr.value.desrep
     }).subscribe({
       next: (actualizado: Reportesjr) => {
@@ -177,6 +207,7 @@ export class ModiReportejrComponent implements OnInit {
       idrepoxopcion: this.idrepoxopcion!,
       nomrep: this.formReportejr.value.nomrep,
       metodo: this.formReportejr.value.metodo,
+      opciones: this.opcionesSeleccionadas,
       desrep: this.formReportejr.value.desrep,
       jrxml: this.jrxmlFile!,
       jasper: this.jasperFile!,
@@ -223,21 +254,4 @@ export class ModiReportejrComponent implements OnInit {
     );
   }
 
-}
-
-function decodeBase64ToXml(base64: string): string {
-  const binary = atob(base64); // decodifica Base64 a string binario
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  const decoder = new TextDecoder('utf-8');
-  return decoder.decode(bytes);
-}
-
-function extractReportNameFromJrxml(xmlString: string): string | null {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlString, 'application/xml');
-  const jasperReport = doc.getElementsByTagName('jasperReport')[0];
-  return jasperReport?.getAttribute('name') ?? null;
 }

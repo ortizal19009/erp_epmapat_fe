@@ -1,3 +1,4 @@
+import { crearIconoMapa } from 'src/app/compartida/mapa-marcadores';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import * as ExcelJS from 'exceljs';
@@ -174,7 +175,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
         try {
           if (item.geolocalizacion != null) {
             const coordsArray: L.LatLngExpression = JSON.parse(item.geolocalizacion);
-            const marker = L.marker(coordsArray).bindPopup(`Abonado ID: ${item.idabonado}`);
+            const marker = L.marker(coordsArray, { icon: crearIconoMapa(), title: `Cuenta ${item.idabonado}` }).bindPopup(`Abonado ID: ${item.idabonado}`);
             cuenta.push(marker);
           }
         } catch (e) {
@@ -182,7 +183,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
         }
       });
     } else {
-      const marker = L.marker(this.edificioMatriz).bindPopup('Edificio Epmapa-T');
+      const marker = L.marker(this.edificioMatriz, { icon: crearIconoMapa('edificio'), title: 'Edificio EPMAPA-T' }).bindPopup('Edificio Epmapa-T');
       cuenta.push(marker);
     }
 

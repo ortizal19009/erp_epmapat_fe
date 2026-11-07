@@ -204,7 +204,7 @@ export class HabilitacionesComponent implements OnInit, OnDestroy {
       this.abonado,
       this.authService.idusuario,
       this.f_habilitacion.value.observacion || 'Habilitación de medidor',
-      'HABILITACION'
+      'HABILITACION', 'HABILITACIONES'
     ).subscribe({
       next: () => {
         this.l_habilitaciones = true;

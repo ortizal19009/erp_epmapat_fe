@@ -1,4 +1,7 @@
 export interface FacturacionCuotasPendientes {
+  cuotasVencidas?: number;
+  valorVencido?: number;
+  primeraCuotaVencida?: string | null;
   idfacturacion: number;
   feccrea: Date | string | null;
   cliente: string;

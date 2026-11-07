@@ -186,6 +186,11 @@
                 <i class="bi bi-bell"></i> Recargos
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link cardTab" href="#historialcuenta" data-toggle="tab" role="tab" (click)="cargarHistorialCuenta()">
+                <i class="bi bi-clock-history"></i> Historial de cambios
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -619,6 +624,43 @@
               </div>
             </div>
 
+            <div class="tab-pane" id="historialcuenta" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Historial de cambios de la cuenta</h6>
+                <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="historialCuentaLoading" (click)="cargarHistorialCuenta(historialCuentaPage)">Actualizar</button>
+              </div>
+              <p class="text-muted">Los cambios se registran automáticamente al modificar la cuenta.</p>
+              <div *ngIf="historialCuentaLoading" role="status">Cargando historial...</div>
+              <div *ngIf="historialCuentaError" class="alert alert-danger" role="alert">{{ historialCuentaError }}</div>
+              <ng-container *ngIf="!historialCuentaLoading && !historialCuentaError">
+                <div class="table-responsive" *ngIf="historialCuenta.length; else sinHistorialCuenta">
+                  <table class="table table-hover table-sm table-bordered">
+                    <thead><tr><th>Fecha y hora</th><th>Cambio</th><th>Anterior</th><th>Nuevo</th><th>Persona</th><th>Módulo</th><th>Observación</th></tr></thead>
+                    <tbody>
+                      <ng-container *ngFor="let registro of historialCuenta">
+                        <tr *ngFor="let cambio of registro.cambios">
+                          <td>{{ registro.fecha | date:'dd/MM/yyyy HH:mm:ss':'-0500' }}</td>
+                          <td>{{ camposHistorial[cambio.campo] || cambio.campo }}</td>
+                          <td class="historial-valor">{{ valorHistorial(cambio.campo, cambio.anterior) }}</td>
+                          <td class="historial-valor">{{ valorHistorial(cambio.campo, cambio.nuevo) }}</td>
+                          <td>{{ registro.persona || (registro.usuario ? 'Usuario #' + registro.usuario : 'Sin usuario informado') }}</td>
+                          <td>{{ moduloHistorial(registro.modulo) }}</td>
+                          <td class="historial-valor">{{ registro.observacion || 'Sin observación' }}</td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+                <ng-template #sinHistorialCuenta><div class="alert alert-info">No hay cambios registrados desde la activación del historial.</div></ng-template>
+                <div class="d-flex justify-content-between align-items-center" *ngIf="historialCuentaTotalPages > 0">
+                  <span>{{ historialCuentaTotal }} operaciones. Página {{ historialCuentaPage + 1 }} de {{ historialCuentaTotalPages }}</span>
+                  <div>
+                    <button class="btn btn-sm btn-outline-secondary mr-2" [disabled]="historialCuentaPage === 0" (click)="cargarHistorialCuenta(historialCuentaPage - 1)">Anterior</button>
+                    <button class="btn btn-sm btn-outline-secondary" [disabled]="historialCuentaPage + 1 >= historialCuentaTotalPages" (click)="cargarHistorialCuenta(historialCuentaPage + 1)">Siguiente</button>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
           </div><!-- tab-content -->
         </div><!-- card-body -->
       </div><!-- card -->

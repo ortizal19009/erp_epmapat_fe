@@ -190,6 +190,14 @@
             "anulaciones": {
               "tsConfig": "tsconfig.anulaciones-spec.json",
               "scripts": []
+            },
+            "reportesjr": {
+              "tsConfig": "tsconfig.reportesjr-spec.json",
+              "scripts": []
+            },
+            "sinafip": {
+              "tsConfig": "tsconfig.sinafip-spec.json",
+              "scripts": []
             }
           }
         }

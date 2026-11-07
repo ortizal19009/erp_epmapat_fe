@@ -1003,3 +1003,7 @@ iframe {
       margin-top: .35rem;
    }
 }
+
+/* Marcadores Leaflet compartidos: SVG embebido, sin imagenes externas. */
+.epmapat-map-pin { background: transparent; border: 0; }
+.epmapat-map-pin:focus-visible { outline: 3px solid #212529; outline-offset: 3px; border-radius: 15px; }

@@ -6,3 +6,8 @@
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
+
+.sinafip-tabla { overflow: auto; max-height: 520px; }
+.sinafip-tabla th { position: sticky; top: 0; background: #e9f0f3; white-space: nowrap; z-index: 1; }
+.sinafip-tabla td { white-space: nowrap; font-variant-numeric: tabular-nums; }
+fieldset { min-width: 0; }

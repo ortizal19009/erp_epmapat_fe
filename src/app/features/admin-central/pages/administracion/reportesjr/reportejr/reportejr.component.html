@@ -91,11 +91,11 @@
 
             <tbody class="detalle roboto small">
                <tr *ngFor="let repojr of repojrFiltrados; let i = index" 
-               [ngClass]="{ 'fila': repojr.metodo === 1, 'pad0': true }"
+               class="fila pad0"
                   (click)="onCellClick($event, repojr )">
                   <td><i *ngIf="repojr.idreporte == ultIdSelec" class="bi bi-caret-right-fill text-primary"></i>
-                     {{ repojr.repoxopcion!.codigo}}</td>
-                  <td>{{ repojr.repoxopcion!.opcion}}</td>
+                     {{ repojr.repoxopcion?.codigo || 'Sin código' }}</td>
+                  <td>{{ repojr.repoxopcion?.opcion || 'Sin opción' }}</td>
                   <td>{{ repojr.nomrep}}</td>
                   <td class="text-center toolt" [title]="nombreMetodo(repojr.metodo!)">{{repojr.metodo}}</td>
                   <td class="text-left text-truncate ancho200" data-toggle="tooltip"
@@ -103,7 +103,7 @@
                      {{ repojr.desrep }}
                   </td>
 
-                  <td class="text-left text-truncate ancho100"> {{ repojr.parametros | json }} </td>
+                  <td class="text-center">{{ parametrosDe(repojr).length }}</td>
 
                   <td class="text-center">
                      <div class="btn-group py-0">
@@ -111,6 +111,8 @@
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" (click)="visualizar(repojr)">
+                              <i class="bi bi-eye"></i>&nbsp; Visualizar</button>
                            <button class="dropdown-item" type="button" (click)="parametros(repojr)">
                               <i class="bi bi-filter-circle"></i>&nbsp; Parámetros</button>
                            <button class="dropdown-item" type="button" (click)="modificar(repojr)">
@@ -131,4 +133,81 @@
       </div>
    </div>
 
+</div>
+<div *ngIf="reporteVisualizado as reporte" class="reporte-modal-fondo" (click)="cerrarVisualizacion()">
+   <section id="detalleReporteDialog" class="reporte-modal" role="dialog" aria-modal="true"
+      aria-labelledby="detalleReporteTitulo" (click)="$event.stopPropagation()">
+      <header class="reporte-modal-cabecera">
+         <div>
+            <small>Reporte Jasper · {{ nombreMetodo(reporte.metodo!) }}</small>
+            <h5 id="detalleReporteTitulo" class="mb-0">{{ reporte.nomrep }}</h5>
+         </div>
+         <button id="cerrarDetalleReporte" type="button" class="btn btn-light btn-sm" aria-label="Cerrar visualización"
+            (click)="cerrarVisualizacion()"><i class="bi bi-x-lg"></i></button>
+      </header>
+      <div class="reporte-modal-contenido">
+         <p *ngIf="cargandoDetalle" role="status"><i class="fa fa-spinner fa-spin"></i> Cargando reporte…</p>
+         <div class="alert alert-danger" *ngIf="errorVista" role="alert">{{ errorVista }}</div>
+         <ng-container *ngIf="!cargandoDetalle">
+            <dl class="reporte-ficha">
+               <div><dt>Código</dt><dd>{{ reporte.repoxopcion?.codigo || 'Sin código' }}</dd></div>
+               <div><dt>Opción principal</dt><dd>{{ reporte.repoxopcion?.opcion || 'Sin opción' }}</dd></div>
+               <div><dt>Nombre de la opción</dt><dd>{{ reporte.repoxopcion?.nombre || 'Sin asignación' }}</dd></div>
+               <div><dt>Descripción</dt><dd>{{ reporte.desrep || 'Sin descripción' }}</dd></div>
+               <div><dt>Archivo JRXML</dt><dd>{{ reporte.jrxmlPath || 'Sin ruta de archivo JRXML' }}</dd></div>
+               <div><dt>Archivo Jasper</dt><dd>{{ reporte.jasperPath || 'Almacenado en la base de datos' }}</dd></div>
+            </dl>
+            <h6 class="font-weight-bold">Opciones adicionales</h6>
+            <p *ngIf="!reporte.opciones?.length" class="text-muted">Solo la opción principal.</p>
+            <ul *ngIf="reporte.opciones?.length">
+               <li *ngFor="let opcion of reporte.opciones">{{ opcion.codigo }} · {{ opcion.opcion }} · {{ opcion.nombre }}</li>
+            </ul>
+            <h6 class="font-weight-bold">Parámetros ({{ parametrosVisualizados.length }})</h6>
+            <div class="table-responsive" *ngIf="parametrosVisualizados.length; else sinParametros">
+               <table class="table table-bordered table-sm">
+                  <thead class="thead-light"><tr><th>Nombre</th><th>Tipo</th><th>Ancho</th><th>Orden</th></tr></thead>
+                  <tbody><tr *ngFor="let parametro of parametrosVisualizados">
+                     <td>{{ parametro.nombre }}</td><td>{{ parametro.tipo }}</td><td>{{ parametro.ancho }}</td><td>{{ parametro.orden }}</td>
+                  </tr></tbody>
+               </table>
+            </div>
+            <ng-template #sinParametros><p class="text-muted">Este reporte no declara parámetros.</p></ng-template>
+            <section class="reporte-vista" *ngIf="reporte.metodo === 1; else vistaDesdeModulo">
+               <h6 class="font-weight-bold">Vista previa PDF</h6>
+               <p class="text-muted small">Completa los parámetros que necesita el reporte. Los campos vacíos se omiten.</p>
+               <form [formGroup]="formVistaPrevia" (ngSubmit)="generarVistaPrevia()">
+                  <div class="row">
+                     <ng-container *ngFor="let parametro of parametrosVisualizados; let i = index">
+                        <div class="form-group col-md-4" *ngIf="parametro.editable">
+                           <label [for]="'parametroVista' + i">{{ parametro.nombre }}</label>
+                           <select *ngIf="parametro.entrada === 'boolean'; else entradaParametro" class="form-control form-control-sm"
+                              [id]="'parametroVista' + i" [formControlName]="parametro.nombre">
+                              <option value="">Sin valor</option><option value="true">Sí</option><option value="false">No</option>
+                           </select>
+                           <ng-template #entradaParametro>
+                              <input class="form-control form-control-sm" [id]="'parametroVista' + i" [type]="parametro.entrada"
+                                 [formControlName]="parametro.nombre" [attr.step]="parametro.entrada === 'number' ? 'any' : null">
+                           </ng-template>
+                           <small class="text-danger" *ngIf="formVistaPrevia.get(parametro.nombre)?.invalid">Ingresa un número entero.</small>
+                        </div>
+                        <p class="col-12 text-muted small" *ngIf="!parametro.editable">{{ parametro.nombre }} ({{ parametro.tipo }}): lo proporciona la integración del reporte.</p>
+                     </ng-container>
+                  </div>
+                  <button class="btn btn-primary btn-sm" type="submit" [disabled]="generandoVista || formVistaPrevia.invalid">
+                     <i [class]="generandoVista ? 'fa fa-spinner fa-spin' : 'bi bi-file-earmark-pdf'"></i>
+                     {{ generandoVista ? 'Generando PDF…' : 'Generar vista previa' }}
+                  </button>
+               </form>
+               <iframe *ngIf="pdfSeguro" [src]="pdfSeguro" title="Vista previa PDF del reporte" class="reporte-pdf"></iframe>
+            </section>
+            <ng-template #vistaDesdeModulo>
+               <p class="alert alert-info mb-0">La vista previa de este reporte requiere los datos enviados por el módulo que lo consume (Beans o Dataset).</p>
+            </ng-template>
+         </ng-container>
+      </div>
+      <footer class="reporte-modal-pie">
+         <button *ngIf="reporte.metodo === 1" type="button" class="btn btn-outline-primary btn-sm mr-2"
+            [disabled]="cargandoDetalle" (click)="imprimirReporte(reporte)">Imprimir / Exportar</button>
+         <button type="button" class="btn btn-secondary btn-sm" (click)="cerrarVisualizacion()">Cerrar</button></footer>
+   </section>
 </div>
