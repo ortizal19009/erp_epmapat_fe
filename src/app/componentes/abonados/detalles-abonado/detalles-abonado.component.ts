@@ -1103,10 +1103,10 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   }
   getSinCobro() {
     this.facService.getSinCobrar(this._abonado[0].idabonado).subscribe({
-      next: (facturas: any) => {
+      next: async (facturas: any) => {
         this._abonado[0].facturas = facturas;
         this.datosImprimir = this._abonado[0];
-        this.impNotificacion();
+        try { await this.impNotificacion(); } catch (error) { console.error(error); }
       },
       error: (e) => console.error(e.error),
     });
@@ -1193,6 +1193,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   }
   async impNotificacion() {
     this.s_loading.showLoading();
+    this.dataURI = '';
+    try {
     this.nameFile = 'Generando archivo...';
     let doc = new jsPDF('p', 'pt', 'a4');
     this.rubrostotal = 0;
@@ -1232,52 +1234,49 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       ],
     });
 
-    // Gather all `getSumaFac()` promises
-    const sumaFacPromises: any[] = [];
-    let facturas: any = this.datosImprimir.facturas;
-    //this._rxf = [];
-
-    facturas.forEach(async (factura: any) => {
-      factura.interes = await this.cInteres(factura);
-    });
-    let d_facturas = [];
-    // Wait for all `getSumaFac()` promises to resolve
-    let t_subtotal: number = 0;
-    let t_intereses: number = 0;
-    let t_total: number = 0;
-    let d_rxf: any = [];
-    this._rxf = await this.rubxfacService.getRubrosIdAbonado(
-      this._abonado[0].idabonado
-    );
-    await this._rxf.forEach((item: any) => {
-      d_rxf.push([
-        item.idrubro_rubros,
-        item.descripcion,
-        +item.total.toFixed(2),
+    // Both tables use exactly the same invoice details and awaited interests.
+    const facturas: any[] = Array.from(new Map<number, any>(
+      (this.datosImprimir.facturas || []).map((factura: any) => [Number(factura.idfactura), factura])
+    ).values());
+    const d_facturas: any[] = [];
+    let subtotalCentavos = 0;
+    let interesesCentavos = 0;
+    const rubrosPorId = new Map<number, { descripcion: string; centavos: number }>();
+    for (const factura of facturas) {
+      const [rubros, interes, fecEmision] = await Promise.all([
+        this.rubxfacService.getByIdfacturaAsync(factura.idfactura),
+        this.cInteres(factura),
+        this.getFechaEmision(factura.idfactura),
       ]);
-      this.rubrostotal += item.total;
-    });
-
-    // Iterate through facturas and add sumaFac values
-    for (let i = 0; i < facturas.length; i++) {
-      const factura = facturas[i];
-      const sumaFac = await this.getSumaFac(facturas[i].idfactura);
-      facturas[i].sumaFac = sumaFac;
-      let fecEmision = await this.getFechaEmision(facturas[i].idfactura);
-      let suma = +factura.sumaFac + +factura.interes;
+      let facturaCentavos = 0;
+      for (const rubro of rubros) {
+        if (rubro.estado != null && Number(rubro.estado) === 0) continue;
+        const id = Number(rubro.idrubro_rubros?.idrubro);
+        const centavos = Math.round((Number(rubro.cantidad) * Number(rubro.valorunitario) + Number.EPSILON) * 100);
+        if (!Number.isFinite(centavos) || !Number.isFinite(id)) {
+          throw new Error(`Detalle de rubros invalido en planilla ${factura.idfactura}`);
+        }
+        facturaCentavos += centavos;
+        const acumulado = rubrosPorId.get(id) || { descripcion: rubro.idrubro_rubros.descripcion || 'Rubro', centavos: 0 };
+        acumulado.centavos += centavos;
+        rubrosPorId.set(id, acumulado);
+      }
+      const interesCentavos = Math.round((Number(interes) + Number.EPSILON) * 100);
+      if (!Number.isFinite(interesCentavos)) throw new Error(`Interes invalido en planilla ${factura.idfactura}`);
+      subtotalCentavos += facturaCentavos;
+      interesesCentavos += interesCentavos;
       d_facturas.push([
-        factura.idfactura,
-        //fecEmision.slice(0, 7),
-        fecEmision,
-        factura.modulo,
-        factura.sumaFac.toFixed(2),
-        factura.interes.toFixed(2),
-        suma.toFixed(2),
+        factura.idfactura, fecEmision || factura.feccrea || '', factura.modulo,
+        (facturaCentavos / 100).toFixed(2), (interesCentavos / 100).toFixed(2),
+        ((facturaCentavos + interesCentavos) / 100).toFixed(2),
       ]);
-      t_subtotal += factura.sumaFac;
-      t_intereses += factura.interes;
-      t_total += suma;
     }
+    const t_subtotal = subtotalCentavos / 100;
+    const t_intereses = interesesCentavos / 100;
+    const t_total = (subtotalCentavos + interesesCentavos) / 100;
+    this.rubrostotal = t_subtotal;
+    const d_rxf: any[] = [...rubrosPorId.entries()].sort(([a], [b]) => a - b)
+      .map(([id, rubro]) => [id, rubro.descripcion, (rubro.centavos / 100).toFixed(2)]);
     d_facturas.push([
       '',
       '',
@@ -1300,7 +1299,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       },
       body: d_facturas,
     });
-    let t: number = t_intereses + this.rubrostotal;
+    const t = t_total;
     d_rxf.push(
       ['5', 'Interes', t_intereses.toFixed(2)],
       ['', 'Sub total: ', this.rubrostotal.toFixed(2)],
@@ -1315,7 +1314,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     // ✅ Reemplaza con esto:
     if (this.swEmail == true) {
       // El email necesita base64, datauri está bien aquí
-      this.dataURI = doc.output('datauri').toString();
+      this.dataURI = doc.output('datauristring').toString();
     } else {
       // Iframe necesita blob URL, no datauri
       const blob = doc.output('blob');
@@ -1331,7 +1330,13 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     }
     this.nameFile = `Notificación_${this._abonado[0].idabonado}.pdf`;
 
-    this.s_loading.hideLoading();
+    } catch (error) {
+      this.nameFile = 'No se pudo generar la notificacion';
+      this.swal('error', 'No se pudo calcular la deuda completa. Intente nuevamente.');
+      throw error;
+    } finally {
+      this.s_loading.hideLoading();
+    }
     // Generate and output the PDF after all data is processed
     //doc.output('pdfobjectnewwindow');
   }
