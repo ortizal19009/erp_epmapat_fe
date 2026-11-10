@@ -33,6 +33,7 @@
                 <option value="5">Recaudación - Planillas</option>
                 <option value="6">Transferencias cobradas</option>
                 <option value="7">Transferencias general</option>
+                <option value="10">Resumen facturación</option>
                 <option value="3">Lista de cajas</option>
   <!--               <option value="8" >Recaudación facturas</option>
                 <option value="9" >Recaudación rubros</option> -->
@@ -41,7 +42,7 @@
             </div>
 
             <div
-              *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
+              *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9 || opcreporte ===10)"
               class="form-group col-md-6">
               <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
@@ -54,7 +55,7 @@
             </div>
 
             <div
-              *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
+              *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9 || opcreporte ===10)"
               class="form-group col-md-6">
               <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
@@ -109,7 +110,7 @@
               </div>
             </div>
 
-            <div *ngIf="opcreporte === 8 || opcreporte === 9" class="form-group col-sm-10 my-0 py-0">
+            <div *ngIf="opcreporte === 8 || opcreporte === 9 || opcreporte === 10" class="form-group col-sm-10 my-0 py-0">
               <div class="input-group input-group-sm mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text font-weight-bold">Formato</span>
@@ -158,7 +159,7 @@
 <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
   <div class='modal-dialog modal-lg'>
 
-    <div class="modal-content" *ngIf="opcreporte == 7 || opcreporte === 8 || opcreporte === 9">
+    <div class="modal-content" *ngIf="opcreporte == 7 || opcreporte === 8 || opcreporte === 9 || opcreporte === 10">
       <div class="modal-header">
         <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">

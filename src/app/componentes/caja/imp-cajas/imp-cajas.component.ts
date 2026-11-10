@@ -316,6 +316,21 @@ export class ImpCajasComponent implements OnInit {
           throw error;
         }
         break;
+      case 10: // Resumen facturacion por forma de pago
+        if (!d_fecha || !h_fecha || d_fecha > h_fecha) {
+          this.errorReporte = 'Ingrese un rango de fechas válido.';
+          this.swbotones = false;
+          break;
+        }
+        this.s_loading.showLoading();
+        const resumenFacturacion = await this.jrService.getReporte({
+          reportName: 'ConteoFacturacionPorFormaPago',
+          parameters: { desde: d_fecha, hasta: h_fecha, idusuario: this.authService.idusuario },
+          extencion: this.getExtensionSeleccionada(),
+        });
+        this.procesarRespuestaReporte(resumenFacturacion, 'Resumen facturacion');
+        this.txtcalculando = this.swimprimir ? 'Mostrar' : 'Descargar';
+        break;
       case 8:
         this.s_loading.showLoading();
         let data: any = {

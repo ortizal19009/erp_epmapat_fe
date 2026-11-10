@@ -68,6 +68,10 @@ export class AguatramiteService {
       return this.http.post(`${baseUrl}`, aguatramite);
    }
 
+   aplicarTramite(tramite: Aguatramite, abonado: import('../modelos/abonados').Abonados): Observable<Aguatramite> {
+      return this.http.post<Aguatramite>(`${baseUrl}/aplicar`, { tramite, abonado });
+   }
+
    delete(idaguatramite: number): Observable<Object> {
       return this.http.delete(`${baseUrl}/${idaguatramite}`);
    }

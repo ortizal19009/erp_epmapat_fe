@@ -263,7 +263,7 @@ export class AguatramComponent implements OnInit {
    }
 
    async retiroMedidor() {
-      const abonado: Abonados = this.abonado;
+      const abonado: Abonados = { ...this.abonado };
       if (!this.validarAbonadoSeleccionado()) return;
       if (abonado.estado === 1 || abonado.estado === 2) {
          const correos = await this.confirmarTramiteConCorreo(
@@ -281,8 +281,9 @@ export class AguatramComponent implements OnInit {
             this.observaciones = this.f_retiroMedidor.value.ubimedidor;
             this.aguatramite.nrodocumento = this.f_retiroMedidor.value.nrodocumento;
             this.aguatramite.iddocumento_documentos = +this.f_retiroMedidor.value.iddocumento_documentos!;
-            const tramite = await this.guardarAguaTramite(abonado, abonado.nromedidor);
-            await this.actualizarAbonado(abonado);
+            const tramite = await this.guardarAguaTramite(abonado, abonado.nromedidor, true);
+            this.abonado = abonado;
+            await this.generarContratoGuardado(tramite);
             await this.enviarCorreoComprobante(tramite, correos);
             this.regresar();
          } catch (e) {
@@ -362,14 +363,17 @@ export class AguatramComponent implements OnInit {
       this.procesandoTramite = true;
       this.s_loading.showLoading();
       try {
-         this.abonado.idcategoria_categorias = this.f_categoria.value.idcategoria_categorias;
-         this.abonado.adultomayor = this.f_categoria.value.adultomayor;
-         this.abonado.municipio = this.f_categoria.value.municipio;
+         const abonado: Abonados = { ...this.abonado,
+            idcategoria_categorias: this.f_categoria.value.idcategoria_categorias,
+            adultomayor: this.f_categoria.value.adultomayor,
+            municipio: this.f_categoria.value.municipio,
+         };
          this.aguatramite.nrodocumento = this.f_categoria.value.nrodocumento;
          this.aguatramite.iddocumento_documentos = +this.f_categoria.value.iddocumento_documentos!;
          this.observaciones = this.f_categoria.value.observaciones;
-         const tramite = await this.guardarAguaTramite(this.abonado, null);
-         await this.actualizarAbonado(this.abonado);
+         const tramite = await this.guardarAguaTramite(abonado, null, true);
+         this.abonado = abonado;
+         await this.generarContratoGuardado(tramite);
          await this.enviarCorreoComprobante(tramite, correos);
          this.regresar();
       } catch (e) {
@@ -434,7 +438,7 @@ export class AguatramComponent implements OnInit {
       return this.f_camPropietario.controls;
    }
 
-   async guardarAguaTramite(abonado: Abonados, codmedidor: any): Promise<Aguatramite> {
+   async guardarAguaTramite(abonado: Abonados, codmedidor: any, aplicarCuenta = false): Promise<Aguatramite> {
       const fechaRegistro = this.normalizarFechaLocal(this.date);
       this.date = fechaRegistro;
       this.aguatramite.idabonado = abonado.idabonado;
@@ -449,14 +453,25 @@ export class AguatramComponent implements OnInit {
       this.aguatramite.usucrea = this.authService.idusuario;
       this.aguatramite.feccrea = fechaRegistro;
       try {
-         const datos = await firstValueFrom(this.s_aguatramite.saveAguaTramite(this.aguatramite)) as Aguatramite;
-         await this.s_tramiteagua.genContratoTramite(datos, this.abonado, this.titulo);
-         this.swal('success', 'Datos guardados con exito');
+         const datos = await firstValueFrom(aplicarCuenta
+            ? this.s_aguatramite.aplicarTramite(this.aguatramite, abonado)
+            : this.s_aguatramite.saveAguaTramite(this.aguatramite)) as Aguatramite;
+         if (!aplicarCuenta) await this.generarContratoGuardado(datos);
          return datos;
       } catch (e) {
          console.error(e);
          this.swal('error', 'Error al guardar tramite de agua');
          throw e;
+      }
+   }
+
+   private async generarContratoGuardado(tramite: Aguatramite): Promise<void> {
+      try {
+         await this.s_tramiteagua.genContratoTramite(tramite, this.abonado, this.titulo);
+         this.swal('success', 'Datos guardados con exito');
+      } catch (error) {
+         console.error('Tramite guardado; fallo al generar el comprobante', error);
+         this.swal('warning', 'Tramite guardado. No se pudo generar el comprobante; puede obtenerlo desde el listado.');
       }
    }
 
