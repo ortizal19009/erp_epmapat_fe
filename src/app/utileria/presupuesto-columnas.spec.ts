@@ -15,6 +15,14 @@ describe('Columnas de cedula presupuestaria', () => {
     expect(totalesPresupuesto(filas).codificado).toBe(.3); expect(totalesPresupuesto(filas).saldoCobpagado).toBe(.3);
   });
   it('no muestra cero como si fuese un dato real cuando falta la ejecucion', () => {
-    expect(() => columnasPresupuesto({ inicia: 100, totmod: 0 })).toThrow();
+    const p = columnasPresupuesto({ inicia: 100, totmod: 20 });
+    expect(p.codificado).toBe(120); expect(p.compromiso).toBeNull(); expect(p.saldoDevengado).toBeNull();
+  });
+  it('conserva datos parciales y no suma totales incompletos', () => {
+    const parcial = columnasPresupuesto({ inicia: 100, totmod: 0, ejecDevengado: 30 });
+    const completa = columnasPresupuesto({ inicia: 50, totmod: 0, ejecCompromiso: 10, ejecDevengado: 20, ejecCobpagado: 5 });
+    const total = totalesPresupuesto([parcial, completa]);
+    expect(total.codificado).toBe(150); expect(total.devengado).toBe(50);
+    expect(total.saldoDevengado).toBe(100); expect(total.compromiso).toBeNull(); expect(total.saldoCobpagado).toBeNull();
   });
 });

@@ -1,4 +1,4 @@
-<div *ngIf="errorPresupuesto" class="alert alert-danger mx-2 mt-2" role="alert">{{errorPresupuesto}}</div>
+<div *ngIf="errorPresupuesto" class="alert alert-warning mx-2 mt-2" role="alert">{{errorPresupuesto}}</div>
 <div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
@@ -67,12 +67,12 @@
 <td class="text-right importe " [ngClass]="{'transparente': partida.inicia == 0}">{{ partida.inicia | number:'1.2-2' }}</td>
 <td class="text-right importe " [ngClass]="{'transparente': partida.totmod == 0}">{{ partida.totmod | number:'1.2-2' }}</td>
 <td class="text-right importe " [ngClass]="{'transparente': partida.codificado == 0}">{{ partida.codificado | number:'1.2-2' }}</td>
-<td class="text-right importe " [ngClass]="{'transparente': partida.compromiso == 0}">{{ partida.compromiso | number:'1.2-2' }}</td>
-<td class="text-right importe " [ngClass]="{'transparente': partida.devengado == 0}">{{ partida.devengado | number:'1.2-2' }}</td>
-<td class="text-right importe " [ngClass]="{'transparente': partida.cobpagado == 0}">{{ partida.cobpagado | number:'1.2-2' }}</td>
-<td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoCompromiso == 0, 'text-danger': partida.saldoCompromiso < 0}">{{ partida.saldoCompromiso | number:'1.2-2' }}</td>
-<td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoDevengado == 0, 'text-danger': partida.saldoDevengado < 0}">{{ partida.saldoDevengado | number:'1.2-2' }}</td>
-<td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoCobpagado == 0, 'text-danger': partida.saldoCobpagado < 0}">{{ partida.saldoCobpagado | number:'1.2-2' }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': partida.compromiso == 0}">{{ partida.compromiso == null ? '—' : (partida.compromiso | number:'1.2-2') }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': partida.devengado == 0}">{{ partida.devengado == null ? '—' : (partida.devengado | number:'1.2-2') }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': partida.cobpagado == 0}">{{ partida.cobpagado == null ? '—' : (partida.cobpagado | number:'1.2-2') }}</td>
+<td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoCompromiso == 0, 'text-danger': partida.saldoCompromiso < 0}">{{ partida.saldoCompromiso == null ? '—' : (partida.saldoCompromiso | number:'1.2-2') }}</td>
+<td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoDevengado == 0, 'text-danger': partida.saldoDevengado < 0}">{{ partida.saldoDevengado == null ? '—' : (partida.saldoDevengado | number:'1.2-2') }}</td>
+<td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoCobpagado == 0, 'text-danger': partida.saldoCobpagado < 0}">{{ partida.saldoCobpagado == null ? '—' : (partida.saldoCobpagado | number:'1.2-2') }}</td>
 <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
@@ -90,7 +90,7 @@
                   </td>
                </tr>
             </tbody>
-            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold roboto small"><tr><td colspan="2" class="text-left">TOTAL: {{partidas.length}}</td><td class="text-right importe">{{totEjecucion.inicia | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.totmod | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.codificado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.compromiso | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.devengado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.cobpagado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.saldoCompromiso | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.saldoDevengado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.saldoCobpagado | number:'1.2-2'}}</td><td></td></tr></tfoot>
+            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold roboto small"><tr><td colspan="2" class="text-left">TOTAL: {{partidas.length}}</td><td class="text-right importe">{{totEjecucion.inicia | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.totmod | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.codificado | number:'1.2-2'}}</td><td class="text-right importe">{{ totEjecucion.compromiso == null ? '—' : (totEjecucion.compromiso | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.devengado == null ? '—' : (totEjecucion.devengado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.cobpagado == null ? '—' : (totEjecucion.cobpagado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoCompromiso == null ? '—' : (totEjecucion.saldoCompromiso | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoDevengado == null ? '—' : (totEjecucion.saldoDevengado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoCobpagado == null ? '—' : (totEjecucion.saldoCobpagado | number:'1.2-2') }}</td><td></td></tr></tfoot>
          </table>
          </div>
       </div>

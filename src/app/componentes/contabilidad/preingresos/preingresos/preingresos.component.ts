@@ -82,7 +82,9 @@ export class PreingresosComponent implements OnInit {
       this.preingService.getParingreso(this.formBuscar.value.codpar, this.formBuscar.value.nompar).subscribe({
          next: resp => {
             this.errorPresupuesto = '';
-            try { this._presupuei = (resp || []).map(p => columnasPresupuesto(p)); }
+            try { this._presupuei = (resp || []).map(p => columnasPresupuesto(p));
+               if (this._presupuei.some(p => p.devengado == null || p.cobpagado == null)) this.errorPresupuesto = 'La ejecución no está disponible para todas las partidas. Los valores pendientes se muestran como —.';
+            }
             catch { this._presupuei = []; this.errorPresupuesto = 'No se pudo obtener la ejecucion presupuestaria completa.'; }
             this.buscarPreingreso = {  //Guarda los datos de bÃºsqueda (por default se buscan todas las partidas)
                codpar: this.formBuscar.value.codpar,

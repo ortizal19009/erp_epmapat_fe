@@ -6,12 +6,12 @@ export class Presupue {
   ejecDevengado?: number;
   ejecCobpagado?: number;
   codificado?: number;
-  compromiso?: number;
-  devengado?: number;
-  cobpagado?: number;
-  saldoCompromiso?: number;
-  saldoDevengado?: number;
-  saldoCobpagado?: number;
+  compromiso?: number | null;
+  devengado?: number | null;
+  cobpagado?: number | null;
+  saldoCompromiso?: number | null;
+  saldoDevengado?: number | null;
+  saldoCobpagado?: number | null;
   intpre: number;
   tippar: number;
   codpar: String;

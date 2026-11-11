@@ -84,7 +84,9 @@ export class PregastosComponent implements OnInit {
       this.pregasService.getPregasto(2, codpar, nompar).subscribe({
          next: (presupue: Presupue[]) => {
             this.errorPresupuesto = '';
-            try { this.partidas = (presupue || []).map(p => columnasPresupuesto(p)); }
+            try { this.partidas = (presupue || []).map(p => columnasPresupuesto(p));
+               if (this.partidas.some(p => p.devengado == null || p.cobpagado == null || p.compromiso == null)) this.errorPresupuesto = 'La ejecución no está disponible para todas las partidas. Los valores pendientes se muestran como —.';
+            }
             catch { this.partidas = []; this.errorPresupuesto = 'No se pudo obtener la ejecucion presupuestaria completa.'; }
             this.buscarPregasto = {
                codpar: this.formBuscar.value.codpar,
