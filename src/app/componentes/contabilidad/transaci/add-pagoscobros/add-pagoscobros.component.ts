@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom, Observable, of } from 'rxjs';
@@ -9,6 +9,7 @@ import { PagoscobrosCreateDTO } from 'src/app/dtos/contabilidad/pagoscobros.dto'
 import { TransaciCreateDTO } from 'src/app/dtos/contabilidad/transaci.dto';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
+import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
 import { Benextran } from 'src/app/modelos/contabilidad/benextran.model';
 import { Cuentas } from 'src/app/modelos/contabilidad/cuentas.model';
 import { Ejecucio } from 'src/app/modelos/contabilidad/ejecucio.model';
@@ -41,7 +42,12 @@ export class AddPagoscobrosComponent implements OnInit {
    nomben!: string;
    nomDebcre: string = 'Haber';
    cuentas: Cuentas[] = [];
-   idcuenta!: number | null;
+   idcuenta: number | null = null;
+   @ViewChild('modalBeneficiarios') modalBeneficiarios?: ElementRef<HTMLDialogElement>;
+   coincidenciasBeneficiarios: { beneficiario: Beneficiarios; registros: Benextran[]; saldo: number }[] = [];
+   beneficiarioSeleccionado: Beneficiarios | null = null;
+   buscandoBeneficiarios = false;
+   private busquedaBeneficiarios = 0;
    documentos: Documentos[] = [];
    benextran: Benextran[] = [];
    hayregistros: boolean | null = null;
@@ -81,7 +87,7 @@ export class AddPagoscobrosComponent implements OnInit {
          intdoc: this.documentos,
          numdoc: ['', Validators.required],
          descri: '',
-         nomben: ''
+         nomben: ['', { updateOn: 'change' }]
       }, { updateOn: "blur" });
 
       this.datosAsiento();
@@ -150,6 +156,9 @@ export class AddPagoscobrosComponent implements OnInit {
       }
    }
    onCuentaSelected(e: any) {
+      this.busquedaBeneficiarios++;
+      this.buscandoBeneficiarios = false;
+      this.limpiarBeneficiarios();
       const selectedOption = this.cuentas.find((x: { codcue: any; }) => x.codcue === e.target.value);
       if (selectedOption) {
          // console.log('Coloca: ', selectedOption.idcuenta)
@@ -159,37 +168,90 @@ export class AddPagoscobrosComponent implements OnInit {
       }
       else {
          this.idcuenta = null;
+         this.f['codcue'].setValue('');
          this.formTransaci.controls['nomcue'].setValue('');
       };
+      this.f['idcuenta'].updateValueAndValidity();
+   }
+
+   private limpiarBeneficiarios(): void {
+      this.cerrarModalBeneficiarios();
+      this.beneficiarioSeleccionado = null;
+      this.benextran = [];
+      this.hayregistros = null;
+      this.partidaSeleccionada = [];
+      this.ejecucionBenxtra = [];
+      this.formBeneficiarios.setControl('liquida', this.fb.array([]));
+      this.f['valor'].setValue(null);
+      this.sumaTotales();
    }
 
    blurNomben() { this.nomben = this.formTransaci.get('nomben')!.value; }
 
+   cambiarBusquedaBeneficiario(): void {
+      this.busquedaBeneficiarios++;
+      this.buscandoBeneficiarios = false;
+      this.limpiarBeneficiarios();
+   }
+
    //Benextran de la cuenta seleccionada
    sinliquidar(): void {
-      const hasta = this.iAsiento.fecha
-      // console.log('hasta: ', hasta)
-      const nomben = this.nomben ?? '';
-      const tiptran = this.tiptran.numero - 6;
-      const codcue = String(this.cuentas[0].codcue);
-      this.bxtService.getACFP(hasta, nomben, tiptran, codcue).subscribe({
+      const codcue = String(this.f['codcue'].value || '').trim();
+      if (this.idcuenta == null || !codcue || !this.iAsiento.fecha) return;
+      const busqueda = ++this.busquedaBeneficiarios;
+      this.limpiarBeneficiarios();
+      this.buscandoBeneficiarios = true;
+      const nomben = String(this.f['nomben'].value || '').trim();
+      this.bxtService.getACFP(this.iAsiento.fecha, nomben, this.tiptran.numero - 6, codcue).subscribe({
          next: (benextran: Benextran[]) => {
-            this.benextran = benextran;
-            if (this.benextran.length == 0) {
-               this.hayregistros = false;
-            } else {
-               this.hayregistros = true;
-               const controles = benextran.map((_, index) =>
-                  this.fb.control(0, [Validators.required], [this.valLiquida(index)])
-               );
-               this.formBeneficiarios.setControl('liquida', this.fb.array(controles));
-
-               this.formTransaci.controls['valor'].setValue(null);
-               this.sumaTotales();
+            if (busqueda !== this.busquedaBeneficiarios) return;
+            this.buscandoBeneficiarios = false;
+            this.hayregistros = benextran.length > 0;
+            const grupos = new Map<number, { beneficiario: Beneficiarios; registros: Benextran[]; saldo: number }>();
+            for (const fila of benextran) {
+               const id = fila.idbene.idbene;
+               let grupo = grupos.get(id);
+               if (!grupo) {
+                  grupo = { beneficiario: fila.idbene, registros: [], saldo: 0 };
+                  grupos.set(id, grupo);
+               }
+               grupo.registros.push(fila);
+               grupo.saldo += fila.valor - fila.totpagcob;
+            }
+            this.coincidenciasBeneficiarios = Array.from(grupos.values());
+            if (this.coincidenciasBeneficiarios.length > 1) {
+               this.modalBeneficiarios?.nativeElement.showModal();
+            } else if (this.coincidenciasBeneficiarios.length === 1) {
+               this.seleccionarBeneficiario(this.coincidenciasBeneficiarios[0].beneficiario.idbene);
             }
          },
-         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar Benextran', err.error); }
+         error: err => {
+            if (busqueda !== this.busquedaBeneficiarios) return;
+            this.buscandoBeneficiarios = false;
+            this.authService.mostrarError('Error al buscar Benextran', err.error);
+         }
       });
+   }
+
+   seleccionarBeneficiario(idbene: number): void {
+      const seleccionado = this.coincidenciasBeneficiarios.find(grupo => grupo.beneficiario.idbene === idbene);
+      if (!seleccionado) return;
+      this.beneficiarioSeleccionado = seleccionado.beneficiario;
+      this.formTransaci.patchValue({ nomben: seleccionado.beneficiario.nomben });
+      this.nomben = seleccionado.beneficiario.nomben;
+      this.benextran = seleccionado.registros;
+      const controles = this.benextran.map((_, index) =>
+         this.fb.control(0, [Validators.required], [this.valLiquida(index)])
+      );
+      this.formBeneficiarios.setControl('liquida', this.fb.array(controles));
+      this.hayregistros = true;
+      this.sumaTotales();
+      this.cerrarModalBeneficiarios();
+   }
+
+   cerrarModalBeneficiarios(): void {
+      if (this.modalBeneficiarios?.nativeElement.open) this.modalBeneficiarios.nativeElement.close();
+      this.coincidenciasBeneficiarios = [];
    }
 
    dobleclick(i: number): void {

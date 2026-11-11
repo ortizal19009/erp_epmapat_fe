@@ -129,16 +129,24 @@
                               (click)="guardar()">
                               <i class="fa fa-check-circle"></i> Aceptar</button>
                            <button type="button" class="btn btn-success btn-sm mx-1 small input-group-prepend"
-                              (click)="sinliquidar()" [disabled]="idcuenta == null"><i class="bi-search"></i>
+                              (click)="sinliquidar()" [disabled]="idcuenta == null || !iAsiento.fecha || buscandoBeneficiarios"><i class="bi-search"></i>
                               Beneficiarios
                            </button>
                            <input *ngIf="idcuenta != null" type="text"
                               class="form-control form-control-sm input-group-append" formControlName="nomben"
-                              (blur)="blurNomben()">
+                              (input)="cambiarBusquedaBeneficiario()" (blur)="blurNomben()" (keydown.enter)="$event.preventDefault(); sinliquidar()"
+                              placeholder="Nombre o parte del nombre" aria-label="Buscar beneficiario por nombre">
                            <button type="button" class="btn btn-success btn-sm mx-1" (click)="regresar()"><i
                                  class="fa fa-times-circle"></i> Cancelar
                            </button>
                         </div>
+                        <div *ngIf="beneficiarioSeleccionado" class="small mb-1" role="status">
+                           Beneficiario seleccionado: {{ beneficiarioSeleccionado.nomben }}
+                           <span *ngIf="beneficiarioSeleccionado.rucben || beneficiarioSeleccionado.ciben">
+                              — {{ beneficiarioSeleccionado.rucben || beneficiarioSeleccionado.ciben }}
+                           </span>
+                        </div>
+                        <div *ngIf="buscandoBeneficiarios" role="status">Buscando beneficiarios...</div>
                         <div *ngIf="hayregistros == false">
                            <div class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
                               <strong>Ups!</strong> No existen registros
@@ -253,3 +261,33 @@
       </div>
    </div>
 </div>
+<dialog #modalBeneficiarios class="beneficiarios-modal" aria-labelledby="tituloBeneficiarios"
+   (close)="coincidenciasBeneficiarios = []">
+   <div class="modal-header cabecera">
+      <h5 class="modal-title" id="tituloBeneficiarios">Seleccionar beneficiario</h5>
+      <button type="button" class="close" aria-label="Cerrar" (click)="cerrarModalBeneficiarios()">
+         <span aria-hidden="true">&times;</span>
+      </button>
+   </div>
+   <div class="modal-body">
+      <p>Se encontraron {{ coincidenciasBeneficiarios.length }} beneficiarios. Selecciona el que corresponde.</p>
+      <div class="table-responsive">
+         <table class="table table-sm table-hover table-bordered">
+            <thead><tr><th>Nombre</th><th>Cédula / RUC</th><th>Código</th><th class="text-right">Saldo</th><th>Acción</th></tr></thead>
+            <tbody>
+               <tr *ngFor="let coincidencia of coincidenciasBeneficiarios">
+                  <td>{{ coincidencia.beneficiario.nomben }}</td>
+                  <td>{{ coincidencia.beneficiario.rucben || coincidencia.beneficiario.ciben || 'Sin identificación' }}</td>
+                  <td>{{ coincidencia.beneficiario.codben || coincidencia.beneficiario.idbene }}</td>
+                  <td class="text-right">{{ coincidencia.saldo | number: '1.2-2' }}</td>
+                  <td><button type="button" class="btn btn-success btn-sm"
+                     (click)="seleccionarBeneficiario(coincidencia.beneficiario.idbene)">Seleccionar</button></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+   <div class="modal-footer">
+      <button type="button" class="btn btn-secondary btn-sm" (click)="cerrarModalBeneficiarios()">Cancelar</button>
+   </div>
+</dialog>

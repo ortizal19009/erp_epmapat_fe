@@ -155,6 +155,10 @@
               "tsConfig": "tsconfig.rrhh-spec.json",
               "scripts": []
             },
+            "pagoscobros": {
+              "tsConfig": "tsconfig.pagoscobros-spec.json",
+              "scripts": []
+            },
             "emisiones": {
               "tsConfig": "tsconfig.emisiones-spec.json",
               "scripts": []

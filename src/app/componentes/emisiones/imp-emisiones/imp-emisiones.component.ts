@@ -620,7 +620,7 @@ export class ImpEmisionesComponent implements OnInit {
         });
     });
     // Columnas a la derecha
-    let columnsToRigth = [3];
+    let columnsToRigth = [4, 5];
     columnsToRigth.forEach((columnIndex) => {
       worksheet
         .getColumn(columnIndex)
@@ -630,7 +630,7 @@ export class ImpEmisionesComponent implements OnInit {
     });
     // Formato numérico con decimales
     const numeroStyle1 = { numFmt: '#,##0.00' };
-    const columnsToFormat1 = [3];
+    const columnsToFormat1 = [5];
     for (let i = 4; i <= getDatos.length + 3; i++) {
       columnsToFormat1.forEach((columnIndex) => {
         const cell = worksheet.getCell(i, columnIndex);
@@ -664,8 +664,8 @@ export class ImpEmisionesComponent implements OnInit {
     let doc = new jsPDF();
     let valoresEmitidos: any = await this.getValoresEmitidos(idemision);
     let body: any = [];
-    valoresEmitidos.forEach(async (item: any) => {
-      await body.push([
+    valoresEmitidos.forEach((item: any) => {
+      body.push([
         item.cuenta,
         item.nombre,
         item.categoria,

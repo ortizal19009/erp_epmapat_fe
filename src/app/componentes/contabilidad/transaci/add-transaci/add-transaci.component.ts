@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { EjecucioCreateDTO } from 'src/app/dtos/contabilidad/ejecucio.dto';
 import { TransaciCreateDTO } from 'src/app/dtos/contabilidad/transaci.dto';
@@ -29,12 +29,15 @@ export class AddTransaciComponent implements OnInit {
    idasiento: number;
    iAsiento = {} as interfaceAsiento; //Interface para los datos del Asiento
    cuentas: Cuentas[] = [];
-   idcuenta: number | null;
+   idcuenta: number | null = null;
+   guardando = false;
+   buscandoPartida = false;
+   transaccionGuardada: Transaci | null = null;
    documentos: Documentos[] = [];
    totDebe: number;
    totHaber: number;
    valorfrmt: number;
-   partida: { intpre: number | null; codpar: String };
+   partida: { intpre: number | null; codpar: String } = { intpre: null, codpar: '' };
 
    constructor(private router: Router, private fb: FormBuilder, private asiService: AsientosService, public authService: AutorizaService,
       private cueService: CuentasService, private docuService: DocumentosService, private tranService: TransaciService,
@@ -55,15 +58,15 @@ export class AddTransaciComponent implements OnInit {
          idcuenta: ['', Validators.required, this.valCuenta()],
          codcue: '',
          nomcue: [''],
-         intdoc: this.documentos,
+         intdoc: [null, Validators.required],
          numdoc: ['', Validators.required],
          debcre: ['', Validators.required],
-         valor: ['', [Validators.required]],
+         valor: [null, [Validators.required, Validators.min(0.01)]],
          descri: '',
          intpre: '',
          codpar: '',
          nompar: ''
-      }, { updateOn: "blur" });
+      });
 
       this.datosAsiento();
       this.listarDocumentos();
@@ -112,6 +115,10 @@ export class AddTransaciComponent implements OnInit {
       }
    }
    onCuentaSelected(e: any) {
+      if (this.transaccionGuardada) return;
+      this.buscandoPartida = false;
+      this.partida = { intpre: null, codpar: '' };
+      this.formTransaci.patchValue({ codcue: '', nomcue: '', codpar: '', nompar: '' });
       const selectedOption = this.cuentas.find((x: { codcue: any; }) => x.codcue === e.target.value);
       if (selectedOption) {
          this.idcuenta = selectedOption.idcuenta
@@ -119,8 +126,11 @@ export class AddTransaciComponent implements OnInit {
          this.f['nomcue'].setValue(selectedOption.nomcue);
          //Para asiento financiero con cuenta que tiene asohaber busca la partida
          if (this.iAsiento.tipasi == 2 && selectedOption.asohaber && selectedOption.asohaber.length > 6) {    //Ok asi porque asohaber no siempre es nulo
+            this.buscandoPartida = true;
             this.preingService.getByCodpar(selectedOption.asohaber).subscribe({
                next: (presupue: Presupue) => {
+                  if (this.idcuenta !== selectedOption.idcuenta) return;
+                  this.buscandoPartida = false;
                   if (presupue) {
                      this.partida = { intpre: presupue.intpre, codpar: presupue.codpar };
                      this.formTransaci.controls['codpar'].setValue(presupue.codpar);
@@ -132,7 +142,13 @@ export class AddTransaciComponent implements OnInit {
                      this.partida = { intpre: null, codpar: '' };
                   }
                },
-               error: err => console.error(err.error)
+               error: err => {
+                  if (this.idcuenta !== selectedOption.idcuenta) return;
+                  this.buscandoPartida = false;
+                  this.idcuenta = null;
+                  this.f['idcuenta'].updateValueAndValidity();
+                  this.authService.mostrarError('Error al buscar la partida', err.error);
+               }
             });
          } else { this.partida = { intpre: null, codpar: '' }; }
       }
@@ -141,6 +157,7 @@ export class AddTransaciComponent implements OnInit {
          this.formTransaci.controls['nomcue'].setValue('');
          this.partida = { intpre: null, codpar: '' };
       };
+      this.f['idcuenta'].updateValueAndValidity();
    }
 
    listarDocumentos() {
@@ -155,7 +172,13 @@ export class AddTransaciComponent implements OnInit {
       input.select();
    }
 
-   onSubmit() {
+   async onSubmit() {
+      if (this.guardando || this.buscandoPartida) return;
+      if (this.formTransaci.invalid || this.formTransaci.pending || this.idcuenta == null) {
+         this.formTransaci.markAllAsTouched();
+         return;
+      }
+      this.guardando = true;
       const dto: TransaciCreateDTO = {
          idasiento: { idasiento: this.idasiento },
          tiptran: 0,
@@ -173,40 +196,43 @@ export class AddTransaciComponent implements OnInit {
          usucrea: this.authService.idusuario,
          feccrea: new Date(),
       };
-      this.tranService.saveTransaci(dto).subscribe({
-         next: (transaci: Transaci) => {
-            if (this.partida.intpre) {
-               const dtoEjecucio: EjecucioCreateDTO = {
-                  tipeje: 3,
-                  intpre: { intpre: this.partida.intpre },
-                  codpar: this.partida.codpar,
-                  fecha_eje: this.iAsiento.fecha,
-                  modifi: 0,
-                  prmiso: 0,
-                  totdeven: 0,
-                  devengado: this.formTransaci.value.valor,
-                  cobpagado: 0,
-                  concep: this.formTransaci.value.descri,
-                  idtrata: 0,
-                  idtrami: null,
-                  idasiento: this.idasiento,
-                  inttra: transaci.inttra,
-                  idparxcer: null,
-                  idprmiso: null,
-                  idrefo: 0,
-                  usucrea: this.authService.idusuario,
-                  feccrea: new Date(),
-               }
-               this.ejecuService.saveEjecu(dtoEjecucio).subscribe({
-                  next: () => { },
-                  error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar Ejecucio', err.error) }
-               });
+      try {
+         const transaci = this.transaccionGuardada ?? await firstValueFrom(this.tranService.saveTransaci(dto));
+         this.transaccionGuardada = transaci;
+         if (this.partida.intpre) {
+            const dtoEjecucio: EjecucioCreateDTO = {
+               tipeje: 3,
+               intpre: { intpre: this.partida.intpre },
+               codpar: this.partida.codpar,
+               fecha_eje: this.iAsiento.fecha,
+               modifi: 0,
+               prmiso: 0,
+               totdeven: 0,
+               devengado: this.formTransaci.value.valor,
+               cobpagado: 0,
+               concep: this.formTransaci.value.descri,
+               idtrata: 0,
+               idtrami: null,
+               idasiento: this.idasiento,
+               inttra: transaci.inttra,
+               idparxcer: null,
+               idprmiso: null,
+               idrefo: 0,
+               usucrea: this.authService.idusuario,
+               feccrea: new Date(),
             }
-            this.authService.swal('success', `Transacción de la Cuenta ${transaci.codcue} guardada con éxito`);
-            this.regresar()
-         },
-         error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar', err.error) }
-      });
+            await firstValueFrom(this.ejecuService.saveEjecu(dtoEjecucio));
+         }
+         this.authService.swal('success', `Transacción de la Cuenta ${transaci.codcue} guardada con éxito`);
+         this.regresar();
+      } catch (err: any) {
+         const titulo = this.transaccionGuardada
+            ? 'La cuenta ya se guardo; no se pudo guardar la ejecucion. Pulse Aceptar para reintentar'
+            : 'Error al guardar';
+         this.authService.mostrarError(titulo, err.error);
+      } finally {
+         this.guardando = false;
+      }
    }
 
    //Valida que se haya seleccionado una Cuenta

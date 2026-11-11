@@ -120,7 +120,7 @@ export class TransaciComponent implements OnInit {
             this.ejecuService.findByIdAsiento(this.idasiento).subscribe({
                next: (ejecucio: Ejecucio[]) => {
                   this.ejecucio = ejecucio;
-                  if (ejecucio.length > 1) this.totalesEjecucion();
+                  this.totalesEjecucion();
                },
                error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar la EjecuciÃ³n', err.error) },
             });

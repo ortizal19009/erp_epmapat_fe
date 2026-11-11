@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { BenextranCreateDTO, BenextranUpdateDTO } from 'src/app/dtos/contabilidad/benextran.dto';
@@ -33,7 +33,12 @@ export class BenextranService {
 
    //Anticipos, CxC, Fondos de Terceros y CxP sin liquidar 
    getACFP(hasta: Date, nomben: String, tiptran: number, codcue: String): Observable<Benextran[]> {
-      return this.http.get<Benextran[]>(`${baseUrl}/acfp?hasta=${hasta}&nomben=${nomben}&tiptran=${tiptran}&codcue=${codcue}`);
+      const params = new HttpParams()
+         .set('hasta', String(hasta))
+         .set('nomben', String(nomben).trim())
+         .set('tiptran', tiptran)
+         .set('codcue', String(codcue));
+      return this.http.get<Benextran[]>(`${baseUrl}/acfp`, { params });
    }
 
    // getACFP(hasta: Date, nomben: string, tiptran: number, codcue: string): Observable<Benextran[]> {
