@@ -89,7 +89,7 @@
                   <td class="text-center">{{ certificacion.fecha | date: 'dd-MM-yyyy' }}</td>
                   <td [ngClass]="{'transparente': certificacion.intdoc?.intdoc == 1}">{{
                      certificacion.intdoc?.nomdoc || 'Sin documento' }} {{ certificacion.numdoc }}</td>
-                  <td [ngClass]="{'transparente': certificacion.idbene?.idbene == 1}">{{ certificacion.idbene?.nomben || 'Sin beneficiario' }}
+                  <td>{{ certificacion.idbene?.idbene == 1 ? 'Sin beneficiario' : (certificacion.idbene?.nomben?.trim() || 'Sin beneficiario') }}
                   </td>
                   <td class="text-right" [ngClass]="{'transparente': certificacion.valor == 0}">{{ certificacion.valor |
                      number:'1.2-2' }}</td>
