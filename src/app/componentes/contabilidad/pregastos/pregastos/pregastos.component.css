@@ -12,3 +12,15 @@
    color: white;
    cursor: pointer;
 }
+
+.presupuesto-scroll { max-height: 72vh; }
+.presupuesto-tabla { font-size: .78rem; margin-bottom: 0; }
+.presupuesto-gastos { min-width: 1450px; }
+.presupuesto-ingresos { min-width: 1220px; }
+.presupuesto-tabla th { vertical-align: middle; white-space: nowrap; padding: .35rem .4rem; }
+.presupuesto-tabla thead { position: sticky; top: 0; z-index: 2; background-color: var(--bgcolor1, #24566b); }
+.presupuesto-tabla .partida-codigo { white-space: nowrap; min-width: 145px; }
+.presupuesto-tabla .partida-nombre { min-width: 250px; max-width: 380px; }
+.presupuesto-tabla .importe { white-space: nowrap; min-width: 95px; padding: .25rem .4rem; font-variant-numeric: tabular-nums; }
+.presupuesto-tabla .saldo-grupo { background-color: rgba(0, 0, 0, .16); }
+.presupuesto-tabla .saldo-columna { background-color: rgba(17, 122, 139, .04); }

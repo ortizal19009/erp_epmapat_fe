@@ -1,3 +1,4 @@
+import { columnasPresupuesto, totalesPresupuesto } from 'src/app/utileria/presupuesto-columnas';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,7 +14,7 @@ import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucio.servic
 })
 export class PreingresosComponent implements OnInit {
 
-   _presupuei: any;
+   _presupuei: any[] = [];
    formBuscar: FormGroup;
    buscarPreingreso = { codpar: String, nompar: String }
    filtro: string;
@@ -26,6 +27,8 @@ export class PreingresosComponent implements OnInit {
    txtbuscar: string = 'Buscar';
    totCodificado = 0; totInicia = 0; totModifi = 0;
    totales = false;
+   totEjecucion = totalesPresupuesto([]);
+   errorPresupuesto = '';
    otraPagina: boolean = false;
    archExportar: string;
 
@@ -78,7 +81,9 @@ export class PreingresosComponent implements OnInit {
       this.txtbuscar = 'Buscando'
       this.preingService.getParingreso(this.formBuscar.value.codpar, this.formBuscar.value.nompar).subscribe({
          next: resp => {
-            this._presupuei = resp;
+            this.errorPresupuesto = '';
+            try { this._presupuei = (resp || []).map(p => columnasPresupuesto(p)); }
+            catch { this._presupuei = []; this.errorPresupuesto = 'No se pudo obtener la ejecucion presupuestaria completa.'; }
             this.buscarPreingreso = {  //Guarda los datos de búsqueda (por default se buscan todas las partidas)
                codpar: this.formBuscar.value.codpar,
                nompar: this.formBuscar.value.nompar
@@ -87,24 +92,17 @@ export class PreingresosComponent implements OnInit {
             this.totales = true;
             this.total()
          },
-         error: err => console.error(err.error)
+         error: err => { this.swbuscando = false; this.txtbuscar = 'Buscar'; this.errorPresupuesto = 'No se pudieron cargar las partidas de ingresos.'; console.error(err); }
       });
    }
 
    total() {
-      let sumInicia: number = 0;
-      let sumModifi: number = 0;
-      let i = 0;
-      this._presupuei.forEach(() => {
-         sumInicia += this._presupuei[i].inicia;
-         sumModifi += this._presupuei[i].totmod;
-         i++;
-      });
-      this.totInicia = sumInicia;
-      this.totModifi = sumModifi;
-      this.totCodificado = sumInicia + sumModifi;
+      this.totEjecucion = totalesPresupuesto(this._presupuei as any);
+      this.totInicia = this.totEjecucion.inicia;
+      this.totModifi = this.totEjecucion.totmod;
+      this.totCodificado = this.totEjecucion.codificado;
       this.swbuscando = false;
-      this.txtbuscar = 'Buscar'
+      this.txtbuscar = 'Buscar';
    }
 
    onInputChange() {

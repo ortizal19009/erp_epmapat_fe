@@ -111,7 +111,7 @@ export class AsientosComponent implements OnInit {
             });
             this.buscar();
          },
-         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar el último', err.error) }
+         error: err => { this.swbuscando = false; this.txtbuscar = 'Buscar'; console.error(err.error); this.authService.mostrarError('Error al buscar el último', err.error) }
       });
    }
 
@@ -161,7 +161,7 @@ export class AsientosComponent implements OnInit {
                   this.txtbuscar = 'Buscar';
                   this.totales();
                },
-               error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar por Asiento', err.error) }
+               error: err => { this.swbuscando = false; this.txtbuscar = 'Buscar'; console.error(err.error); this.authService.mostrarError('Error al buscar por Asiento', err.error) }
             });
       else {   //Busca Comprobantes
          this.asiService.getComprobantes(2, this.formBuscar.value.tipcom, this.formBuscar.value.desdeNum, this.formBuscar.value.hastaNum,
@@ -172,7 +172,7 @@ export class AsientosComponent implements OnInit {
                   this.txtbuscar = 'Buscar';
                   this.totales();
                },
-               error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar por Comprobante', err.error) }
+               error: err => { this.swbuscando = false; this.txtbuscar = 'Buscar'; console.error(err.error); this.authService.mostrarError('Error al buscar por Comprobante', err.error) }
             });
       }
    }
@@ -305,7 +305,7 @@ export class AsientosComponent implements OnInit {
                   this.authService.swal('success', `Asiento ${asiento.asiento} eliminada con éxito`);
                   this.buscar();
                },
-               error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar eliminado', err.error); }
+               error: err => { this.swbuscando = false; this.txtbuscar = 'Buscar'; console.error(err.error); this.authService.mostrarError('Error al guardar eliminado', err.error); }
             });
          },
          error: (err) => {

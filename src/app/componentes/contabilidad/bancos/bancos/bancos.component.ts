@@ -19,6 +19,10 @@ import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service
 
 export class BancosComponent implements OnInit {
 
+   movimientoSeleccionado: any = null;
+   guardandoMovimiento = false;
+   guardandoConciliacion = false;
+   errorBancos = '';
    formBancos: FormGroup;
    formConcilia: FormGroup;
    formTransaci: FormGroup;
@@ -58,8 +62,6 @@ export class BancosComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
 
-      this.listarBancos();
-      this.listarDocumentos();
 
       this.formBancos = this.fb.group({
          idcuenta: '',
@@ -96,6 +98,8 @@ export class BancosComponent implements OnInit {
          numdoc: '',
          descri: '',
       });
+      this.listarBancos();
+      this.listarDocumentos();
    }
 
    colocaColor(colores: any) {
@@ -121,8 +125,8 @@ export class BancosComponent implements OnInit {
    listarBancos() {
       this.cueService.getBancos().subscribe({
          next: datos => {
-            this._bancos = datos;
-            this.formBancos.controls['idcuenta'].setValue(this._bancos[0].idcuenta);
+            this._bancos = Array.isArray(datos) ? datos : [];
+            this.formBancos.controls['idcuenta'].setValue(this._bancos[0]?.idcuenta ?? '');
          },
          error: (e) => console.error(e),
       });
@@ -172,20 +176,22 @@ export class BancosComponent implements OnInit {
    get f() { return this.formTransaci.controls; }
 
    cambioDatosCheck(e: any, transaci: any) {
-      let date: Date = new Date();
       const previousMesConcili = transaci.mesconcili;
-      const previousChecked = !e.target.checked;
-
-      if (e.target.checked === false) {
-        transaci.mesconcili = 0;
-      } else if (e.target.checked === true) {
-         transaci.mesconcili = date.getMonth();
-         //transaci.mesconcili = 1;
+      const previousConcili = transaci.swconcili;
+      const mes = Number(this.formBancos.value.mes);
+      if (e.target.checked && (!Number.isInteger(mes) || mes < 1 || mes > 12)) {
+         e.target.checked = previousConcili === 1;
+         return;
       }
-      this.updateTransaci(transaci, () => {
+      transaci.swconcili = e.target.checked ? 1 : 0;
+      transaci.mesconcili = e.target.checked ? mes : 0;
+      const ahora = new Date();
+      const fecha = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+      this.updateTransaci({ inttra: transaci.inttra, swconcili: transaci.swconcili,
+         mesconcili: transaci.mesconcili, usumodi: this.authService.idusuario, fecmodi: fecha }, () => {
          transaci.mesconcili = previousMesConcili;
-         transaci.swconcili = previousChecked;
-         e.target.checked = previousChecked;
+         transaci.swconcili = previousConcili;
+         e.target.checked = previousConcili === 1;
          e.target.style.border = 'red 1px solid';
       });
       e.target.style.border = 'green 1px solid';
@@ -213,6 +219,8 @@ export class BancosComponent implements OnInit {
    }
 
    conciliacion() {
+      this.conciliaban = null;
+      this.errorBancos = '';
       this.conciService.getByIdcuentaMes(this.formBancos.value.idcuenta, this.formBancos.value.mes).subscribe({
          next: resp => {
             this.conciliaban = resp;
@@ -237,31 +245,91 @@ export class BancosComponent implements OnInit {
                bannc: this.conciliaban.bannc,
                bannd: this.conciliaban.bannd,
                bansaldo: Math.round(((this.conciliaban.baninicial + this.conciliaban.bancreditos - this.conciliaban.bandebitos) - this.conciliaban.bancheaa) * 100) / 100,
+               banerrores: this.conciliaban.banerrores ?? 0,
                observa: this.conciliaban.observa,
             });
+            this.changeLibros();
+            this.changeBanco();
          },
-         error: err => console.error('Al recuperar los datos de conciliban: ', err.error)
+         error: err => { this.conciliaban = null; this.errorBancos = err.status === 404 ? 'No existe conciliacion para la cuenta y mes seleccionados.' : 'No se pudo consultar la conciliacion.'; }
       })
    }
 
    changeLibros() {
       this.formConcilia.patchValue({
-         libsaldo: this.formConcilia.value.libfinal + this.formConcilia.value.libcheques + this.formConcilia.value.liberrores
+         libsaldo: Math.round((Number(this.formConcilia.value.libfinal || 0) - Number(this.formConcilia.value.libdepositos || 0) + Number(this.formConcilia.value.libcheques || 0) + Number(this.formConcilia.value.liberrores || 0)) * 100) / 100
       })
    }
 
    changeBanco() {
+      const v = this.formConcilia.value;
+      const final = Number(v.baninicial || 0) - Number(v.bandebitos || 0) + Number(v.bancreditos || 0);
       this.formConcilia.patchValue({
-         banfinal: this.formConcilia.value.baninicial - this.formConcilia.value.bandebitos + this.formConcilia.value.bancreditos,
-         bansaldo: this.formConcilia.value.banfinal - this.formConcilia.value.bancheaa - this.formConcilia.value.bannc + this.formConcilia.value.bannd + this.formConcilia.value.banerrores
-      })
+         banfinal: Math.round(final * 100) / 100,
+         bansaldo: Math.round((final - Number(v.bancheaa || 0) - Number(v.bannc || 0) + Number(v.bannd || 0) + Number(v.banerrores || 0)) * 100) / 100,
+      });
    }
 
    modificar(transaci: any) {
+      this.movimientoSeleccionado = transaci;
+      this.errorBancos = '';
       this.formTransaci.patchValue({
-         intdoc: transaci.intdoc.intdoc,
+         intdoc: transaci.intdoc?.intdoc ?? null,
          numdoc: transaci.numdoc,
          descri: transaci.descri,
+      });
+   }
+
+   guardarConciliacion() {
+      if (!this.conciliaban?.idconcilia || this.guardandoConciliacion || this.formConcilia.invalid) return;
+      const cuenta = Number(this.formBancos.value.idcuenta);
+      const mes = Number(this.formBancos.value.mes);
+      if (Number(this.conciliaban.idcuenta?.idcuenta) !== cuenta || Number(this.conciliaban.mes) !== mes) {
+         this.errorBancos = 'La cuenta o mes cambio. Consulte nuevamente la conciliacion.'; return;
+      }
+      const cambio: any = { idconcilia: this.conciliaban.idconcilia, idcuenta: { idcuenta: cuenta }, mes,
+         observa: this.formConcilia.value.observa };
+      for (const campo of ['libinicial', 'libdebitos', 'libcreditos', 'libdepositos', 'libcheques', 'liberrores',
+         'baninicial', 'bancreditos', 'bandebitos', 'bancheaa', 'bannc', 'bannd', 'banerrores']) {
+         cambio[campo] = Number(this.formConcilia.value[campo] || 0);
+         if (!Number.isFinite(cambio[campo])) { this.errorBancos = 'Revise los importes de la conciliacion.'; return; }
+      }
+      this.guardandoConciliacion = true; this.errorBancos = '';
+      this.conciService.updateConciliaBan(cambio).subscribe({
+         next: datos => {
+            this.conciliaban = datos; this.guardandoConciliacion = false;
+            document.querySelector<HTMLButtonElement>('#conciliacion button[data-dismiss="modal"]')?.click();
+         },
+         error: error => {
+            this.guardandoConciliacion = false;
+            this.errorBancos = error?.error?.message || 'No se pudo guardar la conciliacion. Intente nuevamente.';
+         },
+      });
+   }
+
+   guardarCambiosMovimiento() {
+      if (!this.movimientoSeleccionado || this.guardandoMovimiento || this.formTransaci.invalid) return;
+      const ahora = new Date();
+      const fecha = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+      const valores = this.formTransaci.value;
+      const movimiento = this.movimientoSeleccionado;
+      const cambio = { inttra: movimiento.inttra,
+         intdoc: valores.intdoc ? { intdoc: Number(valores.intdoc) } : null,
+         numdoc: valores.numdoc, descri: valores.descri, usumodi: this.authService.idusuario, fecmodi: fecha };
+      this.guardandoMovimiento = true;
+      this.errorBancos = '';
+      this.tranService.updateTransaci(cambio as any).subscribe({
+         next: (datos: any) => {
+            Object.assign(movimiento, { numdoc: cambio.numdoc, descri: cambio.descri,
+               intdoc: datos?.intdoc ?? this._documentos?.find((d: any) => Number(d.intdoc) === Number(valores.intdoc)) ?? movimiento.intdoc });
+            this.guardandoMovimiento = false;
+            this.formTransaci.markAsPristine();
+            document.querySelector<HTMLButtonElement>('#modificar button[data-dismiss="modal"]')?.click();
+         },
+         error: (error) => {
+            this.guardandoMovimiento = false;
+            this.errorBancos = error?.error?.message || 'No se pudo guardar el movimiento. Intente nuevamente.';
+         },
       });
    }
 

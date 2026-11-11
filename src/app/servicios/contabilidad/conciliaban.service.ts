@@ -30,11 +30,11 @@ export class ConciliabanService {
    }
 
    updateConciliaBan(conciliaban: Conciliaban) {
-      return this.http.put(`${baseUrl}/${conciliaban.idconcilia}`, conciliaban);
+      return this.http.post(`${baseUrl}`, conciliaban);
    }
 
    saveConciliaBan(conciliaban: Conciliaban) {
-      return this.http.post(`${baseUrl}/saveconcilia`, conciliaban);
+      return this.http.post(`${baseUrl}`, conciliaban);
    }
 
 }

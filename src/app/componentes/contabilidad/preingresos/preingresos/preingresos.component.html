@@ -1,3 +1,4 @@
+<div *ngIf="errorPresupuesto" class="alert alert-danger mx-2 mt-2" role="alert">{{errorPresupuesto}}</div>
 <div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra">
@@ -48,32 +49,27 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table class="table table-hover table-bordered table-sm sombra">
-            <thead class="cabecera pad0">
-               <tr>
-                  <th></th>
-                  <th class="col-md-2">Partida</th>
-                  <th>Denominación</th>
-                  <th class="text-right">Codificado</th>
-                  <th class="text-right">Inicial</th>
-                  <th class="text-right">Reformas</th>
-                  <th></th>
-               </tr>
-            </thead>
+         <div class="table-responsive presupuesto-scroll">
+         <table class="table table-hover table-bordered table-sm sombra presupuesto-tabla presupuesto-ingresos" aria-label="Presupuesto de ingresos">
+            <thead class="cabecera"><tr><th rowspan="2" scope="col" class="">Partida</th>
+<th rowspan="2" scope="col" class="">Denominación</th>
+<th rowspan="2" scope="col" class="text-right">Inicial</th>
+<th rowspan="2" scope="col" class="text-right">Reforma</th>
+<th rowspan="2" scope="col" class="text-right">Codificado</th>
+<th rowspan="2" scope="col" class="text-right">Devengado</th>
+<th rowspan="2" scope="col" class="text-right">Cobrado</th>
+<th colspan="2" scope="colgroup" class="text-center saldo-grupo">SALDO</th><th rowspan="2" scope="col" aria-label="Acciones"></th></tr><tr><th scope="col" class="text-right saldo-grupo" title="Codificado menos devengado">Devengado</th><th scope="col" class="text-right saldo-grupo" title="Codificado menos cobrado">Cobrado</th></tr></thead>
             <tbody class="detalle roboto small pad0">
-               <tr *ngFor="let preing of _presupuei | filter: filtro; let i=index" class="fila"
-                  (click)="onCellClick($event, preing)">
-                  <td class="text-center small font-weight-bold">{{i+1}}</td>
-                  <td>{{ preing.codpar }}</td>
-                  <td>{{ preing.nompar }}</td>
-                  <td class="text-right col-md-1" [ngClass]="{'transparente': preing.inicia + preing.totmod == 0}">{{
-                     preing.inicia +
-                     preing.totmod | number:'1.2-2'}}</td>
-                  <td class="text-right col-md-1" [ngClass]="{'transparente': preing.inicia == 0}">{{
-                     preing.inicia | number:'1.2-2'}}</td>
-                  <td class="text-right col-md-1" [ngClass]="{'transparente': preing.totmod == 0}">{{
-                     preing.totmod | number:'1.2-2'}}</td>
-                  <td class="text-center" id="popup">
+               <tr *ngFor="let preing of _presupuei | filter: filtro" class="fila" (click)="onCellClick($event, preing)">
+                  <td class="partida-codigo">{{ preing.codpar }}</td><td class="partida-nombre">{{ preing.nompar }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': preing.inicia == 0}">{{ preing.inicia | number:'1.2-2' }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': preing.totmod == 0}">{{ preing.totmod | number:'1.2-2' }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': preing.codificado == 0}">{{ preing.codificado | number:'1.2-2' }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': preing.devengado == 0}">{{ preing.devengado | number:'1.2-2' }}</td>
+<td class="text-right importe " [ngClass]="{'transparente': preing.cobpagado == 0}">{{ preing.cobpagado | number:'1.2-2' }}</td>
+<td class="text-right importe saldo-columna" [ngClass]="{'transparente': preing.saldoDevengado == 0, 'text-danger': preing.saldoDevengado < 0}">{{ preing.saldoDevengado | number:'1.2-2' }}</td>
+<td class="text-right importe saldo-columna" [ngClass]="{'transparente': preing.saldoCobpagado == 0, 'text-danger': preing.saldoCobpagado < 0}">{{ preing.saldoCobpagado | number:'1.2-2' }}</td>
+<td class="text-center" id="popup">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
                            aria-expanded="false">
@@ -90,16 +86,9 @@
                   </td>
                </tr>
             </tbody>
-            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold pad0 roboto small">
-               <tr *ngIf="!swfiltro" class="text-right font-weight-bold">
-                  <td colspan="3">TOTAL </td>
-                  <td>{{totCodificado | number: '1.2-2'}}</td>
-                  <td>{{totInicia | number: '1.2-2'}}</td>
-                  <td>{{totModifi | number: '1.2-2'}}</td>
-                  <td></td>
-               </tr>
-            </tfoot>
+            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold roboto small"><tr><td colspan="2" class="text-left">TOTAL: {{_presupuei.length}}</td><td class="text-right importe">{{totEjecucion.inicia | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.totmod | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.codificado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.devengado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.cobpagado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.saldoDevengado | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.saldoCobpagado | number:'1.2-2'}}</td><td></td></tr></tfoot>
          </table>
+         </div>
       </div>
    </div>
 

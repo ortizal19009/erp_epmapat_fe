@@ -89,7 +89,7 @@ export class NiifcuentasComponent implements OnInit {
             this.txtbuscar = 'Buscar';
             this.swbuscando = false;
          },
-         error: (e) => console.error(e),
+         error: (e) => { this.swbuscando = false; this.txtbuscar = 'Buscar'; console.error(e); },
       });
    }
 

@@ -2,6 +2,16 @@ import { Clasificador } from "../clasificador.model";
 
 export class Presupue {
   
+  ejecCompromiso?: number;
+  ejecDevengado?: number;
+  ejecCobpagado?: number;
+  codificado?: number;
+  compromiso?: number;
+  devengado?: number;
+  cobpagado?: number;
+  saldoCompromiso?: number;
+  saldoDevengado?: number;
+  saldoCobpagado?: number;
   intpre: number;
   tippar: number;
   codpar: String;

@@ -43,7 +43,7 @@ export class NiifcuentasService {
    }
 
    updateNiifCuenta(niifcuenta: Niifcuentas) {
-      return this.http.post(`${baseUrl}/upd/${niifcuenta.idniifcue}`, niifcuenta
+      return this.http.put(`${baseUrl}/upd/${niifcuenta.idniifcue}`, niifcuenta
       );
    }
 

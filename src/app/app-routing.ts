@@ -1055,8 +1055,6 @@ const routes: Routes = [
   { path: 'modi-ejecucion', component: ModiEjecucionComponent, canActivate: [AuthGuard] },
   { path: 'add-ejecucion', component: AddEjecucionComponent, canActivate: [AuthGuard] },
 
-  { path: 'bancos', component: BancosComponent, canActivate: [AuthGuard] },
-  { path: 'conciliaban', component: ConciliabanComponent, canActivate: [AuthGuard] },
 
   { path: 'comprobacion', component: ComprobacionComponent, canActivate: [AuthGuard] },
   { path: 'estsituacion', component: EstFinancieraComponent, canActivate: [AuthGuard] },

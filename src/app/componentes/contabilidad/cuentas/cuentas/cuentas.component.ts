@@ -96,7 +96,7 @@ export class CuentasComponent implements OnInit {
             this.swbuscando = false;
             this.txtbuscar = 'Buscar';
          },
-         error: err => console.error(err.error)
+         error: err => { this.swbuscando = false; this.txtbuscar = 'Buscar'; console.error(err.error); }
       })
    }
 

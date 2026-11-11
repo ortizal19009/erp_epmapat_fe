@@ -1,3 +1,4 @@
+import { columnasPresupuesto, totalesPresupuesto } from 'src/app/utileria/presupuesto-columnas';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -24,6 +25,8 @@ export class PregastosComponent implements OnInit {
    txtbuscar: string = 'Buscar';
    totCodificado = 0; totInicia = 0; totModifi = 0;
    totales = false;
+   totEjecucion = totalesPresupuesto([]);
+   errorPresupuesto = '';
    sweliminar: boolean;
    ultIdSelec: number = -1;
 
@@ -80,7 +83,9 @@ export class PregastosComponent implements OnInit {
       if (this.formBuscar.value.nompar != null) nompar = this.formBuscar.value.nompar.toLowerCase();
       this.pregasService.getPregasto(2, codpar, nompar).subscribe({
          next: (presupue: Presupue[]) => {
-            this.partidas = presupue;
+            this.errorPresupuesto = '';
+            try { this.partidas = (presupue || []).map(p => columnasPresupuesto(p)); }
+            catch { this.partidas = []; this.errorPresupuesto = 'No se pudo obtener la ejecucion presupuestaria completa.'; }
             this.buscarPregasto = {
                codpar: this.formBuscar.value.codpar,
                nompar: this.formBuscar.value.nompar
@@ -89,24 +94,17 @@ export class PregastosComponent implements OnInit {
             this.totales = true;
             this.total();
          },
-         error: err => console.error('Al buscar las Partidas de Gastos: ', err.error)
+         error: err => { this.swbuscando = false; this.txtbuscar = 'Buscar'; this.errorPresupuesto = 'No se pudieron cargar las partidas de gastos.'; console.error(err); }
       });
    }
 
    total() {
-      let sumInicia: number = 0;
-      let sumModifi: number = 0;
-      let i = 0;
-      this.partidas.forEach(() => {
-         sumInicia += this.partidas[i].inicia;
-         sumModifi += this.partidas[i].totmod;
-         i++;
-      });
-      this.totInicia = sumInicia;
-      this.totModifi = sumModifi;
-      this.totCodificado = sumInicia + sumModifi;
+      this.totEjecucion = totalesPresupuesto(this.partidas as any);
+      this.totInicia = this.totEjecucion.inicia;
+      this.totModifi = this.totEjecucion.totmod;
+      this.totCodificado = this.totEjecucion.codificado;
       this.swbuscando = false;
-      this.txtbuscar = 'Buscar'
+      this.txtbuscar = 'Buscar';
    }
 
    onInputChange() {

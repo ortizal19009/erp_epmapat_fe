@@ -1,3 +1,4 @@
+<div *ngIf="errorBancos" class="alert alert-danger mx-2 mt-2" role="alert">{{errorBancos}}</div>
 <div class="content mt-1 pt-1 px-2">
    <div class="container-fluid">
       <div class="row mt-0 px-1 py-1 justify-content-start cabecera border sombra">
@@ -76,7 +77,7 @@
                      </div>
                   </td>
                   <td class="text-center">
-                     <input type="checkbox" [(ngModel)]="movibank.swconcili"
+                     <input type="checkbox" [checked]="movibank.swconcili === 1"
                         (change)="cambioDatosCheck($event, movibank)">
                   </td>
                   <td class="text-center">{{movibank.mesconcili}}</td>
@@ -129,6 +130,7 @@
                <h6 class='modal-title font-weight-bold' id='ModalLabel'>Modificar</h6>
             </div>
             <div class='modal-body detalle'>
+               <div *ngIf="errorBancos" class="alert alert-danger" role="alert">{{errorBancos}}</div>
                <form [formGroup]="formTransaci">
                   <div class="row">
 
@@ -161,8 +163,8 @@
                </form>
             </div>
             <div class='modal-footer justify-content-center detalle border py-1'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
-                  [disabled]="formTransaci.pristine || !formTransaci.valid">
+               <button type='button' class='btn btn-success btn-sm' (click)="guardarCambiosMovimiento()"
+                  [disabled]="guardandoMovimiento || formTransaci.pristine || !formTransaci.valid">
                   <i class="fa fa-check-circle"></i> Aceptar
                </button>
                <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
@@ -180,6 +182,7 @@
                <h5 class='modal-title font-weight-bold' id='ModalLabel'>Conciliación</h5>
             </div>
             <div class='modal-body detalle'>
+               <div *ngIf="errorBancos" class="alert alert-danger" role="alert">{{errorBancos}}</div>
                <form [formGroup]="formConcilia">
                   <div class="row">
                      <div class="col-sm-6 py-0 my-0">
@@ -364,7 +367,8 @@
                </form>
             </div>
             <div class='modal-footer justify-content-center detalle border py-1'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'>
+               <button type='button' class='btn btn-success btn-sm' (click)="guardarConciliacion()"
+                  [disabled]="!conciliaban?.idconcilia || guardandoConciliacion || formConcilia.invalid">
                   <i class="fa fa-check-circle"></i> Aceptar
                </button>
                <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
