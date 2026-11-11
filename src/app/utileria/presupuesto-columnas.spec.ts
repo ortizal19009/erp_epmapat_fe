@@ -1,3 +1,4 @@
+import { jerarquiaPresupuesto } from './presupuesto-jerarquia';
 import { columnasPresupuesto, totalesPresupuesto } from './presupuesto-columnas';
 
 describe('Columnas de cedula presupuestaria', () => {
@@ -24,5 +25,43 @@ describe('Columnas de cedula presupuestaria', () => {
     const total = totalesPresupuesto([parcial, completa]);
     expect(total.codificado).toBe(150); expect(total.devengado).toBe(50);
     expect(total.saldoDevengado).toBe(100); expect(total.compromiso).toBeNull(); expect(total.saldoCobpagado).toBeNull();
+  });
+});
+
+describe('Jerarquia de presupuesto', () => {
+  const catalogo = [
+    { codpar: '5', nompar: 'EGRESOS CORRIENTES' },
+    { codpar: '51', nompar: 'EGRESOS EN PERSONAL' },
+    { codpar: '51.01', nompar: 'Remuneraciones Basicas' },
+    { codpar: '51.01.05', nompar: 'Remuneraciones Unificadas' },
+    { codpar: '51.01.05.001', nompar: 'Remuneraciones Unificadas' }
+  ];
+  const detalle = (codpar: string, inicia: number) => columnasPresupuesto({ intpre: inicia, codpar, nompar: 'Detalle', inicia, totmod: 10, ejecCompromiso: 30, ejecDevengado: 20, ejecCobpagado: 5 });
+  it('muestra todos los niveles de gastos con subtotales sin duplicarlos', () => {
+    const filas = jerarquiaPresupuesto([detalle('11.51.01.05.001.0', 100), detalle('11.51.01.05.002.0', 200)], 2, catalogo.filter(c => c.codpar !== '51.01.05.001'), [{ codigo: '11', nombre: 'ADMINISTRACION FINANCIERA' }]);
+    expect(filas.map(p => p.codpar)).toEqual(['11', '11.5', '11.51', '11.51.01', '11.51.01.05', '11.51.01.05.001', '11.51.01.05.001.0', '11.51.01.05.002', '11.51.01.05.002.0']);
+    const padre = filas[0];
+    expect(padre.nompar).toBe('ADMINISTRACION FINANCIERA'); expect(padre.agrupadora).toBeTrue();
+    expect(padre.inicia).toBe(300); expect(padre.codificado).toBe(320); expect(padre.compromiso).toBe(60); expect(padre.saldoCompromiso).toBe(260);
+    expect(filas.filter(p => !p.agrupadora).length).toBe(2);
+    expect(totalesPresupuesto(filas.filter(p => !p.agrupadora)).inicia).toBe(300);
+  });
+  it('ordena cada grupo inmediatamente antes de sus descendientes', () => {
+    const filas = jerarquiaPresupuesto([detalle('11.51.01.05.001.0', 100), detalle('11.84.01.01.001.0', 200)], 2, [...catalogo, {codpar:'8',nompar:'Capital'}, {codpar:'84',nompar:'Bienes'}]);
+    expect(filas.findIndex(p => p.codpar === '11.8')).toBeGreaterThan(filas.findIndex(p => p.codpar === '11.51.01.05.001.0'));
+  });
+  it('separa actividades aunque compartan clasificador', () => {
+    const filas = jerarquiaPresupuesto([detalle('11.51.01.05.001.0', 100), detalle('12.51.01.05.001.0', 200)], 2, catalogo);
+    expect(filas.find(p => p.codpar === '11.51').inicia).toBe(100);
+    expect(filas.find(p => p.codpar === '12.51').inicia).toBe(200);
+  });
+  it('agrupa ingresos desde su naturaleza sin agregar una actividad funcional', () => {
+    const filas = jerarquiaPresupuesto([detalle('11.02.04.01.01', 100)], 1, [{codpar: '1', nompar: 'INGRESOS CORRIENTES'}, {codpar:'11',nompar:'IMPUESTOS'}, {codpar:'11.02',nompar:'Sobre la Propiedad'}, {codpar:'11.02.04.01.01',nompar:'Detalle'}]);
+    expect(filas.map(p => p.codpar)).toEqual(['1', '11', '11.02', '11.02.04', '11.02.04.01', '11.02.04.01.01']);
+    expect(filas[0].devengado).toBe(20); expect(filas[5].agrupadora).toBeFalse();
+  });
+  it('los subtotales no convierten ejecucion ausente en cero', () => {
+    const filas = jerarquiaPresupuesto([columnasPresupuesto({codpar:'11.51.01.05.001.0',inicia:100})], 2, catalogo);
+    expect(filas[0].inicia).toBe(100); expect(filas[0].compromiso).toBeNull(); expect(filas[0].saldoDevengado).toBeNull();
   });
 });

@@ -1,3 +1,6 @@
+import { forkJoin } from 'rxjs';
+import { jerarquiaPresupuesto } from 'src/app/utileria/presupuesto-jerarquia';
+import { PresupuestoJerarquiaService } from 'src/app/servicios/contabilidad/presupuesto-jerarquia.service';
 import { columnasPresupuesto, totalesPresupuesto } from 'src/app/utileria/presupuesto-columnas';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -33,7 +36,7 @@ export class PreingresosComponent implements OnInit {
    archExportar: string;
 
    constructor(public fb: FormBuilder, private preingService: PreingresoService, private router: Router,
-      public authService: AutorizaService, private coloresService: ColoresService, private ejecuService: EjecucionService) { }
+      public authService: AutorizaService, private coloresService: ColoresService, private ejecuService: EjecucionService, private jerarquia: PresupuestoJerarquiaService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/preingresos');
@@ -79,10 +82,10 @@ export class PreingresosComponent implements OnInit {
    buscar() {
       this.swbuscando = true;
       this.txtbuscar = 'Buscando'
-      this.preingService.getParingreso(this.formBuscar.value.codpar, this.formBuscar.value.nompar).subscribe({
-         next: resp => {
+      forkJoin({ detalles: this.preingService.getParingreso(this.formBuscar.value.codpar, this.formBuscar.value.nompar), catalogos: this.jerarquia.catalogos$ }).subscribe({
+         next: ({ detalles: resp, catalogos }) => {
             this.errorPresupuesto = '';
-            try { this._presupuei = (resp || []).map(p => columnasPresupuesto(p));
+            try { this._presupuei = jerarquiaPresupuesto((resp || []).map(p => columnasPresupuesto(p)), 1, catalogos.clasificador, catalogos.funciones);
                if (this._presupuei.some(p => p.devengado == null || p.cobpagado == null)) this.errorPresupuesto = 'La ejecución no está disponible para todas las partidas. Los valores pendientes se muestran como —.';
             }
             catch { this._presupuei = []; this.errorPresupuesto = 'No se pudo obtener la ejecucion presupuestaria completa.'; }
@@ -98,8 +101,10 @@ export class PreingresosComponent implements OnInit {
       });
    }
 
+   get cantidadDetalles() { return this._presupuei.filter(p => !p.agrupadora).length; }
+
    total() {
-      this.totEjecucion = totalesPresupuesto(this._presupuei as any);
+      this.totEjecucion = totalesPresupuesto(this._presupuei.filter(p => !p.agrupadora) as any);
       this.totInicia = this.totEjecucion.inicia;
       this.totModifi = this.totEjecucion.totmod;
       this.totCodificado = this.totEjecucion.codificado;
@@ -113,6 +118,7 @@ export class PreingresosComponent implements OnInit {
    }
 
    onCellClick(event: any, paring: any) {
+      if (paring.agrupadora) return;
       const tagName = event.target.tagName;
       if (tagName === 'TD') {
          //Guarda los datos a enviar a aux-ingreso

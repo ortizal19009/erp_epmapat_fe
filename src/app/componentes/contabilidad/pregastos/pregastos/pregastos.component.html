@@ -62,7 +62,7 @@
 <th rowspan="2" scope="col" class="text-right">Pagado</th>
 <th colspan="3" scope="colgroup" class="text-center saldo-grupo">SALDO</th><th rowspan="2" scope="col" aria-label="Acciones"></th></tr><tr><th scope="col" class="text-right saldo-grupo" title="Codificado menos compromiso">Compromiso</th><th scope="col" class="text-right saldo-grupo" title="Codificado menos devengado">Devengado</th><th scope="col" class="text-right saldo-grupo" title="Codificado menos pagado">Pagado</th></tr></thead>
             <tbody class="detalle roboto small pad0">
-               <tr *ngFor="let partida of partidas | filter: filtro" class="fila" (click)="onCellClick($event, partida)">
+               <tr *ngFor="let partida of partidas | filter: filtro" class="fila" [class.font-weight-bold]="partida.agrupadora" (click)="onCellClick($event, partida)">
                   <td class="partida-codigo"><i *ngIf="partida.intpre == ultIdSelec" class="bi bi-caret-right-fill text-primary"></i>{{ partida.codpar }}</td><td class="partida-nombre">{{ partida.nompar }}</td>
 <td class="text-right importe " [ngClass]="{'transparente': partida.inicia == 0}">{{ partida.inicia | number:'1.2-2' }}</td>
 <td class="text-right importe " [ngClass]="{'transparente': partida.totmod == 0}">{{ partida.totmod | number:'1.2-2' }}</td>
@@ -74,7 +74,7 @@
 <td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoDevengado == 0, 'text-danger': partida.saldoDevengado < 0}">{{ partida.saldoDevengado == null ? '—' : (partida.saldoDevengado | number:'1.2-2') }}</td>
 <td class="text-right importe saldo-columna" [ngClass]="{'transparente': partida.saldoCobpagado == 0, 'text-danger': partida.saldoCobpagado < 0}">{{ partida.saldoCobpagado == null ? '—' : (partida.saldoCobpagado | number:'1.2-2') }}</td>
 <td class="text-center">
-                     <div class="btn-group py-0">
+                     <div *ngIf="!partida.agrupadora" class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
                            aria-expanded="false">
                         </button>
@@ -90,7 +90,7 @@
                   </td>
                </tr>
             </tbody>
-            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold roboto small"><tr><td colspan="2" class="text-left">TOTAL: {{partidas.length}}</td><td class="text-right importe">{{totEjecucion.inicia | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.totmod | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.codificado | number:'1.2-2'}}</td><td class="text-right importe">{{ totEjecucion.compromiso == null ? '—' : (totEjecucion.compromiso | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.devengado == null ? '—' : (totEjecucion.devengado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.cobpagado == null ? '—' : (totEjecucion.cobpagado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoCompromiso == null ? '—' : (totEjecucion.saldoCompromiso | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoDevengado == null ? '—' : (totEjecucion.saldoDevengado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoCobpagado == null ? '—' : (totEjecucion.saldoCobpagado | number:'1.2-2') }}</td><td></td></tr></tfoot>
+            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold roboto small"><tr><td colspan="2" class="text-left">TOTAL: {{cantidadDetalles}}</td><td class="text-right importe">{{totEjecucion.inicia | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.totmod | number:'1.2-2'}}</td><td class="text-right importe">{{totEjecucion.codificado | number:'1.2-2'}}</td><td class="text-right importe">{{ totEjecucion.compromiso == null ? '—' : (totEjecucion.compromiso | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.devengado == null ? '—' : (totEjecucion.devengado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.cobpagado == null ? '—' : (totEjecucion.cobpagado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoCompromiso == null ? '—' : (totEjecucion.saldoCompromiso | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoDevengado == null ? '—' : (totEjecucion.saldoDevengado | number:'1.2-2') }}</td><td class="text-right importe">{{ totEjecucion.saldoCobpagado == null ? '—' : (totEjecucion.saldoCobpagado | number:'1.2-2') }}</td><td></td></tr></tfoot>
          </table>
          </div>
       </div>

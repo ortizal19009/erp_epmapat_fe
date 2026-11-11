@@ -1,6 +1,7 @@
 import { Clasificador } from "../clasificador.model";
 
 export class Presupue {
+  agrupadora?: boolean;
   
   ejecCompromiso?: number;
   ejecDevengado?: number;

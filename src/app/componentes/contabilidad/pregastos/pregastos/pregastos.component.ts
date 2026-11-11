@@ -1,3 +1,6 @@
+import { forkJoin } from 'rxjs';
+import { jerarquiaPresupuesto } from 'src/app/utileria/presupuesto-jerarquia';
+import { PresupuestoJerarquiaService } from 'src/app/servicios/contabilidad/presupuesto-jerarquia.service';
 import { columnasPresupuesto, totalesPresupuesto } from 'src/app/utileria/presupuesto-columnas';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -31,7 +34,7 @@ export class PregastosComponent implements OnInit {
    ultIdSelec: number = -1;
 
    constructor(public fb: FormBuilder, private pregasService: PregastoService, private router: Router,
-      public authService: AutorizaService, private coloresService: ColoresService, private ejecuService: EjecucionService) { }
+      public authService: AutorizaService, private coloresService: ColoresService, private ejecuService: EjecucionService, private jerarquia: PresupuestoJerarquiaService) { }
 
    ngOnInit(): void {
       if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
@@ -81,10 +84,10 @@ export class PregastosComponent implements OnInit {
       if (this.formBuscar.value.codpar != null) codpar = this.formBuscar.value.codpar;
       let nompar = '';
       if (this.formBuscar.value.nompar != null) nompar = this.formBuscar.value.nompar.toLowerCase();
-      this.pregasService.getPregasto(2, codpar, nompar).subscribe({
-         next: (presupue: Presupue[]) => {
+      forkJoin({ detalles: this.pregasService.getPregasto(2, codpar, nompar), catalogos: this.jerarquia.catalogos$ }).subscribe({
+         next: ({ detalles: presupue, catalogos }) => {
             this.errorPresupuesto = '';
-            try { this.partidas = (presupue || []).map(p => columnasPresupuesto(p));
+            try { this.partidas = jerarquiaPresupuesto((presupue || []).map(p => columnasPresupuesto(p)), 2, catalogos.clasificador, catalogos.funciones);
                if (this.partidas.some(p => p.devengado == null || p.cobpagado == null || p.compromiso == null)) this.errorPresupuesto = 'La ejecución no está disponible para todas las partidas. Los valores pendientes se muestran como —.';
             }
             catch { this.partidas = []; this.errorPresupuesto = 'No se pudo obtener la ejecucion presupuestaria completa.'; }
@@ -100,8 +103,10 @@ export class PregastosComponent implements OnInit {
       });
    }
 
+   get cantidadDetalles() { return this.partidas.filter(p => !p.agrupadora).length; }
+
    total() {
-      this.totEjecucion = totalesPresupuesto(this.partidas as any);
+      this.totEjecucion = totalesPresupuesto(this.partidas.filter(p => !p.agrupadora) as any);
       this.totInicia = this.totEjecucion.inicia;
       this.totModifi = this.totEjecucion.totmod;
       this.totCodificado = this.totEjecucion.codificado;
@@ -118,6 +123,7 @@ export class PregastosComponent implements OnInit {
    }
 
    onCellClick(event: any, pargas: Presupue) {
+      if (pargas.agrupadora) return;
       const tagName = event.target.tagName;
       this.ultIdSelec = pargas.intpre;
       sessionStorage.setItem('ultIDpregas', this.ultIdSelec.toString());
