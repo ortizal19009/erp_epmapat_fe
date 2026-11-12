@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { DefinirService } from 'src/app/servicios/administracion/definir.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { map, Observable, of, switchMap } from 'rxjs';
+import { map, Observable, of, Subscription, switchMap } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
@@ -15,9 +16,13 @@ import { BeneficiariosService } from 'src/app/servicios/contabilidad/beneficiari
    templateUrl: './add-asiento.component.html',
    styleUrls: ['./add-asiento.component.css']
 })
-export class AddAsientoComponent implements OnInit {
+export class AddAsientoComponent implements OnInit, OnDestroy {
 
    formAsiento: FormGroup;
+   periodoContable: string | null = null;
+   cargandoPeriodo = false;
+   errorPeriodo = '';
+   private consultaPeriodo?: Subscription;
    beneficiarios: Beneficiarios[] = [];
    idbene: number | null;
    documentos: Documentos[] = [];
@@ -26,18 +31,15 @@ export class AddAsientoComponent implements OnInit {
    tiempoTranscurrido: number = 0;
 
    constructor(private router: Router, private fb: FormBuilder, private beneService: BeneficiariosService,
-      public authService: AutorizaService, private docuService: DocumentosService, private asiService: AsientosService) { }
+      public authService: AutorizaService, private docuService: DocumentosService, private asiService: AsientosService, private definirService: DefinirService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/asientos');
       let coloresJSON = sessionStorage.getItem('/asientos');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-      const datosEmpresa = this.authService.getDatosEmpresa()
-      const año = datosEmpresa!.fechap.toString().slice(0, 4);
-      const fecha = new Date(año + '-01-01')
       this.formAsiento = this.fb.group({
-         fecha: [fecha, Validators.required, this.valAño()],
+         fecha: [null, Validators.required, this.valAño()],
          tipasi: 2,
          tipcom: ['', { validators: [Validators.required], updateOn: 'change' }],
          compro: ['', Validators.required, this.valCompro()],
@@ -47,10 +49,44 @@ export class AddAsientoComponent implements OnInit {
          glosa: '',
       }, { updateOn: "blur" });
 
+      this.cargarPeriodo();
       this.inicioFormulario = Date.now();
       this.ultimafecha();
       this.listarDocumentos();
       this.changeTipcom();
+   }
+
+   ngOnDestroy(): void { this.consultaPeriodo?.unsubscribe(); }
+
+   cargarPeriodo(): void {
+      this.consultaPeriodo?.unsubscribe();
+      this.errorPeriodo = '';
+      this.periodoContable = null;
+      const fecha = String(this.authService.getDatosEmpresa()?.fechap || '');
+      if (this.aplicarPeriodo(fecha)) return;
+      this.cargandoPeriodo = true;
+      this.consultaPeriodo = this.definirService.getByIddefinir(1).subscribe({
+         next: datos => {
+            this.cargandoPeriodo = false;
+            if (!this.aplicarPeriodo(String(datos?.fechap || ''))) {
+               this.errorPeriodo = 'No hay un periodo contable valido configurado.';
+            }
+         },
+         error: () => {
+            this.cargandoPeriodo = false;
+            this.errorPeriodo = 'No se pudo cargar el periodo contable. Intente nuevamente.';
+         }
+      });
+   }
+
+   private aplicarPeriodo(fecha: string): boolean {
+      if (!/^[1-9]\d{3}-\d{2}-\d{2}$/.test(fecha)) return false;
+      this.periodoContable = fecha.slice(0, 4);
+      this.cargandoPeriodo = false;
+      const control = this.f['fecha'];
+      if (!control.value) control.setValue(this.periodoContable + '-01-01');
+      control.updateValueAndValidity();
+      return true;
    }
 
    colocaColor(colores: any) {
@@ -66,7 +102,7 @@ export class AddAsientoComponent implements OnInit {
       this.asiService.obtenerUltimaFecha().subscribe({
          next: (ultimafecha: Date) => {
 
-            this.formAsiento.patchValue({ fecha: ultimafecha })
+            if (ultimafecha) this.formAsiento.patchValue({ fecha: ultimafecha });
       },
          error: err => console.error('Error al obtener la última fecha', err.error)
       });
@@ -113,6 +149,10 @@ export class AddAsientoComponent implements OnInit {
 
    // Guarda
    saveAsiento() {
+      if (!this.periodoContable || this.cargandoPeriodo || this.formAsiento.invalid || this.formAsiento.pending) {
+         this.formAsiento.markAllAsTouched();
+         return;
+      }
       // Vuelve a validar el número de comprobante (Mientras toman café ...)
       this.validaComprobanteAntesDeGuardar().subscribe(existe => {
          if (existe) {
@@ -180,10 +220,9 @@ export class AddAsientoComponent implements OnInit {
    //Valida el año de la fecha
    valAño(): AsyncValidatorFn {
       return (control: AbstractControl): Observable<ValidationErrors | null> => {
-         const datos = this.authService.getDatosEmpresa();
-         const añoEmpresa = datos?.fechap?.toString().slice(0, 4);
+         const añoEmpresa = this.periodoContable;
          const añoDigitado = control.value?.toString().slice(0, 4);
-         const esValido = añoEmpresa === añoDigitado;
+         const esValido = !!añoEmpresa && añoEmpresa === añoDigitado;
          return of(esValido ? null : { añoinvalido: true });
       };
    }

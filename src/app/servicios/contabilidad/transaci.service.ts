@@ -119,7 +119,7 @@ export class TransaciService {
 
    // Este se esta usando en Bancos, cambiar a dto
    updateTransaci(transaci: Transaci) {
-      return this.http.put(`${baseUrl}/updtransaci/${transaci.inttra}`, transaci);
+      return this.http.put<Transaci>(`${baseUrl}/${transaci.inttra}`, transaci);
    }
 
    //Actualiza indicando el Id

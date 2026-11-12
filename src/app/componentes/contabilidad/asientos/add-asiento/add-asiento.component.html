@@ -4,6 +4,11 @@
          <div class="col-sm-8 mt-5">
             <h4 class="font-weight-bold text-center cabecera sombra border py-1">Nuevo Asiento</h4>
             <div class="card card-body sombra fondo detalle">
+               <div *ngIf="cargandoPeriodo" role="status">Cargando periodo contable...</div>
+               <div *ngIf="errorPeriodo" class="alert alert-warning" role="alert">
+                  {{ errorPeriodo }}
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cargarPeriodo()">Reintentar</button>
+               </div>
                <form [formGroup]="formAsiento">
                   <div class="row">
 
@@ -131,7 +136,7 @@
 
                   <div class="text-center">
                      <button type="submit" class="btn btn-success btn-sm mx-1" (click)="saveAsiento()"
-                        [disabled]="!formAsiento.valid">
+                        [disabled]="!formAsiento.valid || cargandoPeriodo || !periodoContable">
                         <i class="fa fa-check-circle"></i> Aceptar</button>
                      <button type="button" class="btn btn-outline-success btn-sm" (click)="regresar()"><i
                            class="fa fa-times-circle"></i> Cancelar
