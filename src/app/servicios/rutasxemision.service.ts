@@ -15,7 +15,7 @@ export class RutasxemisionService {
   constructor(private http: HttpClient) {}
 
   getByIdEmision(idemision: Number) {
-    return this.http.get<Rutasxemision>(`${baseUrl}?idemision=${idemision}`);
+    return this.http.get<Rutasxemision[]>(`${baseUrl}?idemision=${idemision}`);
   }
 
   getByQuery(dato: String) {

@@ -183,6 +183,14 @@
               "tsConfig": "tsconfig.caja-reportes-spec.json",
               "scripts": []
             },
+            "notificacion-deuda": {
+              "tsConfig": "tsconfig.notificacion-deuda-spec.json",
+              "scripts": []
+            },
+            "ruta-lector": {
+              "tsConfig": "tsconfig.ruta-lector-spec.json",
+              "scripts": []
+            },
             "rutas-gestion": {
               "tsConfig": "tsconfig.rutas-gestion-spec.json",
               "scripts": []

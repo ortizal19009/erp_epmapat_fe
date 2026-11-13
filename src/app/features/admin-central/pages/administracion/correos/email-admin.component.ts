@@ -254,8 +254,10 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
           this.loadEmailPage();
         }
       },
-      error: () => {
-        this.errorMessage = 'No fue posible cargar el modulo de correos. Intenta nuevamente.';
+      error: (error: any) => {
+        this.errorMessage = Number(error?.status) === 502
+          ? 'El backend no puede conectarse al microservicio de correos (HTTP 502). Verifique que el servicio esté iniciado y su dirección configurada sea correcta. Después pulse Actualizar.'
+          : this.extractErrorMessage(error, 'No fue posible cargar el modulo de correos. Intenta nuevamente.');
         this.loading = false;
       },
     });
@@ -717,6 +719,9 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
     }
     if (typeof error?.error?.message === 'string' && error.error.message.trim()) {
       return error.error.message.trim();
+    }
+    if (typeof error?.error?.error === 'string' && error.error.error.trim()) {
+      return error.error.error.trim();
     }
     if (typeof error?.message === 'string' && error.message.trim()) {
       return error.message.trim();

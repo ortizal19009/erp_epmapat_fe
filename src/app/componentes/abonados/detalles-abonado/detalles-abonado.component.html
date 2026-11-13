@@ -23,7 +23,7 @@
 
         <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir"
-            (click)="swEmail = false">
+            (click)="abrirImprimir()">
             <i class="bi bi-printer"></i>&nbsp; Imprimir
           </button>
 
@@ -944,14 +944,15 @@
 <!-- ===========================
      MODAL IMPRIMIR (se conserva ids/eventos)
 =========================== -->
-<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true"
+  data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered" [class.modal-lg]="pdfView" [class.modal-xl]="!pdfView">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white py-3">
-        <h5 class="modal-title">
+        <h5 class="modal-title" id="imprimirLabel">
           <i class="bi bi-printer mr-2"></i>Imprimir Reportes
         </h5>
-        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar" (click)="cancelar()">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -960,25 +961,34 @@
         <div *ngIf="pdfView; else pdfHide">
           <div class="form-group mb-0">
             <label class="small font-weight-bold">Seleccionar Reporte</label>
-            <select class="form-control form-control-sm" [(ngModel)]="opt">
+            <select class="form-control form-control-sm" [(ngModel)]="opt" [disabled]="reporteCargando">
               <option value="0">Cartas pendientes</option>
-              <option value="1">Reporte de cobros</option>
-              <option value="2">Estado de cuenta</option>
+              <option value="1" disabled>Reporte de cobros (no disponible)</option>
+              <option value="2" disabled>Estado de cuenta (no disponible)</option>
             </select>
           </div>
         </div>
 
         <ng-template #pdfHide>
-          <iframe id="pdfViewer" src="" width="100%" height="400px" style="border:none;"></iframe>
+          <div *ngIf="reporteCargando" class="text-center py-4" role="status" aria-live="polite">
+            <span class="spinner-border spinner-border-sm text-primary mr-2" aria-hidden="true"></span>
+            {{ reporteTotal ? 'Calculando planillas: ' + reporteProcesadas + ' de ' + reporteTotal : 'Consultando planillas pendientes...' }}
+          </div>
+          <iframe *ngIf="reportePdfUrl && !reporteCargando" #reportePdfViewer id="reporteAbonadoPdfViewer"
+            title="Reporte del abonado" width="100%" height="600px" style="border:none;"></iframe>
         </ng-template>
+        <div *ngIf="reporteError" class="alert alert-danger mb-0" role="alert">{{ reporteError }}</div>
       </div>
 
       <div class="modal-footer bg-light">
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" (click)="cancelar()">
           <i class="bi bi-x-circle mr-1"></i> Cancelar
         </button>
-        <button class="btn btn-success btn-sm" (click)="setOptImprimir()">
-          <i class="bi bi-check-circle mr-1"></i> Aceptar
+        <button type="button" class="btn btn-outline-primary btn-sm" *ngIf="!pdfView && !reporteCargando" (click)="abrirImprimir()">
+          Cambiar reporte
+        </button>
+        <button type="button" class="btn btn-success btn-sm" *ngIf="pdfView || reporteError" [disabled]="reporteCargando" (click)="setOptImprimir()">
+          <i class="bi bi-check-circle mr-1"></i> {{ reporteError ? 'Reintentar' : 'Aceptar' }}
         </button>
       </div>
     </div>

@@ -38,7 +38,7 @@ import { Recargosxcuenta } from 'src/app/modelos/recargosxcuenta.model';
 import { RecargosxcuentaService } from 'src/app/servicios/recargosxcuenta.service';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
-import { firstValueFrom, from, of, Subscription, mergeMap, map, catchError, timeout } from 'rxjs';
+import { firstValueFrom, from, of, Subscription, mergeMap, map, catchError, timeout, toArray } from 'rxjs';
 declare const $: any;
 
 @Component({
@@ -87,6 +87,17 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   opt = '0';
 
   datosImprimir: any;
+  reporteCargando = false;
+  reporteError = '';
+  reportePdfUrl: string | null = null;
+  reporteProcesadas = 0;
+  reporteTotal = 0;
+  private reporteRequest = 0;
+  @ViewChild('reportePdfViewer')
+  set visorReporte(viewer: ElementRef<HTMLIFrameElement> | undefined) {
+    if (viewer && this.reportePdfUrl) viewer.nativeElement.src = this.reportePdfUrl;
+  }
+
   /* Intereses */
   calInteres = {} as calcInteres;
   totInteres: number = 0;
@@ -266,6 +277,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   ngAfterViewInit(): void { }
   ngOnDestroy(): void {
     this.totalesHistorialSubscription?.unsubscribe();
+    this.cancelar();
   }
   cancelarFE() {
     if (this.facElectro != true) {
@@ -1088,28 +1100,62 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     this.facElectro = false;
   }
 
-  setOptImprimir() {
-    switch (this.opt) {
-      case '0':
-        this.getSinCobro();
-        this.pdfView = false;
-        this.modalSize = 'xl';
-        break;
-    }
+  abrirImprimir(): void {
+    this.cancelar();
+    this.swEmail = false;
+    this.opt = '0';
   }
-  cancelar() {
+
+  async setOptImprimir(): Promise<void> {
+    if (this.reporteCargando) return;
+    if (this.opt !== '0') {
+      this.reporteError = 'Este reporte no esta disponible todavia. Seleccione Cartas pendientes.';
+      return;
+    }
+    this.pdfView = false;
+    this.modalSize = 'xl';
+    await this.getSinCobro();
+  }
+
+  cancelar(): void {
+    this.reporteRequest = (this.reporteRequest ?? 0) + 1;
+    this.reporteCargando = false;
+    this.reporteError = '';
+    this.reporteProcesadas = 0;
+    this.reporteTotal = 0;
     this.pdfView = true;
     this.modalSize = 'sm';
+    this.limpiarPdfReporte();
   }
-  getSinCobro() {
-    this.facService.getSinCobrar(this._abonado[0].idabonado).subscribe({
-      next: async (facturas: any) => {
-        this._abonado[0].facturas = facturas;
-        this.datosImprimir = this._abonado[0];
-        try { await this.impNotificacion(); } catch (error) { console.error(error); }
-      },
-      error: (e) => console.error(e.error),
-    });
+
+  private limpiarPdfReporte(): void {
+    if (this.reportePdfUrl) URL.revokeObjectURL(this.reportePdfUrl);
+    this.reportePdfUrl = null;
+  }
+
+  async getSinCobro(): Promise<void> {
+    if (this.reporteCargando) return;
+    const solicitud = this.reporteRequest = (this.reporteRequest ?? 0) + 1;
+    this.reporteCargando = true;
+    this.reporteError = '';
+    this.reporteProcesadas = 0;
+    this.reporteTotal = 0;
+    this.dataURI = '';
+    this.limpiarPdfReporte();
+    try {
+      const abonado = this._abonado?.[0];
+      if (!abonado?.idabonado) throw new Error('No se ha cargado la cuenta del abonado.');
+      const facturas = await firstValueFrom(this.facService.getSinCobrar(abonado.idabonado).pipe(timeout(30000)));
+      if (solicitud !== this.reporteRequest) return;
+      this.datosImprimir = { ...abonado, facturas };
+      await this.impNotificacion(solicitud);
+    } catch (error) {
+      if (solicitud !== this.reporteRequest) return;
+      this.reporteError = 'No se pudo cargar el reporte completo. Intente nuevamente.';
+      this.nameFile = 'No se pudo generar la notificacion';
+    } finally {
+      if (solicitud === this.reporteRequest) this.reporteCargando = false;
+    }
   }
   calcularDeudasAC() {
     this.s_loading.showLoading();
@@ -1191,9 +1237,9 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     }
     return respuesta;
   }
-  async impNotificacion() {
-    this.s_loading.showLoading();
+  async impNotificacion(solicitud = this.reporteRequest) {
     this.dataURI = '';
+    this.limpiarPdfReporte();
     try {
     this.nameFile = 'Generando archivo...';
     let doc = new jsPDF('p', 'pt', 'a4');
@@ -1242,12 +1288,26 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     let subtotalCentavos = 0;
     let interesesCentavos = 0;
     const rubrosPorId = new Map<number, { descripcion: string; centavos: number }>();
-    for (const factura of facturas) {
-      const [rubros, interes, fecEmision] = await Promise.all([
-        this.rubxfacService.getByIdfacturaAsync(factura.idfactura),
-        this.cInteres(factura),
-        this.getFechaEmision(factura.idfactura),
-      ]);
+    this.reporteTotal = facturas.length;
+    this.reporteProcesadas = 0;
+    const detalles = await firstValueFrom(from(facturas).pipe(
+      mergeMap(async (factura, index) => {
+        if (solicitud !== this.reporteRequest) throw new Error('Reporte cancelado');
+        const [rubros, interes, fecEmision] = await Promise.all([
+          this.rubxfacService.getByIdfacturaAsync(factura.idfactura),
+          this.cInteres(factura),
+          this.getFechaEmision(factura.idfactura),
+        ]);
+        if (solicitud !== this.reporteRequest) throw new Error('Reporte cancelado');
+        this.reporteProcesadas++;
+        return { factura, rubros, interes, fecEmision, index };
+      }, 4),
+      timeout(60000),
+      toArray()
+    ));
+    if (solicitud !== this.reporteRequest) return;
+    detalles.sort((a, b) => a.index - b.index);
+    for (const { factura, rubros, interes, fecEmision } of detalles) {
       let facturaCentavos = 0;
       for (const rubro of rubros) {
         if (rubro.estado != null && Number(rubro.estado) === 0) continue;
@@ -1316,26 +1376,17 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       // El email necesita base64, datauri está bien aquí
       this.dataURI = doc.output('datauristring').toString();
     } else {
-      // Iframe necesita blob URL, no datauri
-      const blob = doc.output('blob');
-      const url = URL.createObjectURL(blob);
-      const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
-
-      if (pdfViewer) {
-        if (pdfViewer.src?.startsWith('blob:')) {
-          URL.revokeObjectURL(pdfViewer.src);
-        }
-        pdfViewer.src = url;
-      }
+      // El visor propio recibe el PDF cuando Angular termina de crear el iframe.
+      this.limpiarPdfReporte();
+      this.reportePdfUrl = URL.createObjectURL(doc.output('blob'));
     }
-    this.nameFile = `Notificación_${this._abonado[0].idabonado}.pdf`;
+    this.nameFile = `Notificación_${this.datosImprimir.idabonado}.pdf`;
 
     } catch (error) {
+      if (solicitud !== this.reporteRequest) return;
       this.nameFile = 'No se pudo generar la notificacion';
       this.swal('error', 'No se pudo calcular la deuda completa. Intente nuevamente.');
       throw error;
-    } finally {
-      this.s_loading.hideLoading();
     }
     // Generate and output the PDF after all data is processed
     //doc.output('pdfobjectnewwindow');

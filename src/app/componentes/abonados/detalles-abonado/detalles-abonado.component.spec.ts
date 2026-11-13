@@ -1,3 +1,4 @@
+import { Subject, throwError } from 'rxjs';
 import { DetallesAbonadoComponent } from './detalles-abonado.component';
 
 describe('Notificacion de deuda: conciliacion de totales', () => {
@@ -47,6 +48,59 @@ describe('Notificacion de deuda: conciliacion de totales', () => {
     spyOn(c, 'cInteres').and.rejectWith(new Error('Sin conexion'));
     await expectAsync(c.impNotificacion()).toBeRejected();
     expect(documento).toBeNull(); expect(c.dataURI).toBe('');
-    expect(c.s_loading.hideLoading).toHaveBeenCalled();
+    expect(c.reportePdfUrl).toBeNull();
   });
+  it('abre siempre el selector y libera el PDF anterior sin consultar datos', () => {
+    c.reportePdfUrl = 'blob:anterior'; c.pdfView = false;
+    c.reporteCargando = true; c.reporteError = 'Error anterior';
+    const liberar = spyOn(URL, 'revokeObjectURL');
+    c.abrirImprimir();
+    expect(c.pdfView).toBeTrue(); expect(c.reporteCargando).toBeFalse();
+    expect(c.reporteError).toBe(''); expect(c.reportePdfUrl).toBeNull();
+    expect(liberar).toHaveBeenCalledWith('blob:anterior');
+    expect(c.rubxfacService.getByIdfacturaAsync).not.toHaveBeenCalled();
+  });
+
+  it('asigna el PDF al visor propio aunque haya otro iframe llamado pdfViewer', () => {
+    c.reportePdfUrl = 'blob:reporte';
+    const frame = { src: '' };
+    c.visorReporte = { nativeElement: frame };
+    expect(frame.src).toBe('blob:reporte');
+  });
+
+  it('procesa hasta cuatro planillas simultaneas y mantiene los totales', async () => {
+    c.datosImprimir.facturas = Array.from({ length: 9 }, (_, i) => ({ idfactura: i + 1, modulo: 'EMISION' }));
+    let activas = 0, maximo = 0;
+    c.rubxfacService.getByIdfacturaAsync.and.callFake(async () => {
+      activas++; maximo = Math.max(maximo, activas);
+      await new Promise(resolve => setTimeout(resolve, 5));
+      activas--; return rubros;
+    });
+    spyOn(c, 'cInteres').and.resolveTo(0);
+    await c.impNotificacion();
+    expect(maximo).toBe(4);
+    expect(c.reporteProcesadas).toBe(9);
+    expect(c.rubrostotal).toBe(1245.87);
+  });
+
+  it('muestra error recuperable si falla la consulta inicial', async () => {
+    c.reporteRequest = 0;
+    c.facService = { getSinCobrar: () => throwError(() => new Error('Sin conexion')) };
+    await c.setOptImprimir.call(Object.assign(c, { opt: '0' }));
+    expect(c.reporteCargando).toBeFalse();
+    expect(c.reporteError).toContain('No se pudo cargar');
+    expect(c.reportePdfUrl).toBeNull();
+  });
+
+  it('ignora una consulta anterior cuando se cierra y se vuelve a abrir el modal', async () => {
+    const pendiente = new Subject<any[]>();
+    c.reporteRequest = 0; c.facService = { getSinCobrar: () => pendiente };
+    const generar = spyOn(c, 'impNotificacion').and.resolveTo();
+    const solicitud = c.getSinCobro();
+    c.abrirImprimir(); pendiente.next([{ idfactura: 1 }]);
+    await solicitud;
+    expect(generar).not.toHaveBeenCalled();
+    expect(c.pdfView).toBeTrue(); expect(c.reporteCargando).toBeFalse();
+  });
+
 });

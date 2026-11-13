@@ -549,7 +549,7 @@ export class RutaToLectorComponent implements OnInit {
         this.pdfPreviewObjectUrl = URL.createObjectURL(this.buildPdfReporteGeneral(reporte));
         this.pdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfPreviewObjectUrl);
         this.rutaPreview = null;
-        this.previewTitulo = 'Reporte general de rutas asignadas';
+        this.previewTitulo = 'Reporte general de rutas de la emisión';
       } else {
         await this.generarExcelReporteGeneral(reporte);
       }
@@ -597,99 +597,92 @@ export class RutaToLectorComponent implements OnInit {
     }
   }
 
+  // Combina el catalogo de la emision con las asignaciones; no depende del lector seleccionado.
+  private async cargarRutasReporte(idemision: number): Promise<any[]> {
+    const [asignaciones, rutasEmision] = await Promise.all([
+      firstValueFrom(this.usrxrutaService.findByEmision(idemision)) as Promise<any[]>,
+      firstValueFrom(this.rutasxemisionService.getByIdEmision(idemision))
+    ]);
+    const rutas = new Map<number, any>();
+    for (const item of rutasEmision ?? []) {
+      const ruta = item?.idruta_rutas;
+      if (ruta?.idruta != null) rutas.set(Number(ruta.idruta), { ...ruta, lectores: new Map<number, any>() });
+    }
+    for (const asignacion of asignaciones ?? []) {
+      const usuario = asignacion?.idusuario_usuarios;
+      const idusuario = usuario?.idusuario ?? asignacion?.idusuario;
+      for (const ruta of asignacion?.rutas ?? []) {
+        if (ruta?.idruta == null) continue;
+        const id = Number(ruta.idruta);
+        if (!rutas.has(id)) rutas.set(id, { ...ruta, lectores: new Map<number, any>() });
+        if (idusuario != null) rutas.get(id).lectores.set(Number(idusuario), {
+          idusuario, lector: usuario?.nomusu ?? asignacion?.nomusu ?? 'Sin nombre'
+        });
+      }
+    }
+    return Array.from(rutas.values()).map(ruta => ({
+      ...ruta, lectores: Array.from(ruta.lectores.values())
+        .sort((a: any, b: any) => Number(a.idusuario) - Number(b.idusuario))
+    })).sort((a, b) => String(a.codigo ?? a.idruta).localeCompare(String(b.codigo ?? b.idruta), 'es', { numeric: true }));
+  }
+
   private async construirReporteGeneralAsignaciones(): Promise<any> {
-    const asignaciones: any[] = await firstValueFrom(
-      this.usrxrutaService.findByEmision(this.emisionSelected.idemision)
-    ) as any[];
-
-    const detalles = (asignaciones ?? []).map((item: any, index: number) => ({
-      numero: index + 1,
-      idusuario: item?.idusuario_usuarios?.idusuario ?? item?.idusuario ?? '',
-      lector: item?.idusuario_usuarios?.nomusu ?? item?.nomusu ?? '',
-      totalRutas: (item?.rutas ?? []).length,
-      rutas: (item?.rutas ?? []).map((ruta: any) => ({
-        idruta: ruta?.idruta ?? '',
-        codigo: ruta?.codigo ?? '',
-        descripcion: ruta?.descripcion ?? ''
-      }))
-    }));
-
-    return {
-      emision: this.emisionSelected?.emision ?? '',
-      fechaGeneracion: new Date(),
-      detalles
-    };
+    const emision = { ...this.emisionSelected };
+    const rutas = await this.cargarRutasReporte(emision.idemision);
+    const grupos = new Map<string, any>();
+    for (const ruta of rutas) {
+      const clave = ruta.lectores.map((lector: any) => lector.idusuario).join(',');
+      if (!grupos.has(clave)) grupos.set(clave, {
+        numero: grupos.size + 1,
+        idusuario: ruta.lectores.map((lector: any) => lector.idusuario).join(', '),
+        lector: ruta.lectores.map((lector: any) => lector.lector).join(' / ') || 'Sin lector asignado',
+        totalRutas: 0, rutas: []
+      });
+      const grupo = grupos.get(clave);
+      grupo.rutas.push(ruta);
+      grupo.totalRutas++;
+    }
+    return { emision: emision.emision ?? '', fechaGeneracion: new Date(), totalRutas: rutas.length,
+      detalles: Array.from(grupos.values()) };
   }
 
   private async construirReporteLecturasGenerales(): Promise<any> {
-    const asignaciones: any[] = await firstValueFrom(
-      this.usrxrutaService.findByEmision(this.emisionSelected.idemision)
-    ) as any[];
-
-    const detalles: any[] = [];
-
-    for (const asignacion of asignaciones ?? []) {
-      const lector = asignacion?.idusuario_usuarios?.nomusu ?? asignacion?.nomusu ?? 'Sin lector';
-      const idusuario = asignacion?.idusuario_usuarios?.idusuario ?? asignacion?.idusuario ?? '';
-
-      for (const ruta of asignacion?.rutas ?? []) {
-        const rutaEmision: any = await firstValueFrom(
-          this.rutasxemisionService.getByEmisionRuta(this.emisionSelected.idemision, ruta.idruta)
-        );
-
-        if (!rutaEmision?.idrutaxemision) {
-          continue;
-        }
-
-        const lecturas: any[] = await firstValueFrom(
-          this.lecturasService.get_Lecturas(rutaEmision.idrutaxemision)
-        );
-
-        for (const lectura of lecturas ?? []) {
-          const abonado = lectura?.idabonado_abonados ?? {};
-          const novedad = lectura?.idnovedad_novedades ?? {};
-          const lecturaAnterior = Number(lectura?.lecturaanterior ?? 0);
-          const lecturaActual = Number(lectura?.lecturaactual ?? 0);
-          const fechaHoraLectura = this.parseFechaLectura(lectura?.fechalectura);
-
-          detalles.push({
-            numero: detalles.length + 1,
-            lector,
-            idusuario,
-            rutaCodigo: rutaEmision?.idruta_rutas?.codigo ?? ruta?.codigo ?? '',
-            rutaDescripcion: rutaEmision?.idruta_rutas?.descripcion ?? ruta?.descripcion ?? '',
-            cuenta: abonado?.idabonado ?? '',
-            nromedidor: abonado?.nromedidor ?? '',
-            abonado:
-              abonado?.idresponsable?.nombre ??
-              abonado?.idcliente_clientes?.nombre ??
-              '',
-            direccion:
-              abonado?.direccionubicacion ??
-              abonado?.idcliente_clientes?.direccion ??
-              '',
-            categoria: abonado?.idcategoria_categorias?.descripcion ?? '',
-            promedio: abonado?.promedio ?? '',
-            geolocalizacion: abonado?.geolocalizacion ?? '',
-            fecha: fechaHoraLectura.fecha,
-            hora: fechaHoraLectura.hora,
-            idnovedad: novedad?.idnovedad ?? '',
-            novedad: novedad?.descripcion ?? '',
-            lecturaAnterior,
-            lecturaActual,
-            consumo: lecturaActual - lecturaAnterior,
-            observacion: lectura?.observaciones ?? lectura?.observacion ?? '',
-            confirmacion: this.getConfirmacionLectura(lectura)
-          });
-        }
-      }
-    }
-
-    return {
-      emision: this.emisionSelected?.emision ?? '',
-      fechaGeneracion: new Date(),
-      detalles
-    };
+    const emision = { ...this.emisionSelected };
+    const [rutas, lecturas] = await Promise.all([
+      this.cargarRutasReporte(emision.idemision),
+      firstValueFrom(this.lecturasService.getByIdEmision(emision.idemision))
+    ]);
+    const porRuta = new Map<number, any>(rutas.map(ruta => [Number(ruta.idruta), ruta]));
+    const detalles = (lecturas ?? []).map((lectura: any) => {
+      const abonado = lectura?.idabonado_abonados ?? {};
+      const ruta = lectura?.idrutaxemision_rutasxemision?.idruta_rutas ?? abonado?.idruta_rutas ?? {};
+      const lectores = porRuta.get(Number(ruta.idruta))?.lectores ?? [];
+      const novedad = lectura?.idnovedad_novedades ?? {};
+      const lecturaAnterior = Number(lectura?.lecturaanterior ?? 0);
+      const lecturaActual = Number(lectura?.lecturaactual ?? 0);
+      const fechaHora = this.parseFechaLectura(lectura?.fechalectura, lectura?.readingCapturedAt);
+      return {
+        numero: 0,
+        lector: lectores.map((lector: any) => lector.lector).join(' / ') || 'Sin lector asignado',
+        idusuario: lectores.map((lector: any) => lector.idusuario).join(', '),
+        rutaCodigo: ruta.codigo ?? '', rutaDescripcion: ruta.descripcion ?? 'Sin ruta registrada',
+        cuenta: abonado?.idabonado ?? '', nromedidor: abonado?.nromedidor ?? '',
+        abonado: abonado?.idresponsable?.nombre ?? abonado?.idcliente_clientes?.nombre ?? '',
+        direccion: abonado?.direccionubicacion ?? abonado?.idcliente_clientes?.direccion ?? '',
+        categoria: abonado?.idcategoria_categorias?.descripcion ?? '',
+        promedio: lectura?.promedio ?? abonado?.promedio ?? '',
+        geolocalizacion: abonado?.geolocalizacion ?? '',
+        fecha: fechaHora.fecha, hora: fechaHora.hora,
+        foto: String(lectura?.fotoPath ?? '').trim() ? 'Sí' : 'No',
+        idnovedad: novedad?.idnovedad ?? '', novedad: novedad?.descripcion ?? '',
+        lecturaAnterior, lecturaActual, consumo: lecturaActual - lecturaAnterior,
+        observacion: lectura?.observaciones ?? lectura?.observacion ?? '',
+        confirmacion: this.getConfirmacionLectura(lectura)
+      };
+    }).sort((a: any, b: any) => String(a.rutaCodigo).localeCompare(String(b.rutaCodigo), 'es', { numeric: true })
+      || Number(a.cuenta) - Number(b.cuenta));
+    detalles.forEach((detalle, index) => detalle.numero = index + 1);
+    return { emision: emision.emision ?? '', fechaGeneracion: new Date(), detalles };
   }
 
   private buildPdfReporteGeneral(reporte: any): Blob {
@@ -699,7 +692,7 @@ export class RutaToLectorComponent implements OnInit {
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text('Reporte general de rutas asignadas', 14, 12);
+    doc.text('Reporte general de rutas de la emisión', 14, 12);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
@@ -732,7 +725,7 @@ export class RutaToLectorComponent implements OnInit {
   }
 
   private buildPdfLecturasGenerales(reporte: any): Blob {
-    const doc = new jsPDF('l', 'mm', 'a4');
+    const doc = new jsPDF('l', 'mm', 'a3');
     const fecha = reporte.fechaGeneracion.toLocaleDateString('es-EC');
     const hora = reporte.fechaGeneracion.toLocaleTimeString('es-EC');
 
@@ -748,10 +741,13 @@ export class RutaToLectorComponent implements OnInit {
     autoTable(doc, {
       startY: 32,
       theme: 'grid',
-      styles: { fontSize: 6.2, cellPadding: 1, valign: 'middle' },
+      tableWidth: 396,
+      styles: { fontSize: 7, cellPadding: 1, valign: 'middle' },
       headStyles: { fillColor: [52, 73, 94] },
       margin: { left: 6, right: 6 },
       head: [[
+        'Cod. ruta',
+        'Ruta',
         'Cuenta',
         'Nro. Medidor',
         'Abonado',
@@ -767,9 +763,13 @@ export class RutaToLectorComponent implements OnInit {
         'Geolocalizacion',
         'Confirmacion',
         'Lector',
-        'Fecha'
+        'Fecha',
+        'Foto',
+        'Hora de toma'
       ]],
       body: reporte.detalles.map((item: any) => [
+        item.rutaCodigo,
+        item.rutaDescripcion,
         item.cuenta,
         item.nromedidor,
         item.abonado,
@@ -785,24 +785,31 @@ export class RutaToLectorComponent implements OnInit {
         item.geolocalizacion,
         item.confirmacion,
         item.lector,
-        item.fecha
+        item.fecha,
+        item.foto,
+        item.hora
       ]),
       columnStyles: {
-        0: { cellWidth: 15, halign: 'center' },
-        1: { cellWidth: 18, halign: 'center' },
-        2: { cellWidth: 36 },
-        3: { cellWidth: 35 },
-        4: { cellWidth: 35 },
-        5: { cellWidth: 16, halign: 'right' },
-        6: { cellWidth: 16, halign: 'right' },
-        7: { cellWidth: 16, halign: 'right' },
-        8: { cellWidth: 14, halign: 'right' },
-        9: { cellWidth: 14, halign: 'center' },
-        10: { cellWidth: 18 },
-        11: { cellWidth: 26 },
-        12: { cellWidth: 24 },
-        13: { cellWidth: 16, halign: 'center' },
+        0: { cellWidth: 18 },
+        1: { cellWidth: 26 },
+        2: { cellWidth: 15 },
+        3: { cellWidth: 18 },
+        4: { cellWidth: 32 },
+        5: { cellWidth: 32 },
+        6: { cellWidth: 20 },
+        7: { cellWidth: 17 },
+        8: { cellWidth: 17 },
+        9: { cellWidth: 14 },
+        10: { cellWidth: 14 },
+        11: { cellWidth: 12 },
+        12: { cellWidth: 22 },
+        13: { cellWidth: 28 },
         14: { cellWidth: 24 },
+        15: { cellWidth: 14 },
+        16: { cellWidth: 22 },
+        17: { cellWidth: 20 },
+        18: { cellWidth: 13 },
+        19: { cellWidth: 18 }
       }
     });
 
@@ -818,7 +825,7 @@ export class RutaToLectorComponent implements OnInit {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Rutas asignadas');
 
-    worksheet.addRow(['Reporte general de rutas asignadas']);
+    worksheet.addRow(['Reporte general de rutas de la emisión']);
     worksheet.addRow(['Emision', reporte.emision]);
     worksheet.addRow(['Fecha', reporte.fechaGeneracion.toLocaleString('es-EC')]);
     worksheet.addRow([]);
@@ -844,7 +851,7 @@ export class RutaToLectorComponent implements OnInit {
     });
 
     this.configurarAnchos(worksheet, [10, 14, 26, 14, 60]);
-    await this.descargarWorkbook(workbook, `reporte_general_rutas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
+    await this.descargarWorkbook(workbook, `reporte_general_rutas_${reporte.emision || 'emision'}.xlsx`);
     this.swal('success', 'Excel general generado correctamente');
   }
 
@@ -858,6 +865,8 @@ export class RutaToLectorComponent implements OnInit {
     worksheet.addRow([]);
 
     const headerRow = worksheet.addRow([
+      'Cod. ruta',
+      'Ruta',
       'Cuenta',
       'Nro. Medidor',
       'Abonado',
@@ -873,13 +882,17 @@ export class RutaToLectorComponent implements OnInit {
       'Geolocalizacion',
       'Confirmacion',
       'Lector',
-      'Fecha'
+      'Fecha',
+      'Foto',
+      'Hora de toma'
     ]);
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
     headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
 
     reporte.detalles.forEach((item: any) => {
       worksheet.addRow([
+        item.rutaCodigo,
+        item.rutaDescripcion,
         item.cuenta,
         item.nromedidor,
         item.abonado,
@@ -895,32 +908,33 @@ export class RutaToLectorComponent implements OnInit {
         item.geolocalizacion,
         item.confirmacion,
         item.lector,
-        item.fecha
+        item.fecha,
+        item.foto,
+        item.hora
       ]);
     });
 
-    this.configurarAnchos(worksheet, [12, 16, 34, 34, 18, 16, 16, 12, 12, 14, 20, 26, 24, 16, 24]);
-    await this.descargarWorkbook(workbook, `reporte_global_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
+    this.configurarAnchos(worksheet, [16, 30, 12, 16, 34, 34, 18, 16, 16, 12, 12, 14, 20, 26, 24, 16, 24, 16, 10, 18]);
+    await this.descargarWorkbook(workbook, `reporte_global_lecturas_${reporte.emision || 'emision'}.xlsx`);
     this.swal('success', 'Excel de lecturas generado correctamente');
   }
 
-  private parseFechaLectura(fechaLectura: any): { fecha: string; hora: string } {
-    if (!fechaLectura) {
-      return { fecha: '', hora: '' };
-    }
-
-    const fecha = new Date(fechaLectura);
-    if (Number.isNaN(fecha.getTime())) {
-      return { fecha: String(fechaLectura), hora: '' };
-    }
-
+  private parseFechaLectura(fechaLectura: any, captura?: any): { fecha: string; hora: string } {
+    const capturada = captura ? new Date(captura) : null;
+    const tieneCaptura = capturada != null && !Number.isNaN(capturada.getTime());
+    const fecha = tieneCaptura ? capturada! : fechaLectura ? new Date(fechaLectura) : null;
+    if (!fecha || Number.isNaN(fecha.getTime())) return { fecha: '', hora: 'Sin registro' };
+    const zona = 'America/Guayaquil';
+    const hora = fecha.toLocaleTimeString('es-EC', {
+      timeZone: zona, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+    });
+    // Las fechas historicas a medianoche no conservan la hora de toma.
+    const soloFecha = typeof fechaLectura === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaLectura);
     return {
-      fecha: fecha.toLocaleDateString('es-EC'),
-      hora: fecha.toLocaleTimeString('es-EC', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      })
+      fecha: soloFecha && !tieneCaptura
+        ? fechaLectura.split('-').reverse().join('/')
+        : fecha.toLocaleDateString('es-EC', { timeZone: zona }),
+      hora: tieneCaptura || (!soloFecha && hora !== '00:00:00') ? hora : 'Sin registro'
     };
   }
 
