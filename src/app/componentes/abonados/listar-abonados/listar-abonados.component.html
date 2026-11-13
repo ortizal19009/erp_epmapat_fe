@@ -402,8 +402,22 @@
         </div>
         <div class='modal-body cuerpo'>
 
+          <div class="form-group mb-2">
+            <label for="tipoReporteAbonados">Reporte</label>
+            <select id="tipoReporteAbonados" class="form-control form-control-sm" [(ngModel)]="tipoReportePdf">
+              <option value="listado">Listado de abonados</option>
+              <option value="medidores-antiguos">Medidores mayores a 7 años y 5.000 m³</option>
+            </select>
+          </div>
+          <div *ngIf="tipoReportePdf === 'medidores-antiguos'" class="form-group mb-2">
+            <label for="fechaCorteMedidores">Fecha de corte</label>
+            <input id="fechaCorteMedidores" type="date" class="form-control form-control-sm"
+              [(ngModel)]="fechaCorteMedidores" required>
+            <small class="text-muted">Total de medidores con más de 7 años y acumulado mayor a 5.000 m³ desde su instalación. Incluye todas las cuentas, sin aplicar los filtros del listado.</small>
+          </div>
+
           <!-- Info de lo que se va a imprimir -->
-          <div class="alert alert-info py-1 px-2 small mb-2">
+          <div *ngIf="tipoReportePdf === 'listado'" class="alert alert-info py-1 px-2 small mb-2">
             <i class="bi bi-info-circle"></i>
             <ng-container *ngIf="!modoFiltro">
               B&uacute;squeda: <strong>{{ _abonados.length }}</strong> abonado(s) en pantalla
@@ -415,7 +429,7 @@
           </div>
 
           <!-- Alcance (solo en modo filtro paginado) -->
-          <div class="form-group mb-2" *ngIf="modoFiltro">
+          <div class="form-group mb-2" *ngIf="modoFiltro && tipoReportePdf === 'listado'">
             <label class="small text-muted mb-1">Alcance del reporte</label>
             <div class="d-flex flex-column" style="gap:4px">
               <label class="mb-0">
@@ -441,6 +455,7 @@
 
           <div class='row justify-content-center mt-3'>
             <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+              [disabled]="generandoReporteMedidores || (tipoReportePdf === 'medidores-antiguos' && !fechaCorteMedidores)"
               [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
               <i class="fa fa-check-circle"></i>&nbsp; Generar PDF</button>
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>

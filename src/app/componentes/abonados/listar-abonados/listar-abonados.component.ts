@@ -50,6 +50,9 @@ export class ListarAbonadosComponent implements OnInit {
   archExportar: string = '';
   otraPagina: boolean = false;
   pdfAlcance: 'pagina' | 'todos' = 'pagina';
+  tipoReportePdf: 'listado' | 'medidores-antiguos' = 'listado';
+  fechaCorteMedidores = new Date().toLocaleDateString('en-CA');
+  generandoReporteMedidores = false;
   excelAlcance: 'pagina' | 'todos' = 'pagina';
   excelFiltrado = false;
   exportandoExcel = false;
@@ -643,6 +646,10 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   pdf() {
+    if (this.tipoReportePdf === 'medidores-antiguos') {
+      this.pdfMedidoresAntiguos();
+      return;
+    }
     // Si modo filtro y quiere todos, descarga primero y luego genera
     if (this.modoFiltro && this.pdfAlcance === 'todos') {
       this.loadingService.showLoading();
@@ -652,6 +659,49 @@ export class ListarAbonadosComponent implements OnInit {
       }).catch(e => { console.error(e); this.loadingService.hideLoading(); });
     } else {
       this.generarPdf(this._abonados);
+    }
+  }
+
+  private async pdfMedidoresAntiguos(): Promise<void> {
+    if (!this.fechaCorteMedidores || this.generandoReporteMedidores) return;
+    this.generandoReporteMedidores = true;
+    this.loadingService.showLoading();
+    try {
+      const reporte = await firstValueFrom(this.aboService.getReporteMedidoresAntiguos(this.fechaCorteMedidores));
+      const doc = new jsPDF({ orientation: 'landscape' });
+      doc.setFontSize(14);
+      doc.text('EPMAPA-T | Reporte de medidores', 14, 16);
+      doc.setFontSize(10);
+      doc.text(`Fecha de corte: ${reporte.fechaCorte}`, 14, 24);
+      autoTable(doc, {
+        startY: 30,
+        theme: 'grid',
+        head: [['Indicador', 'Cantidad']],
+        body: [[reporte.descripcion, reporte.cantidad]],
+        styles: { fontSize: 10 },
+        columnStyles: { 1: { halign: 'center', cellWidth: 30 } },
+      });
+      doc.setFontSize(9);
+      doc.text('Acumulado: última lectura al corte menos lectura inicial. Incluye todas las cuentas, sin filtros del listado.', 14, 64);
+      autoTable(doc, {
+        startY: 70,
+        theme: 'grid',
+        head: [['Cuenta', 'Medidor', 'Cliente', 'Instalación', 'Lectura inicial', 'Última lectura', 'Lectura actual', 'Acumulado m³']],
+        body: reporte.detalle.length ? reporte.detalle.map(fila => [
+          fila.idabonado, fila.nromedidor || '-', fila.cliente || '-', fila.fechainstalacion,
+          fila.lecturainicial, fila.fechalectura?.slice(0, 10) || '-', fila.lecturaactual,
+          Number(fila.acumuladom3).toLocaleString('es-EC', { maximumFractionDigits: 2 }),
+        ]) : [[{ content: 'No hay medidores que cumplan los criterios al corte seleccionado.', colSpan: 8 }]],
+        styles: { fontSize: 8 },
+      });
+      this.abrirPdf(doc);
+    } catch (error) {
+      console.error(error);
+      this.loadingService.hideLoading();
+      await Swal.fire('No se pudo generar el reporte', 'Verifique la conexión y que el backend esté actualizado e intente nuevamente.', 'error');
+    } finally {
+      this.generandoReporteMedidores = false;
+      this.loadingService.hideLoading();
     }
   }
 

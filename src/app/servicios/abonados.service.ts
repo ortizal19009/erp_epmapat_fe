@@ -9,6 +9,22 @@ import { PageResponse } from '../interfaces/page-response';
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/abonados`;
 
+export interface ReporteMedidoresAntiguos {
+  fechaCorte: string;
+  descripcion: string;
+  cantidad: number;
+  detalle: Array<{
+    idabonado: number;
+    nromedidor: string;
+    cliente: string;
+    fechainstalacion: string;
+    lecturainicial: number;
+    fechalectura: string;
+    lecturaactual: number;
+    acumuladom3: number;
+  }>;
+}
+
 export interface AbonadoGeoPreviewDto {
   idabonado: number;
   nombre: string;
@@ -31,6 +47,12 @@ export interface AbonadoGeoUploadItemResultDto {
 @Injectable({ providedIn: 'root' })
 export class AbonadosService {
   constructor(private http: HttpClient) { }
+
+  getReporteMedidoresAntiguos(fechaCorte: string): Observable<ReporteMedidoresAntiguos> {
+    return this.http.get<ReporteMedidoresAntiguos>(`${baseUrl}/reportes/medidores-antiguos`, {
+      params: { fechaCorte },
+    });
+  }
 
   async getById_v2(idabonado: number) {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
