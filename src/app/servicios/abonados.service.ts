@@ -17,6 +17,9 @@ export interface ReporteMedidoresAntiguos {
     idabonado: number;
     nromedidor: string;
     cliente: string;
+    ruta: string | null;
+    categoria: string | null;
+    estado: number | null;
     fechainstalacion: string;
     lecturainicial: number;
     fechalectura: string;

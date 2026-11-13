@@ -444,7 +444,7 @@
             </div>
           </div>
 
-          <div class="input-group input-group-sm mb-0">
+          <div class="input-group input-group-sm mb-0" *ngIf="tipoReportePdf === 'listado'">
             <div class="input-group-prepend">
               <small class="input-group-text">Abrir en otra p&aacute;gina</small>
               <div class="input-group-text">
@@ -456,8 +456,12 @@
           <div class='row justify-content-center mt-3'>
             <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
               [disabled]="generandoReporteMedidores || (tipoReportePdf === 'medidores-antiguos' && !fechaCorteMedidores)"
-              [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
+              [attr.data-target]="otraPagina || tipoReportePdf === 'medidores-antiguos' ? null : '#pdf'" data-toggle="modal">
               <i class="fa fa-check-circle"></i>&nbsp; Generar PDF</button>
+            <button *ngIf="tipoReportePdf === 'medidores-antiguos'" type="button"
+              class="btn btn-success btn-sm mx-1" data-dismiss="modal" (click)="excelMedidoresAntiguos()"
+              [disabled]="generandoReporteMedidores || !fechaCorteMedidores">
+              <i class="bi bi-file-earmark-excel"></i>&nbsp; Generar Excel</button>
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
               <i class="bi bi-x-circle"></i> Cancelar</button>
           </div>

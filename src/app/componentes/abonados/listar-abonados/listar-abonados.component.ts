@@ -12,7 +12,7 @@ import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { PageResponse } from 'src/app/interfaces/page-response';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Ng2SearchPipe } from 'ng2-search-filter';
 
@@ -662,12 +662,67 @@ export class ListarAbonadosComponent implements OnInit {
     }
   }
 
-  private async pdfMedidoresAntiguos(): Promise<void> {
+  excelMedidoresAntiguos(): void {
+    this.pdfMedidoresAntiguos('excel');
+  }
+
+  private async pdfMedidoresAntiguos(formato: 'pdf' | 'excel' = 'pdf'): Promise<void> {
     if (!this.fechaCorteMedidores || this.generandoReporteMedidores) return;
     this.generandoReporteMedidores = true;
     this.loadingService.showLoading();
     try {
-      const reporte = await firstValueFrom(this.aboService.getReporteMedidoresAntiguos(this.fechaCorteMedidores));
+      const reporte = await firstValueFrom(
+        this.aboService.getReporteMedidoresAntiguos(this.fechaCorteMedidores).pipe(timeout(45000))
+      );
+      const estados: Record<number, string> = { 0: 'Eliminado', 1: 'Activo', 2: 'Suspendido', 3: 'Retirado' };
+      const encabezados = ['Cuenta', 'Medidor', 'Cliente', 'Ruta', 'Categoría', 'Estado', 'Instalación',
+        'Lectura inicial', 'Última lectura', 'Lectura actual', 'Acumulado m³'];
+      const filas = reporte.detalle.map(fila => [
+        fila.idabonado, fila.nromedidor || '-', fila.cliente || '-', fila.ruta || '-', fila.categoria || '-',
+        fila.estado == null ? '-' : estados[fila.estado] ?? String(fila.estado),
+        fila.fechainstalacion, fila.lecturainicial, fila.fechalectura?.slice(0, 10) || '-',
+        fila.lecturaactual, Number(fila.acumuladom3),
+      ]);
+      if (formato === 'excel') {
+        const libro = new ExcelJS.Workbook();
+        const hoja = libro.addWorksheet('Medidores');
+        hoja.mergeCells('A1:K1');
+        hoja.getCell('A1').value = 'EPMAPA-T | Reporte de medidores';
+        hoja.getCell('A1').font = { bold: true, size: 14 };
+        hoja.mergeCells('A2:K2');
+        hoja.getCell('A2').value = `Fecha de corte: ${reporte.fechaCorte}`;
+        hoja.mergeCells('A3:J3');
+        hoja.getCell('A3').value = reporte.descripcion;
+        hoja.getCell('K3').value = reporte.cantidad;
+        hoja.getCell('A3').alignment = { wrapText: true };
+        hoja.getRow(3).height = 32;
+        const cabecera = hoja.addRow(encabezados);
+        cabecera.eachCell(celda => {
+          celda.font = { bold: true, color: { argb: 'FFFFFF' } };
+          celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '2C3E50' } };
+        });
+        filas.forEach(fila => hoja.addRow(fila));
+        if (!filas.length) {
+          hoja.mergeCells('A5:K5');
+          hoja.getCell('A5').value = 'No hay medidores que cumplan los criterios al corte seleccionado.';
+        }
+        [12, 20, 40, 28, 25, 16, 16, 18, 18, 18, 20].forEach((ancho, indice) => {
+          hoja.getColumn(indice + 1).width = ancho;
+        });
+        [8, 10, 11].forEach(columna => hoja.getColumn(columna).numFmt = '#,##0.00');
+        hoja.views = [{ state: 'frozen', ySplit: 4 }];
+        hoja.autoFilter = 'A4:K4';
+        const buffer = await libro.xlsx.writeBuffer();
+        const url = URL.createObjectURL(new Blob([buffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        }));
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = `Medidores_antiguos_${reporte.fechaCorte}.xlsx`;
+        enlace.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return;
+      }
       const doc = new jsPDF({ orientation: 'landscape' });
       doc.setFontSize(14);
       doc.text('EPMAPA-T | Reporte de medidores', 14, 16);
@@ -686,15 +741,11 @@ export class ListarAbonadosComponent implements OnInit {
       autoTable(doc, {
         startY: 70,
         theme: 'grid',
-        head: [['Cuenta', 'Medidor', 'Cliente', 'Instalación', 'Lectura inicial', 'Última lectura', 'Lectura actual', 'Acumulado m³']],
-        body: reporte.detalle.length ? reporte.detalle.map(fila => [
-          fila.idabonado, fila.nromedidor || '-', fila.cliente || '-', fila.fechainstalacion,
-          fila.lecturainicial, fila.fechalectura?.slice(0, 10) || '-', fila.lecturaactual,
-          Number(fila.acumuladom3).toLocaleString('es-EC', { maximumFractionDigits: 2 }),
-        ]) : [[{ content: 'No hay medidores que cumplan los criterios al corte seleccionado.', colSpan: 8 }]],
-        styles: { fontSize: 8 },
+        head: [encabezados],
+        body: filas.length ? filas : [[{ content: 'No hay medidores que cumplan los criterios al corte seleccionado.', colSpan: 11 }]],
+        styles: { fontSize: 7, cellPadding: 1.5 },
       });
-      this.abrirPdf(doc);
+      doc.save(`Medidores_antiguos_${reporte.fechaCorte}.pdf`);
     } catch (error) {
       console.error(error);
       this.loadingService.hideLoading();
